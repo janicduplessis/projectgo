@@ -23,4 +23,6 @@ _testmain.go
 *.test
 
 #Project specific
-webroot/bower_components
+bower_components
+node_modules
+webroot/lib
