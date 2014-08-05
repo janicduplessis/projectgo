@@ -1,0 +1,41 @@
+<link rel="import" href="../bower_components/core-icons/core-icons.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../services/ct-msg-service.html">
+
+<polymer-element name="ct-send-box">
+
+	<template>
+		<ct-msg-service id="ctMsgService"></ct-msg-service>
+
+		<div class="sendBox" horizontal layout>
+			<div flex>
+      			<paper-input id="tbMessage" multiline rows="{{rows}}" label="{{label}}" on-input="{{onInput}}"></paper-input>
+      		</div>
+      		<div layout horizontal center>
+      			<paper-fab id="btnSend" class="mini" icon="arrow-forward" on-tap="{{sendMessage}}" disabled="{{sendDisabled}}"></paper-fab>
+      		</div>
+      	</div>
+	</template>
+	<script>
+		Polymer('ct-send-box', {
+			publish: {
+				label: '',
+				rows: 3
+			},
+
+			sendDisabled: true,
+
+			sendMessage: function() {
+				var msg = this.$.tbMessage.inputValue;
+				this.$.ctMsgService.sendMessage({Author:"Me", Body: msg});
+				this.$.tbMessage.value = '';
+			},
+
+			onInput: function(value) {
+				this.sendDisabled = this.$.tbMessage.inputValue.length === 0;
+			}
+		});
+	</script>
+
+</polymer-element>

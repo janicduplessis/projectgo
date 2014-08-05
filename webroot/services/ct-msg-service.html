@@ -1,0 +1,38 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="ct-msg-service" attributes="messages">
+	<template>
+		<style>
+    		:host {
+      			display: none;
+    		}
+    	</style>
+  	</template>
+  	<script>
+  	(function() {
+  		var ws = new WebSocket("ws://localhost:8080/send"),
+  			messages = [];
+
+		ws.onopen = function(){
+        }
+ 
+        ws.onmessage = function(event){
+        	messages.push(JSON.parse(event.data));
+        }
+ 
+        ws.onclose = function(){
+        }   
+
+	  	Polymer('ct-msg-service', {
+	    	created: function() {
+	    		this.webservice = ws;
+	      		this.messages = messages;
+	    	},
+
+	    	sendMessage: function(message) {
+				this.webservice.send(JSON.stringify(message));
+	    	}
+	  	});
+	})();
+  	</script>
+</polymer-element>

@@ -1,9 +1,20 @@
 package main
 
-import ()
+import (
+	"log"
+	"net/http"
+
+	"github.com/janicduplessis/projectgo/ct"
+)
 
 func main() {
-	var server = new(Server)
-	server.Start()
+	log.SetFlags(log.Lshortfile)
 
+	// Chat server
+	server := ct.NewServer()
+	go server.Listen()
+
+	http.Handle("/", http.FileServer(http.Dir("webroot")))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -1,0 +1,41 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../services/ct-msg-service.html">
+
+<polymer-element name="ct-message-list">
+  <template>
+    <style>
+      .msg {
+        background-color: #F4F4F4;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 10px;
+        width: 100%;
+        word-b
+      }
+      .msgAuthor {
+        font-weight: bold;
+      }
+      .msgBody {
+        word-break: break-all;
+      }
+    </style>
+
+    <ct-msg-service id="ctMsgService" messages="{{messages}}"></ct-msg-service>
+    
+    <div layout vertical center>
+      <template repeat="{{m in messages}}">
+        <div class="msg">
+          <span class="msgAuthor">{{m.Author}} : </span>
+          <span class="msgBody">{{m.Body}}</span>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <script>
+  Polymer({
+    handleFavorite: function(event, detail, sender) {
+    }
+  });
+  </script>
+</polymer-element>
