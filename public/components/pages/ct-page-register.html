@@ -1,0 +1,52 @@
+<link rel="import" href="/lib/paper-input/paper-input.html">
+<link rel="import" href="/lib/paper-button/paper-button.html">
+
+<link rel="import" href="/services/ct-auth-service.html">
+
+<polymer-element name="ct-page-register" attributes="route user">
+	<template>
+		<style>
+    		.primary {
+    			color: #fff;
+    			background-color: #03a9f4;
+    		}
+    		paper-input {
+    			width: 100%;
+    		}
+    		paper-button {
+    			margin-left: 10px;
+    		}
+    	</style>
+
+    	<ct-auth-service id="authService" user="{{user}}" on-ct-register="{{register}}"></ct-auth-service>
+
+    	<h2>Register</h2>
+    	<div>
+    		<paper-input label="Username" value="{{username}}" flex></paper-input>
+    		<paper-input label="Password" type="password" value="{{password}}"></paper-input>
+    		<paper-input label="Repeat password" type="password" value="{{passwordRepeat}}"></paper-input>
+    		<paper-input label="First name" value="{{firstName}}"></paper-input>
+    		<paper-input label="Last name" value="{{lastName}}"></paper-input>
+    		<paper-input label="Email" value="{{email}}"></paper-input>
+    		<div flex horizontal end-justified layout>
+    			<paper-button raisedButton label="Cancel" on-tap="{{cancel}}"></paper-button>
+    			<paper-button raisedButton class="primary" label="Submit" on-tap="{{submit}}"></paper-button>
+    		</div>
+    	</div>
+  	</template>
+  	<script>
+			  Polymer('ct-page-register', {
+			  	submit: function() {
+			  		this.$.authService.register(this.username, this.password, this.firstName, this.lastName, this.email);
+			  	},
+			    register: function(event) {
+			    	var response = event.detail;
+			    	if(response.result) {
+			    		this.route = 'home'
+			    	} else {
+			    		//show error message
+			    	}
+			    }
+			  });
+  	</script>
+</polymer-element>

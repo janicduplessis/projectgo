@@ -1,0 +1,66 @@
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
+
+<polymer-element name="ct-auth-service" attributes="user">
+  <template>
+    <style>
+        :host {
+            display: none;
+        }
+    </style>
+    <core-ajax id="login" 
+               url="/login" 
+               method="POST" 
+               handleAs="json" 
+               body="{{bodyLogin}}"
+               on-core-response="{{loginResponse}}">
+    </core-ajax>
+    <core-ajax id="register" 
+               url="/register" 
+               method="POST" 
+               handleAs="json" 
+               body="{{bodyRegister}}" 
+               on-core-response="{{registerResponse}}">
+    </core-ajax>
+  </template>
+  <script>
+    (function() {
+      Polymer('ct-auth-service', {
+        login: function(username, password) {
+          var loginInfo = {
+            UserName: username,
+            Password: password
+          }
+          this.bodyLogin = JSON.stringify(loginInfo);
+          this.$.login.go();
+        },
+        register: function(username, password, firstName, lastName, email) {
+          var registerInfo = {
+            UserName: username,
+            Password: password,
+            FirstName: firstName,
+            LastName: lastName,
+            Email: email
+          }
+          this.bodyRegister = JSON.stringify(registerInfo);
+          this.$.register.go();
+        },
+        logout: function() {
+          this.user = null;
+        },
+
+        loginResponse: function(event) {
+          var response = event.detail.response;
+          this.user = response.User;
+          this.fire('ct-login', {result: response.Result, user: response.User});
+        },
+
+        registerResponse: function(event) {
+          var response = event.detail.response;
+          this.user = response.User;
+          this.fire('ct-register', {result: response.Result, user: response.User});
+        }
+
+      });
+    })();
+  </script>
+</polymer-element>

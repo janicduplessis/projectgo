@@ -1,0 +1,48 @@
+<link rel="import" href="/lib/paper-input/paper-input.html">
+<link rel="import" href="/lib/paper-button/paper-button.html">
+
+<link rel="import" href="/services/ct-auth-service.html">
+
+<polymer-element name="ct-page-login" attributes="route user">
+	<template>
+		<style>
+		.primary {
+    			color: #fff;
+    			background-color: #03a9f4;
+    		}
+    		paper-input {
+    			width: 100%;
+    		}
+    		paper-button {
+    			margin-left: 10px;
+    		}
+		</style>
+
+		<ct-auth-service id="authService" user="{{user}}" on-ct-login="{{login}}"></ct-auth-service>
+
+		<h2>Login</h2>
+		<div>
+			<paper-input label="Username" value="{{username}}" flex></paper-input>
+			<paper-input label="Password" type="password" value="{{password}}"></paper-input>
+			<div flex horizontal end-justified layout>
+				<paper-button raisedButton label="Cancel" on-tap="{{cancel}}"></paper-button>
+				<paper-button raisedButton class="primary" label="Login" on-tap="{{submit}}"></paper-button>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer('ct-page-login', {
+			submit: function() {
+				this.$.authService.login(this.username, this.password);
+			},
+			login: function(event) {
+			   var response = event.detail;
+			    if(response.result) {
+			    	this.route = 'home'
+			    } else {
+			    	//show error message
+			    }
+			}
+		});
+  	</script>
+</polymer-element>

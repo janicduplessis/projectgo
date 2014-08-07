@@ -1,0 +1,19 @@
+<link rel="import" href="/components/ct-send-box.html">
+<link rel="import" href="/components/ct-message-list.html">
+
+<polymer-element name="ct-page-chat" attributes="route user">
+	<template>
+		<style>
+    		
+    	</style>
+		<ct-message-list></ct-message-list>
+		<ct-send-box id="sendBox" label="Send message!" sender="{{user.UserName}}"></ct-send-box>
+  	</template>
+  	<script>
+			  Polymer('ct-page-chat', {
+
+			  });
+  	</script>
+</polymer-element>
+
+

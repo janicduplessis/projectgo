@@ -2,6 +2,7 @@ package ct
 
 import (
 	"database/sql"
+	//"log"
 
 	"code.google.com/p/go.crypto/bcrypt"
 	_ "github.com/go-sql-driver/mysql"
@@ -34,43 +35,53 @@ func (a *Auth) Register(info *RegisterInfo) (bool, error) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(info.Password), bcrypt.DefaultCost)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 	//Validate infos
 
-	stmt, err := a.db.Prepare("CALL pRegister (?, ?, ?, ?, ?)")
+	_, err = a.db.Exec("CALL pRegister (?, ?, ?, ?, ?)", info.UserName, string(hash), info.FirstName, info.LastName, info.Email)
 	if err != nil {
-		panic(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(info.UserName, string(hash), info.FirstName, info.LastName, info.Email)
-	if err != nil {
-		panic(err)
+		return false, err
 	}
 
 	return true, nil
 }
 
 func (a *Auth) Login(info *LoginInfo) (*User, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(info.Password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
-	}
 	//Validate infos
-
-	stmt, err := a.db.Prepare("CALL pLogin (?, ?)")
+	rows, err := a.db.Query(`SELECT UserId, PasswordHash, UserName, FirstName, LastName, Email
+							 FROM user
+							 WHERE UserName = ?`,
+		info.UserName)
 	if err != nil {
-		panic(err)
-	}
-	defer stmt.Close()
-
-	rows, err := stmt.Query(info.UserName, string(hash))
-	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if rows.Next() {
-		return &User{}, nil
+		var (
+			id        int
+			hash      string
+			username  string
+			firstName string
+			lastName  string
+			email     string
+		)
+		err = rows.Scan(&id, &hash, &username, &firstName, &lastName, &email)
+		if err != nil {
+			return nil, err
+		}
+		err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(info.Password))
+		if err != nil {
+			return nil, nil
+		}
+
+		return &User{
+			UserId:    id,
+			UserName:  username,
+			FirstName: firstName,
+			LastName:  lastName,
+			Email:     email,
+		}, nil
+
 	} else {
 		return nil, nil
 	}

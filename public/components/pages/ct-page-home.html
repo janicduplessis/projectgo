@@ -1,0 +1,23 @@
+<link rel="import" href="/lib/paper-button/paper-button.html">
+
+<link rel="import" href="/services/ct-auth-service.html">
+
+<polymer-element name="ct-page-home" attributes="route user">
+	<template>
+		<style>
+    		
+    	</style>
+
+    	<ct-auth-service id="service" user="{{user}}"></ct-auth-service>
+
+    	<h2>Welcome home!</h2>
+    	<paper-button label="test" on-tap="{{test}}"></paper-button>
+  	</template>
+  	<script>
+			  Polymer('ct-page-home', {
+			    test: function() {
+			    	alert(JSON.stringify(this.user));
+			    }
+			  });
+  	</script>
+</polymer-element>

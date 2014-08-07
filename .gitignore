@@ -25,4 +25,4 @@ _testmain.go
 #Project specific
 bower_components
 node_modules
-webroot/lib
+public/lib

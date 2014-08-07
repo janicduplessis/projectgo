@@ -3,7 +3,11 @@ package ct
 import ()
 
 type User struct {
-	Id     int
-	Name   string
+	UserId    int
+	UserName  string
+	FirstName string
+	LastName  string
+	Email     string
+
 	Client *Client
 }

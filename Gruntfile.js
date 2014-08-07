@@ -14,25 +14,12 @@ module.exports = function(grunt) {
       }
 
     },
-    //Copy all bower_components into /webroot/lib
-    bowercopy: {
-      lib: {
-        options: {
-          destPrefix: 'webroot/lib'
-        },
-        files: {
-          '': ''
-        }
-      }
-    }
-
   });
 
   // Load the plugins
-  grunt.loadNpmTasks('grunt-bowercopy');
   grunt.loadNpmTasks('grunt-go');
 
   // Default task(s).
-  grunt.registerTask('default', ['bowercopy:lib', 'go:run:ct']);
+  grunt.registerTask('default', ['go:run:ct']);
 
 };
