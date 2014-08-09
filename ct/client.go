@@ -20,12 +20,19 @@ type Client struct {
 	User *User
 }
 
-func NewClient(conn *websocket.Conn, s *Server) *Client {
+func NewClient(conn *websocket.Conn, s *Server, user *User) *Client {
 	curId++
 	msgCh := make(chan *Message, chanBufferSize)
 	doneCh := make(chan bool)
 
-	return &Client{id: curId, conn: conn, server: s, msgCh: msgCh, doneCh: doneCh}
+	return &Client{
+		id:     curId,
+		conn:   conn,
+		server: s,
+		msgCh:  msgCh,
+		doneCh: doneCh,
+		User:   user,
+	}
 }
 
 func (c *Client) Conn() *websocket.Conn {
@@ -45,6 +52,10 @@ func (c *Client) Listen() {
 	c.listenReceive()
 }
 
+func (c *Client) Done() {
+	c.doneCh <- true
+}
+
 func (c *Client) listenSend() {
 	for {
 		select {
@@ -62,7 +73,7 @@ func (c *Client) listenReceive() {
 		default:
 			var msg Message
 			err := websocket.JSON.Receive(c.conn, &msg)
-			//msg.Author = c.User.Name
+			msg.Author = c.User.String()
 			if err == io.EOF {
 				c.doneCh <- true
 			} else if err != nil {

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"github.com/janicduplessis/projectgo/ct"
 )
 
@@ -16,5 +17,5 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux)))
 }

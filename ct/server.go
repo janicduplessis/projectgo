@@ -2,6 +2,7 @@ package ct
 
 import (
 	"database/sql"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"code.google.com/p/go.net/websocket"
+	"github.com/gorilla/sessions"
 )
 
 const (
@@ -20,13 +22,15 @@ const (
 	dbUser     = "ct"
 	dbPassword = "wyty640"
 	dbName     = "ct"
+
+	sessionKey  = "IAsOAlsdkawpkodpwaoADas"
+	sessionName = "ct-session"
 )
 
 // Server manages login, registration and messaging
 type Server struct {
 	messages  []*Message
 	clients   map[int]*Client
-	users     map[int]*User
 	addCh     chan *Client
 	delCh     chan *Client
 	sendAllCh chan *Message
@@ -34,6 +38,7 @@ type Server struct {
 	logCh     chan string
 	db        *sql.DB
 	auth      *Auth
+	store     *sessions.CookieStore
 }
 
 // JSON object
@@ -43,12 +48,14 @@ type JSON map[string]interface{}
 func NewServer() *Server {
 	messages := []*Message{}
 	clients := make(map[int]*Client)
-	users := make(map[int]*User)
 	addCh := make(chan *Client)
 	delCh := make(chan *Client)
 	sendAllCh := make(chan *Message)
 	doneCh := make(chan bool)
 	logCh := make(chan string)
+
+	store := sessions.NewCookieStore([]byte(sessionKey))
+	gob.Register(&User{})
 
 	// Db connection
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", dbUser, dbPassword, dbName))
@@ -61,7 +68,6 @@ func NewServer() *Server {
 	return &Server{
 		messages:  messages,
 		clients:   clients,
-		users:     users,
 		addCh:     addCh,
 		delCh:     delCh,
 		sendAllCh: sendAllCh,
@@ -69,6 +75,7 @@ func NewServer() *Server {
 		logCh:     logCh,
 		db:        db,
 		auth:      auth,
+		store:     store,
 	}
 }
 
@@ -106,23 +113,11 @@ func (s *Server) Log(tag string, message string) {
 // Listen starts the server
 // Handle client connections and message broadcast
 func (s *Server) Listen() {
-	onConnected := func(conn *websocket.Conn) {
-		// Whenever this function exits close the connection
-		defer func() {
-			err := conn.Close()
-			if err != nil {
-				s.Err(err)
-			}
-		}()
 
-		// Add then client to the server
-		client := NewClient(conn, s)
-		s.Add(client)
-		// Listen untill the client disconnects
-		client.Listen()
-	}
+	// Registered handlers
+	http.HandleFunc(urlSend, s.authenticate(s.handleInitChat))
 
-	http.Handle(urlSend, websocket.Handler(onConnected))
+	// Public handlers
 	http.HandleFunc(urlLogin, s.handleLogin)
 	http.HandleFunc(urlRegister, s.handleRegister)
 
@@ -156,6 +151,28 @@ func (s *Server) Listen() {
 	}
 }
 
+func (s *Server) handleInitChat(w http.ResponseWriter, r *http.Request, user *User) {
+	onConnected := func(conn *websocket.Conn) {
+		// Whenever this function exits close the connection
+		defer func() {
+			err := conn.Close()
+			if err != nil {
+				s.Err(err)
+			}
+		}()
+
+		// Add then client to the server
+		client := NewClient(conn, s, user)
+		user.Client = client
+		s.Add(client)
+		// Listen untill the client disconnects
+		client.Listen()
+	}
+
+	onConnectedHander := websocket.Handler(onConnected)
+	onConnectedHander.ServeHTTP(w, r)
+}
+
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	s.Log("d", "Login request")
 	var loginInfo = new(LoginInfo)
@@ -171,6 +188,12 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if user != nil {
 		//Authentification successful
 		result = true
+		err = s.startSession(w, r, user)
+		if err != nil {
+			s.Err(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	} else {
 		//Authentification unsuccessful
 		result = false
@@ -184,14 +207,23 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var regInfo = new(RegisterInfo)
 	s.readJSON(r, regInfo)
 
-	res, err := s.auth.Register(regInfo)
+	user, err := s.auth.Register(regInfo)
 	if err != nil {
 		s.Err(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	s.sendJSON(w, &JSON{"Result": res})
+	if user != nil {
+		err = s.startSession(w, r, user)
+		if err != nil {
+			s.Err(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	s.sendJSON(w, &JSON{"Result": user != nil, "User": user})
 }
 
 func (s *Server) readJSON(r *http.Request, obj interface{}) {
@@ -224,4 +256,50 @@ func (s *Server) sendAll(msg *Message) {
 	for _, c := range s.clients {
 		c.Send(msg)
 	}
+}
+
+// authenticate makes sure the user is logged, if not it returns an AUTH_NEEDED_ERROR to the client
+func (s *Server) authenticate(fn func(http.ResponseWriter, *http.Request, *User)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := s.store.Get(r, sessionName)
+		if err != nil {
+			s.authNeededError(w)
+			s.Err(err)
+			return
+		}
+		user := session.Values["User"].(*User)
+		if user == nil {
+			s.authNeededError(w)
+			return
+		}
+
+		fn(w, r, user)
+	}
+
+}
+
+func (s *Server) startSession(w http.ResponseWriter, r *http.Request, user *User) error {
+	session, err := s.store.Get(r, sessionName)
+	session.Values["User"] = user
+	session.Save(r, w)
+
+	return err
+}
+
+func (s *Server) endSession(w http.ResponseWriter, r *http.Request) error {
+	session, err := s.store.Get(r, sessionName)
+	user := session.Values["User"].(*User)
+	if user != nil && user.Client != nil {
+		user.Client.Done()
+		s.Del(user.Client)
+	}
+	session.Values["User"] = nil
+	session.Save(r, w)
+
+	return err
+}
+
+// authNeededError returns an error to an unauthentificated client when the page requires authentification
+func (s *Server) authNeededError(w http.ResponseWriter) {
+	s.sendJSON(w, &JSON{"Response": "AUTH_NEEDED_ERROR"})
 }

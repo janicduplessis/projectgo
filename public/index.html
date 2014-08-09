@@ -18,6 +18,7 @@
 
   <link rel="import" href="components/pages/ct-pages.html">
   <link rel="import" href="services/ct-auth-service.html">
+  <link rel="import" href="services/ct-msg-service.html">
 
   <link rel="stylesheet" type="text/css" href="css/main.css"></head>
 
@@ -38,6 +39,7 @@
             on-director-route="{{routeChanged}}"></flatiron-director>
 
     <ct-auth-service user="{{user}}"></ct-auth-service>
+    <ct-msg-service user="{{user}}"></ct-msg-service>
 
     <core-header-panel>
       <core-toolbar>

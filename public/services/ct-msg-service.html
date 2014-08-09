@@ -1,4 +1,4 @@
-<polymer-element name="ct-msg-service" attributes="messages">
+<polymer-element name="ct-msg-service" attributes="messages user">
   <template>
     <style>
         :host {
@@ -8,26 +8,44 @@
   </template>
   <script>
     (function() {
-      var _ws = new WebSocket("ws://localhost:8080/send"),
+      var _ws = null,
           _messages = [];
-
-      _ws.onopen = function(){
-      }
- 
-      _ws.onmessage = function(event){
-        _messages.push(JSON.parse(event.data));
-      }
- 
-      _ws.onclose = function(){
-      }   
 
       Polymer('ct-msg-service', {
         get messages() {
           return _messages;
         },
 
+        userChanged: function() {
+            if(this.user !== null) {
+              this.connect()
+            }
+        },
+
         sendMessage: function(message) {
+          if(_ws === null) {
+            return;
+          }
+
           _ws.send(JSON.stringify(message));
+        },
+
+        connect: function() {
+          if (_ws !== null) {
+            return;
+          }
+          _ws = new WebSocket("ws://localhost:8080/send"),
+
+          _ws.onopen = function(){
+          }
+     
+          _ws.onmessage = function(event){
+            _messages.push(JSON.parse(event.data));
+          }
+     
+          _ws.onclose = function(){
+            _ws = null;
+          }  
         }
       });
   })();
