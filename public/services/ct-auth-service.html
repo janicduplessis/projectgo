@@ -1,4 +1,5 @@
 <link rel="import" href="/lib/core-ajax/core-ajax.html">
+<link rel="import" href="/lib/core-localstorage/core-localstorage.html">
 
 <polymer-element name="ct-auth-service" attributes="user">
   <template>
@@ -21,9 +22,16 @@
                body="{{bodyRegister}}" 
                on-core-response="{{registerResponse}}">
     </core-ajax>
+    <core-ajax id="logout"
+               url="/logout"
+               method="POST"
+               handleAs="json">
+    </core-ajax>
+
+    <core-localstorage name="ct-user" value="{{user}}"></core-localstorage>
+
   </template>
   <script>
-    (function() {
       Polymer('ct-auth-service', {
         login: function(username, password) {
           var loginInfo = {
@@ -46,14 +54,14 @@
         },
         logout: function() {
           this.user = null;
+          this.$.logout.go();
+          this.fire('ct-logout');
         },
-
         loginResponse: function(event) {
           var response = event.detail.response;
           this.user = response.User;
           this.fire('ct-login', {result: response.Result, user: response.User});
         },
-
         registerResponse: function(event) {
           var response = event.detail.response;
           this.user = response.User;
@@ -61,6 +69,5 @@
         }
 
       });
-    })();
   </script>
 </polymer-element>

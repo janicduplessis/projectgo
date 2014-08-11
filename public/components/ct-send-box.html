@@ -10,7 +10,7 @@
 
 		<div class="sendBox" horizontal layout>
 			<div flex>
-      			<paper-input id="tbMessage" multiline rows="{{rows}}" label="{{label}}" on-input="{{onInput}}"></paper-input>
+      			<paper-input id="tbMessage" multiline rows="{{rows}}" label="{{label}}" on-input="{{onInput}}" on-keypress="{{onKeypress}}"></paper-input>
       		</div>
       		<div layout horizontal center>
       			<paper-fab id="btnSend" class="mini" icon="arrow-forward" on-tap="{{sendMessage}}" disabled="{{sendDisabled}}"></paper-fab>
@@ -29,11 +29,22 @@
 			sendMessage: function() {
 				var msg = this.$.tbMessage.inputValue;
 				this.$.ctMsgService.sendMessage({Author: this.sender, Body: msg});
-				this.$.tbMessage.value = '';
+				this.$.tbMessage.inputValue = '';
 			},
 
-			onInput: function(value) {
+			onInput: function() {
 				this.sendDisabled = this.$.tbMessage.inputValue.length === 0;
+			},
+
+			onKeypress: function(event) {
+				//Enter
+				if(event.keyCode === 13 && !event.shiftKey) {
+					event.preventDefault();
+					if(!this.sendDisabled) {
+						this.sendMessage();
+						this.onInput();
+					}
+				}
 			}
 		});
 	</script>

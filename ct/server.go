@@ -18,6 +18,7 @@ const (
 	urlLogin    = "/login"
 	urlRegister = "/register"
 	urlSend     = "/send"
+	urlLogout   = "/logout"
 
 	dbUser     = "ct"
 	dbPassword = "wyty640"
@@ -110,12 +111,17 @@ func (s *Server) Log(tag string, message string) {
 	s.logCh <- fmt.Sprintf("[%s][%s] %s", t.Format("2006-01-02 15:04:05"), tag, message)
 }
 
+func (s *Server) Messages() []*Message {
+	return s.messages
+}
+
 // Listen starts the server
 // Handle client connections and message broadcast
 func (s *Server) Listen() {
 
 	// Registered handlers
 	http.HandleFunc(urlSend, s.authenticate(s.handleInitChat))
+	http.HandleFunc(urlLogout, s.authenticate(s.handleLogout))
 
 	// Public handlers
 	http.HandleFunc(urlLogin, s.handleLogin)
@@ -173,6 +179,14 @@ func (s *Server) handleInitChat(w http.ResponseWriter, r *http.Request, user *Us
 	onConnectedHander.ServeHTTP(w, r)
 }
 
+func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request, user *User) {
+	s.endSession(w, r)
+	if user.Client != nil {
+		s.Del(user.Client)
+	}
+	s.sendJSON(w, &JSON{"Result": true})
+}
+
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	s.Log("d", "Login request")
 	var loginInfo = new(LoginInfo)
@@ -226,6 +240,13 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 	s.sendJSON(w, &JSON{"Result": user != nil, "User": user})
 }
 
+// Send a message to every client
+func (s *Server) sendAll(msg *Message) {
+	for _, c := range s.clients {
+		c.Send(msg)
+	}
+}
+
 func (s *Server) readJSON(r *http.Request, obj interface{}) {
 	// Read the request's body
 	defer r.Body.Close()
@@ -249,13 +270,6 @@ func (s *Server) sendJSON(w http.ResponseWriter, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	//Write response body
 	w.Write(bytes)
-}
-
-// Send a message to every client
-func (s *Server) sendAll(msg *Message) {
-	for _, c := range s.clients {
-		c.Send(msg)
-	}
 }
 
 // authenticate makes sure the user is logged, if not it returns an AUTH_NEEDED_ERROR to the client

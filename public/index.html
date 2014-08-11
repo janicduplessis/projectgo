@@ -11,9 +11,10 @@
   <link rel="import" href="lib/font-roboto/roboto.html">
   <link rel="import" href="lib/core-header-panel/core-header-panel.html">
   <link rel="import" href="lib/core-toolbar/core-toolbar.html">
-  <link rel="import" href="lib/core-pages/core-pages.html">
+  <link rel="import" href="lib/core-animated-pages/core-animated-pages.html">
 
   <link rel="import" href="lib/paper-tabs/paper-tabs.html">
+  <link rel="import" href="lib/paper-button/paper-button.html">
   <link rel="import" href="lib/flatiron-director/flatiron-director.html">
 
   <link rel="import" href="components/pages/ct-pages.html">
@@ -29,6 +30,14 @@
     #tabsRight {
       max-width: 400px;
     }
+    #controlsRight {
+      height: 48px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    #controlsRight paper-button {
+      margin-left: 20px;
+    }
   </style>
 
 <body unresolved>
@@ -38,14 +47,16 @@
     <flatiron-director route="{{route}}" autoHash
             on-director-route="{{routeChanged}}"></flatiron-director>
 
-    <ct-auth-service user="{{user}}"></ct-auth-service>
+    <ct-auth-service id="auth" user="{{user}}"></ct-auth-service>
     <ct-msg-service user="{{user}}"></ct-msg-service>
 
     <core-header-panel>
       <core-toolbar>
         <paper-tabs id="tabsLeft" selected="{{route}}" valueattr="hash" self-end flex>
           <paper-tab hash="home">Home</paper-tab>
-          <paper-tab hash="chat">Chat</paper-tab>
+          <template if="{{user != null}}">
+            <paper-tab hash="chat">Chat</paper-tab>
+          </template>
         </paper-tabs>
         <div flex></div>
         <paper-tabs id="tabsRight" selected="{{route}}" valueattr="hash" self-end flex>
@@ -53,19 +64,21 @@
             <paper-tab hash="login">Login</paper-tab>
             <paper-tab hash="register">Register</paper-tab>
           </template>
-          <template if="{{user != null}}">
-            <paper-tab hash="logout">Logout</paper-tab>
-            <div>Hello {{user.UserName}}!</div>
-          </template>
         </paper-tabs>
+        <template if="{{user != null}}">
+          <div id="controlsRight" horizontal layout center self-end>
+              Hello {{user.UserName}}!
+              <paper-button on-tap="{{logout}}">Logout</paper-button>
+          </div>
+        </template>
       </core-toolbar>
       <div class="container" vertical layout center-justified>
-        <core-pages selected="{{route}}" valueattr="hash">
+        <core-animated-pages transitions="cross-fade-all" selected="{{route}}" valueattr="hash">
           <ct-page-home hash="home" route="{{route}}" user="{{user}}"></ct-page-home>
           <ct-page-chat hash="chat" route="{{route}}" user="{{user}}"></ct-page-chat>
           <ct-page-register hash="register" route="{{route}}" user="{{user}}"></ct-page-register>
           <ct-page-login hash="login" route="{{route}}" user="{{user}}"></ct-page-login>
-        </core-pages>
+        </core-animated-pages>
       </div>
     </core-header-panel>
 
@@ -80,8 +93,14 @@
     }
   }
 
+  template.logout = function() {
+    this.$.auth.logout();
+    this.route = 'home';
+  }
+
   template.addEventListener('template-bound', function() {
     this.route = this.route || 'home';
+    this.user = this.user || null;
   });
 
 </script>

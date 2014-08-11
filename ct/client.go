@@ -14,7 +14,7 @@ type Client struct {
 	id     int
 	conn   *websocket.Conn
 	server *Server
-	msgCh  chan *Message
+	msgCh  chan []*Message
 	doneCh chan bool
 
 	User *User
@@ -22,7 +22,7 @@ type Client struct {
 
 func NewClient(conn *websocket.Conn, s *Server, user *User) *Client {
 	curId++
-	msgCh := make(chan *Message, chanBufferSize)
+	msgCh := make(chan []*Message, chanBufferSize)
 	doneCh := make(chan bool)
 
 	return &Client{
@@ -41,6 +41,14 @@ func (c *Client) Conn() *websocket.Conn {
 
 func (c *Client) Send(msg *Message) {
 	select {
+	case c.msgCh <- []*Message{msg}:
+	default:
+
+	}
+}
+
+func (c *Client) SendArray(msg []*Message) {
+	select {
 	case c.msgCh <- msg:
 	default:
 
@@ -49,6 +57,7 @@ func (c *Client) Send(msg *Message) {
 
 func (c *Client) Listen() {
 	go c.listenSend()
+	c.SendArray(c.server.Messages())
 	c.listenReceive()
 }
 

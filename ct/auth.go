@@ -44,7 +44,7 @@ func (a *Auth) Register(info *RegisterInfo) (*User, error) {
 	// Check if the username is available
 	err = a.db.QueryRow(`SELECT 1
 				 	   FROM user
-				 	   WHERE UserName = ?`, info.UserName).Scan()
+				 	   WHERE UserName = ?`, info.UserName).Scan(new(int))
 	if err != sql.ErrNoRows {
 		if err != nil {
 			return nil, err

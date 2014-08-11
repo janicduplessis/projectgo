@@ -1,5 +1,6 @@
 <link rel="import" href="/lib/paper-input/paper-input.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/paper-toast/paper-toast.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
 
@@ -16,19 +17,23 @@
     		paper-button {
     			margin-left: 10px;
     		}
+    		paper-toast {
+    			position: relative;
+    			margin-top: 40px;
+			}
 		</style>
 
 		<ct-auth-service id="authService" user="{{user}}" on-ct-login="{{login}}"></ct-auth-service>
 
 		<h2>Login</h2>
-		<div>
-			<paper-input label="Username" value="{{username}}" flex></paper-input>
-			<paper-input label="Password" type="password" value="{{password}}"></paper-input>
+		<div on-keypress="{{onKeypress}}">
+			<paper-input id="username" label="Username" value="{{username}}" autofocus floatingLabel flex></paper-input>
+			<paper-input id="password" label="Password" type="password" value="{{password}}" floatingLabel></paper-input>
 			<div flex horizontal end-justified layout>
-				<paper-button raisedButton label="Cancel" on-tap="{{cancel}}"></paper-button>
 				<paper-button raisedButton class="primary" label="Login" on-tap="{{submit}}"></paper-button>
 			</div>
 		</div>
+		<paper-toast id="toast" class="capsule" style="padding-right: 60px;" on-focus="{{fixFocus}}"></paper-toast>
 	</template>
 	<script>
 		Polymer('ct-page-login', {
@@ -36,12 +41,42 @@
 				this.$.authService.login(this.username, this.password);
 			},
 			login: function(event) {
-			   var response = event.detail;
-			    if(response.result) {
-			    	this.route = 'home'
+			   	var response = event.detail;
+			   	if(response.result) {
+			    	this.route = 'home';
+			    	this.username = '';
 			    } else {
 			    	//show error message
+			    	if(this.password === '' && this.username === '') {
+			    		this.$.toast.text = 'Please enter your username and password';
+			    		this.$.username.focus();
+			    	} else if(this.password === '') {
+			    		this.$.toast.text = 'Please enter your password';
+			    		this.$.password.focus();
+			    	} else if(this.username === '') {
+			    		this.$.toast.text = 'Please enter your username';
+			    		this.$.username.focus();
+			    	} else {
+			    		this.$.toast.text = 'Invalid username or password';
+			    		this.$.password.focus();
+			    	}
+			    	this.$.toast.show();		    	
 			    }
+			    this.password = '';
+			},
+			onKeypress: function(event) {
+				//Enter
+				if(event.keyCode === 13) {
+					event.preventDefault();
+					event.target.blur();
+					this.submit();
+				}
+			},
+			//Hack to fix the fact that inputs lose focus when showing a toast
+			fixFocus: function(event) {
+				setTimeout(function() {
+					event.relatedTarget.focus();
+				}, 10);
 			}
 		});
   	</script>
