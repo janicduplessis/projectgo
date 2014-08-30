@@ -3,8 +3,9 @@
 <link rel="import" href="/lib/paper-toast/paper-toast.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
+<link rel="import" href="/components/ct-module.html">
 
-<polymer-element name="ct-page-login" attributes="route user">
+<polymer-element name="ct-page-login" extends="ct-module">
 	<template>
 		<style>
 		.primary {
@@ -23,7 +24,7 @@
 			}
 		</style>
 
-		<ct-auth-service id="authService" user="{{user}}" on-ct-login="{{login}}"></ct-auth-service>
+		<ct-auth-service id="authService" on-ct-login="{{login}}"></ct-auth-service>
 
 		<h2>Login</h2>
 		<div on-keypress="{{onKeypress}}">
@@ -43,7 +44,7 @@
 			login: function(event) {
 			   	var response = event.detail;
 			   	if(response.result) {
-			    	this.route = 'home';
+			    	this.nav.route = 'home';
 			    	this.username = '';
 			    } else {
 			    	//show error message

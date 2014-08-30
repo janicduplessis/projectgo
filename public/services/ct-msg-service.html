@@ -1,4 +1,4 @@
-<polymer-element name="ct-msg-service" attributes="messages user">
+<polymer-element name="ct-msg-service" attributes="messages">
   <template>
     <style>
         :host {
@@ -11,15 +11,43 @@
       var _ws = null,
           _messages = [];
 
-      Polymer('ct-msg-service', {
-        get messages() {
-          return _messages;
-        },
+      function connect() {
+        if (_ws !== null) {
+          return;
+        }
+        _ws = new WebSocket("ws://localhost:8080/send"),
 
-        userChanged: function() {
-            if(this.user !== null) {
-              this.connect()
-            }
+        _ws.onopen = function(){
+        }
+   
+        _ws.onmessage = function(event){
+          var newMessages = JSON.parse(event.data);
+          for(var i = 0; i < newMessages.length; i++) {
+            _messages.push(newMessages[i]);
+          }
+        }
+   
+        _ws.onclose = function(){
+          _ws = null;
+        }
+      }
+
+      function disconnect() {
+        _ws.onclose = function() {};
+        _ws.close();
+      }
+
+      document.addEventListener('log-in', function() {
+        connect();
+      });
+      document.addEventListener('log-out', function() {
+        disconnect();
+      });
+
+      Polymer('ct-msg-service', {
+
+        ready: function() {
+          this.messages = _messages;
         },
 
         sendMessage: function(message) {
@@ -29,27 +57,6 @@
 
           _ws.send(JSON.stringify(message));
         },
-
-        connect: function() {
-          if (_ws !== null) {
-            return;
-          }
-          _ws = new WebSocket("ws://localhost:8080/send"),
-
-          _ws.onopen = function(){
-          }
-     
-          _ws.onmessage = function(event){
-            var newMessages = JSON.parse(event.data);
-            for(var i = 0; i < newMessages.length; i++) {
-              _messages.push(newMessages[i]);
-            }
-          }
-     
-          _ws.onclose = function(){
-            _ws = null;
-          }  
-        }
       });
   })();
     </script>

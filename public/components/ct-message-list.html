@@ -1,4 +1,5 @@
 <link rel="import" href="../services/ct-msg-service.html">
+<link rel="import" href="../lib/core-animation/core-animation.html">
 
 <polymer-element name="ct-message-list">
   <template>
@@ -16,11 +17,25 @@
       .msgBody {
         word-break: break-all;
       }
+      #msgList {
+
+      }
     </style>
 
     <ct-msg-service id="ctMsgService" messages="{{messages}}"></ct-msg-service>
+
+    <core-animation id="fadein" duration="300">
+      <core-animation-keyframe>
+        <core-animation-prop name="opacity" value="0"></core-animation-prop>
+        <core-animation-prop name="transform" value="translate(-50px, 0)"></core-animation-prop>
+      </core-animation-keyframe>
+      <core-animation-keyframe>
+        <core-animation-prop name="opacity" value="1"></core-animation-prop>
+        <core-animation-prop name="transform" value="translate(0, 0)"></core-animation-prop>
+      </core-animation-keyframe>
+    </core-animation>
     
-    <div layout vertical center>
+    <div id="msgList" layout vertical center>
       <template repeat="{{m in messages}}">
         <div class="msg">
           <span class="msgAuthor">{{m.Author}} : </span>
@@ -31,8 +46,10 @@
   </template>
 
   <script>
-  Polymer({
-    handleFavorite: function(event, detail, sender) {
+  Polymer('ct-message-list', {
+    messagesChanged: function() {
+      this.$.fadein.target = this.$.msgList.children[this.$.msgList.children.length - 1];
+      this.$.fadein.play();
     }
   });
   </script>

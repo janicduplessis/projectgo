@@ -2,22 +2,21 @@
 
 <link rel="import" href="/services/ct-auth-service.html">
 
-<polymer-element name="ct-page-home" attributes="route user">
-	<template>
-		<style>
-    		
-    	</style>
+<link rel="import" href="/components/ct-loading.html">
+<link rel="import" href="/components/ct-module.html">
 
-    	<ct-auth-service id="service" user="{{user}}"></ct-auth-service>
-
-    	<h2>Welcome home!</h2>
-    	<paper-button label="test" on-tap="{{test}}"></paper-button>
-  	</template>
-  	<script>
-			  Polymer('ct-page-home', {
-			    test: function() {
-			    	alert(JSON.stringify(this.user));
-			    }
-			  });
-  	</script>
+<polymer-element name="ct-page-home" extends="ct-module">
+  <template>
+    <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+    <style></style>
+    <ct-auth-service id="service"></ct-auth-service>
+    <div class="card wide">
+      <h2>Welcome home!</h2>
+      <!--<ct-loading></ct-loading>-->
+    </div>
+  </template>
+  <script>
+        Polymer('ct-page-home', {
+        });
+    </script>
 </polymer-element>

@@ -1,0 +1,103 @@
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
+<link rel="import" href="/lib/core-localstorage/core-localstorage.html">
+<link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
+
+<link rel="import" href="/components/ct-loading.html">
+
+<polymer-element name="ct-controller" attributes="user">
+  <template>
+    <style></style>
+    <core-ajax id="request"
+               url="{{requestUrl}}"
+               method="POST"
+               handleAs="json"
+               on-core-response="{{requestResponse}}"></core-ajax>
+
+    <core-localstorage id="localStorage"></core-localstorage>
+
+    <template if="{{!updating}}">
+      <core-animated-pages transitions="cross-fade-all" selected="{{nav.route}}" on-core-select="{{routeChanged}}" valueattr="name">
+        <content></content>
+      </core-animated-pages>
+    </template>
+    <template if="{{updating}}">
+      <ct-loading></ct-loading>
+    </template>
+
+  </template>
+  <script>
+      Polymer('ct-controller', {
+        init: function() {
+          var pages = this.children;
+          this.modules = {};
+          for(var i = 0; i < pages.length; i++) {
+            var page = pages[i];
+            page.user = this.user;
+            page.nav = this.nav;
+            var name = page.name;
+            this.modules[name] = page;
+          }
+          this.update();
+        },
+        modules: null,
+        curModule: null,
+        updating: false,
+        nav: null,
+
+        routeChanged: function() {
+          if(this.modules === null) {
+            return;
+          }
+          this.update();
+        },
+        update: function() {
+          if(this.updating || !this.nav || !this.nav.route) {
+            return;
+          }
+          this.updating = true;
+          var modulePath = this.nav.route.replace('/', '.');
+          var module = this.modules[modulePath];
+          if(this.curModule) {
+            this.curModule.onUnload();
+          }
+          this.curModule = module;
+          module.onLoad();
+
+          if(!module) {
+            //TODO: Show error page
+            return;
+          }
+          if(module.hasModel) {
+            this.$.localStorage.name = 'ct-' + module.name + '-model';
+            var data = this.$.localStorage.value;
+            if(!data) {
+              this.model = {updating: true};
+              // Capitalize first letter of the module
+              var upperModule = module.name.replace(/(?:^|\s)\w/g, function(match) {
+                return match.toUpperCase();
+              });
+              this.requestUrl = '/models/get' + upperModule + 'Model';
+              this.$.request.go();
+            } else {
+              module.model = data;
+              module.model.updating = false;
+              this.updating = false;
+              module.onModelReady();
+            }
+          } else {
+            module.model = {updating: false};
+            this.updating = false;
+            module.onModelReady();
+          }
+        },
+        requestResponse: function(event) {
+          var response = event.detail.response;
+          this.curModule.model = response.Model;
+          this.curModule.updating = false;
+          this.updating = false;
+          this.curModule.onModelReady();
+          this.$.localStorage.value = response.Model;
+        }
+      });
+  </script>
+</polymer-element>

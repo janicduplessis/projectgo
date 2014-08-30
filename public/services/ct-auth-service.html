@@ -1,17 +1,17 @@
 <link rel="import" href="/lib/core-ajax/core-ajax.html">
 <link rel="import" href="/lib/core-localstorage/core-localstorage.html">
 
-<polymer-element name="ct-auth-service" attributes="user">
+<polymer-element name="ct-auth-service">
   <template>
     <style>
         :host {
             display: none;
         }
     </style>
-    <core-ajax id="login" 
-               url="/login" 
-               method="POST" 
-               handleAs="json" 
+    <core-ajax id="login"
+               url="/login"
+               method="POST"
+               handleAs="json"
                body="{{bodyLogin}}"
                on-core-response="{{loginResponse}}">
     </core-ajax>
@@ -28,11 +28,30 @@
                handleAs="json">
     </core-ajax>
 
-    <core-localstorage name="ct-user" value="{{user}}"></core-localstorage>
+    <core-localstorage id="storage" name="ct-user" on-core-localstorage-load="{{storageLoaded}}"></core-localstorage>
 
   </template>
   <script>
+    (function() {
+      var _user = {
+        logged: false,
+        identity: null
+      };
+
       Polymer('ct-auth-service', {
+        get user() {
+          return _user;
+        },
+        storageLoaded: function() {
+          var user = this.$.storage.value;
+          if(user && user.logged && user.identity) {
+            this.user.logged = user.logged;
+            this.user.identity = user.identity;
+            if(this.user.logged) {
+              this.fire('log-in', this.user);
+            }
+          }
+        },
         login: function(username, password) {
           var loginInfo = {
             UserName: username,
@@ -53,21 +72,38 @@
           this.$.register.go();
         },
         logout: function() {
-          this.user = null;
+          this.user.logged = false;
+          this.user.identity = null;
           this.$.logout.go();
-          this.fire('ct-logout');
+          this.$.storage.value = this.user;
+          this.fire('log-out');
         },
         loginResponse: function(event) {
           var response = event.detail.response;
-          this.user = response.User;
+          if(response.Result) {
+            this.user.logged = true;
+            this.user.identity = response.User;
+            this.fire('log-in', response.User);
+          } else {
+            this.user.logged = false;
+            this.user.identity = null;
+          }
+          this.$.storage.value = this.user;
           this.fire('ct-login', {result: response.Result, user: response.User});
         },
         registerResponse: function(event) {
           var response = event.detail.response;
-          this.user = response.User;
-          this.fire('ct-register', {result: response.Result, user: response.User});
+          if(response.Result) {
+            this.user.logged = true;
+            this.user.identity = response.User;
+            this.fire('log-in', response.User);
+          } else {
+            this.user.logged = false;
+            this.user.identity = null;
+          }
+          this.$.storage.value = this.user;
         }
-
       });
+    })();
   </script>
 </polymer-element>

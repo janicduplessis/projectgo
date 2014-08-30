@@ -1,0 +1,13 @@
+.card.wide {
+	margin-top: 32px;
+	width: 512px;
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
+	border-radius: 2px;
+}
+
+.card {
+	background-color: #fff;
+	padding: 20px 16px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}

@@ -1,0 +1,29 @@
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
+<link rel="import" href="/lib/core-localstorage/core-localstorage.html">
+<link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
+
+<link rel="import" href="/components/ct-loading.html">
+
+<polymer-element name="ct-module" attributes="name model user">
+  <template>
+  </template>
+  <script>
+      Polymer('ct-module', {
+        model: null,
+        name: "",
+        nav: null,
+        get hasModel() {
+          return this.getAttribute('model') !== null;
+        },
+        onLoad: function() {
+
+        },
+        onModelReady: function() {
+
+        },
+        onUnload: function() {
+
+        }
+      });
+  </script>
+</polymer-element>

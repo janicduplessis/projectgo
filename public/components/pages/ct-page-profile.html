@@ -1,0 +1,55 @@
+<link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/lib/core-icons/core-icons.html">
+
+<link rel="import" href="/components/ct-module.html">
+
+<polymer-element name="ct-page-profile" extends="ct-module">
+	<template>
+	  <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+		<style>
+    		h2 {
+          margin-top: 0px;
+        }
+        .label {
+          margin-right: 10px;
+        }
+        paper-icon-button {
+          visibility: hidden;
+        }
+        .identifier:hover {
+          background-color: #ddd;
+        }
+        .identifier:hover paper-icon-button {
+          visibility: visible;
+        }
+    </style>
+    <div class="card wide" vertical-layout>
+  		<img src="{{model.ProfileImage}}" />
+  		<h2>{{model.UserName}}</h2>
+      <div id="firstName" class="identifier" horizontal layout center>
+        <div class="label">First name: </div>
+        <div class="value">{{model.FirstName}}</div>
+        <paper-icon-button icon="create"></paper-icon-button>
+      </div>
+      <div id="lastName" class="identifier" horizontal layout center>
+        <div class="label">Last name: </div>
+        <div class="value">{{model.LastName}}</div>
+        <paper-icon-button icon="create"></paper-icon-button>
+      </div>
+      <div id="email" class="identifier" horizontal layout center>
+        <div class="label">Email: </div>
+        <div class="value">{{model.Email}}</div>
+        <paper-icon-button icon="create"></paper-icon-button>
+      </div>
+  	</div>
+  </template>
+  <script>
+  	Polymer('ct-page-profile', {
+  		onModelReady: function() {
+  			
+  		}
+  	});
+  </script>
+</polymer-element>
+
+

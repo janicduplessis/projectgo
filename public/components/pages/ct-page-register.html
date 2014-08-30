@@ -2,8 +2,9 @@
 <link rel="import" href="/lib/paper-button/paper-button.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
+<link rel="import" href="/components/ct-module.html">
 
-<polymer-element name="ct-page-register" attributes="route user">
+<polymer-element name="ct-page-register" extends="ct-module">
 	<template>
 		<style>
     		.primary {
@@ -18,7 +19,7 @@
     		}
     	</style>
 
-    	<ct-auth-service id="authService" user="{{user}}" on-ct-register="{{register}}"></ct-auth-service>
+    	<ct-auth-service id="authService" on-ct-register="{{register}}"></ct-auth-service>
 
     	<h2>Register</h2>
         <div on-keypress="{{onKeypress}}">
@@ -88,7 +89,7 @@
                 this.querySelector('paper-input');
 		    	var response = event.detail;
 		    	if(response.result) {
-		    		this.route = 'home'
+		    		this.nav.route = 'home'
                     this.$.username.invalid = false;
                     this.$.password.invalid = false;
                     this.$.passwordRepeat.invalid = false;

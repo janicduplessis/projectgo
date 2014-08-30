@@ -20,6 +20,8 @@ const (
 	urlSend     = "/send"
 	urlLogout   = "/logout"
 
+	urlProfileModel = "/models/getProfileModel"
+
 	dbUser     = "ct"
 	dbPassword = "wyty640"
 	dbName     = "ct"
@@ -122,6 +124,7 @@ func (s *Server) Listen() {
 	// Registered handlers
 	http.HandleFunc(urlSend, s.authenticate(s.handleInitChat))
 	http.HandleFunc(urlLogout, s.authenticate(s.handleLogout))
+	http.HandleFunc(urlProfileModel, s.authenticate(s.handleGetProfileModel))
 
 	// Public handlers
 	http.HandleFunc(urlLogin, s.handleLogin)
@@ -185,6 +188,10 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request, user *User
 		s.Del(user.Client)
 	}
 	s.sendJSON(w, &JSON{"Result": true})
+}
+
+func (s *Server) handleGetProfileModel(w http.ResponseWriter, r *http.Request, user *User) {
+	s.sendJSON(w, &JSON{"Model": user})
 }
 
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -281,11 +288,11 @@ func (s *Server) authenticate(fn func(http.ResponseWriter, *http.Request, *User)
 			s.Err(err)
 			return
 		}
-		user := session.Values["User"].(*User)
-		if user == nil {
+		if session.Values["User"] == nil {
 			s.authNeededError(w)
 			return
 		}
+		user := session.Values["User"].(*User)
 
 		fn(w, r, user)
 	}
