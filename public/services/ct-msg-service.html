@@ -15,7 +15,7 @@
         if (_ws !== null) {
           return;
         }
-        _ws = new WebSocket('ws://' + window.location.host + ':8080/send'),
+        _ws = new WebSocket('ws://' + window.location.host + '/send'),
 
         _ws.onopen = function(){
         }
