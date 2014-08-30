@@ -25,6 +25,8 @@ const (
 	dbUser     = "ct"
 	dbPassword = "wyty640"
 	dbName     = "ct"
+	dbUrl      = "localhost"
+	dbPort     = "3306"
 
 	sessionKey  = "IAsOAlsdkawpkodpwaoADas"
 	sessionName = "ct-session"
@@ -42,13 +44,22 @@ type Server struct {
 	db        *sql.DB
 	auth      *Auth
 	store     *sessions.CookieStore
+	config    *ServerConfig
+}
+
+type ServerConfig struct {
+	DbUser     string
+	DbPassword string
+	DbName     string
+	DbUrl      string
+	DbPort     string
 }
 
 // JSON object
 type JSON map[string]interface{}
 
 // NewServer creates an instance of server
-func NewServer() *Server {
+func NewServer(config *ServerConfig) *Server {
 	messages := []*Message{}
 	clients := make(map[int]*Client)
 	addCh := make(chan *Client)
@@ -61,7 +72,7 @@ func NewServer() *Server {
 	gob.Register(&User{})
 
 	// Db connection
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", dbUser, dbPassword, dbName))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config.DbUser, config.DbPassword, config.DbUrl, config.DbPort, config.DbName))
 	if err != nil {
 		panic(err)
 	}
@@ -79,6 +90,7 @@ func NewServer() *Server {
 		db:        db,
 		auth:      auth,
 		store:     store,
+		config:    config,
 	}
 }
 

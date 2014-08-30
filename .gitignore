@@ -26,3 +26,4 @@ _testmain.go
 bower_components
 node_modules
 public/lib
+server.json
