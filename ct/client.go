@@ -57,7 +57,7 @@ func (c *Client) SendArray(msg []*Message) {
 
 func (c *Client) Listen() {
 	go c.listenSend()
-	c.SendArray(c.server.Messages())
+	//c.SendArray(c.server.Messages())
 	c.listenReceive()
 }
 
@@ -88,7 +88,7 @@ func (c *Client) listenReceive() {
 			} else if err != nil {
 				c.server.Err(err)
 			} else {
-				c.server.SendAll(&msg)
+				c.server.Send(&msg)
 			}
 		}
 	}

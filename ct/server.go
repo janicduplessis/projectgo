@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"code.google.com/p/go.net/websocket"
@@ -15,18 +16,16 @@ import (
 )
 
 const (
-	urlLogin    = "/login"
-	urlRegister = "/register"
-	urlSend     = "/send"
-	urlLogout   = "/logout"
+	urlLogin      = "login"
+	urlRegister   = "register"
+	urlSend       = "send"
+	urlLogout     = "logout"
+	urlJoinChan   = "chan/join"
+	urlLeaveChan  = "chan/leave"
+	urlCreateChan = "chan/create"
+	urlListChan   = "chan/list"
 
 	urlProfileModel = "/models/getProfileModel"
-
-	dbUser     = "ct"
-	dbPassword = "wyty640"
-	dbName     = "ct"
-	dbUrl      = "localhost"
-	dbPort     = "3306"
 
 	sessionKey  = "IAsOAlsdkawpkodpwaoADas"
 	sessionName = "ct-session"
@@ -34,20 +33,27 @@ const (
 
 // Server manages login, registration and messaging
 type Server struct {
-	messages  []*Message
-	clients   map[int]*Client
-	addCh     chan *Client
-	delCh     chan *Client
-	sendAllCh chan *Message
-	doneCh    chan bool
-	logCh     chan string
-	db        *sql.DB
-	auth      *Auth
-	store     *sessions.CookieStore
-	config    *ServerConfig
+	Channels map[int64]*Channel
+	Db       *sql.DB
+
+	clients         map[int]*Client
+	addCh           chan *Client
+	delCh           chan *Client
+	sendCh          chan *Message
+	joinChannelCh   chan ChannelUser
+	leaveChannelCh  chan ChannelUser
+	createChannelCh chan *ChannelInfo
+	channelsMutex   sync.RWMutex
+	doneCh          chan bool
+	logCh           chan string
+	auth            *Auth
+	store           *sessions.CookieStore
+	config          *ServerConfig
 }
 
 type ServerConfig struct {
+	SiteRoot   string
+	SitePort   string
 	DbUser     string
 	DbPassword string
 	DbName     string
@@ -60,13 +66,16 @@ type JSON map[string]interface{}
 
 // NewServer creates an instance of server
 func NewServer(config *ServerConfig) *Server {
-	messages := []*Message{}
+	channels := make(map[int64]*Channel)
 	clients := make(map[int]*Client)
 	addCh := make(chan *Client)
 	delCh := make(chan *Client)
-	sendAllCh := make(chan *Message)
+	sendCh := make(chan *Message)
 	doneCh := make(chan bool)
 	logCh := make(chan string)
+	joinChannelCh := make(chan ChannelUser)
+	leaveChannelCh := make(chan ChannelUser)
+	createChannelCh := make(chan *ChannelInfo)
 
 	store := sessions.NewCookieStore([]byte(sessionKey))
 	gob.Register(&User{})
@@ -80,17 +89,21 @@ func NewServer(config *ServerConfig) *Server {
 	auth := NewAuth(db)
 
 	return &Server{
-		messages:  messages,
-		clients:   clients,
-		addCh:     addCh,
-		delCh:     delCh,
-		sendAllCh: sendAllCh,
-		doneCh:    doneCh,
-		logCh:     logCh,
-		db:        db,
-		auth:      auth,
-		store:     store,
-		config:    config,
+		Channels: channels,
+		Db:       db,
+
+		clients:         clients,
+		addCh:           addCh,
+		delCh:           delCh,
+		sendCh:          sendCh,
+		joinChannelCh:   joinChannelCh,
+		leaveChannelCh:  leaveChannelCh,
+		createChannelCh: createChannelCh,
+		doneCh:          doneCh,
+		logCh:           logCh,
+		auth:            auth,
+		store:           store,
+		config:          config,
 	}
 }
 
@@ -104,10 +117,29 @@ func (s *Server) Del(c *Client) {
 	s.delCh <- c
 }
 
-// SendAll sends a message to all clients
-func (s *Server) SendAll(msg *Message) {
-	s.Log("d", fmt.Sprintf("Received message from %s: %s", msg.Author, msg.Body))
-	s.sendAllCh <- msg
+func (s *Server) Send(msg *Message) {
+	s.sendCh <- msg
+}
+
+func (s *Server) GetChannel(channelId int64) *Channel {
+	//We'll user a mutex for reading channels values, writes will be handled in main loop
+	s.channelsMutex.RLock()
+	channel := s.Channels[channelId]
+	s.channelsMutex.RUnlock()
+	if channel == nil {
+		s.Log("e", fmt.Sprintf("Cannot find channel %s", channelId))
+	}
+	return channel
+}
+
+func (s *Server) GetAllChannels() []*Channel {
+	s.channelsMutex.RLock()
+	channels := make([]*Channel, 0, len(s.Channels))
+	for _, channel := range s.Channels {
+		channels = append(channels, channel)
+	}
+	s.channelsMutex.RUnlock()
+	return channels
 }
 
 // Done shuts down the server
@@ -125,24 +157,24 @@ func (s *Server) Log(tag string, message string) {
 	s.logCh <- fmt.Sprintf("[%s][%s] %s", t.Format("2006-01-02 15:04:05"), tag, message)
 }
 
-func (s *Server) Messages() []*Message {
-	return s.messages
-}
-
 // Listen starts the server
 // Handle client connections and message broadcast
 func (s *Server) Listen() {
 
 	// Registered handlers
-	http.HandleFunc(urlSend, s.authenticate(s.handleInitChat))
-	http.HandleFunc(urlLogout, s.authenticate(s.handleLogout))
-	http.HandleFunc(urlProfileModel, s.authenticate(s.handleGetProfileModel))
+	http.HandleFunc(s.makeServerUrl(urlSend), s.authenticate(s.handleInitChat))
+	http.HandleFunc(s.makeServerUrl(urlLogout), s.authenticate(s.handleLogout))
+	http.HandleFunc(s.makeServerUrl(urlProfileModel), s.authenticate(s.handleGetProfileModel))
+	http.HandleFunc(s.makeServerUrl(urlJoinChan), s.authenticate(s.handleJoinChan))
+	http.HandleFunc(s.makeServerUrl(urlLeaveChan), s.authenticate(s.handleLeaveChan))
+	http.HandleFunc(s.makeServerUrl(urlCreateChan), s.authenticate(s.handleCreateChan))
+	http.HandleFunc(s.makeServerUrl(urlListChan), s.authenticate(s.handleListChan))
 
 	// Public handlers
-	http.HandleFunc(urlLogin, s.handleLogin)
-	http.HandleFunc(urlRegister, s.handleRegister)
+	http.HandleFunc(s.makeServerUrl(urlLogin), s.handleLogin)
+	http.HandleFunc(s.makeServerUrl(urlRegister), s.handleRegister)
 
-	defer s.db.Close()
+	defer s.Db.Close()
 
 	// Server listen loop
 	for {
@@ -156,14 +188,21 @@ func (s *Server) Listen() {
 		case c := <-s.delCh:
 			delete(s.clients, c.id)
 
-		// Send to all clients
-		case msg := <-s.sendAllCh:
-			s.messages = append(s.messages, msg)
-			s.sendAll(msg)
+		case msg := <-s.sendCh:
+			s.send(msg)
 
 		// Log errors
 		case message := <-s.logCh:
 			log.Println(message)
+
+		case chanUser := <-s.joinChannelCh:
+			s.joinChannel(chanUser)
+
+		case chanUser := <-s.leaveChannelCh:
+			s.leaveChannel(chanUser)
+
+		case chanInfo := <-s.createChannelCh:
+			s.createChannel(chanInfo)
 
 		// Stop server
 		case <-s.doneCh:
@@ -192,6 +231,35 @@ func (s *Server) handleInitChat(w http.ResponseWriter, r *http.Request, user *Us
 
 	onConnectedHander := websocket.Handler(onConnected)
 	onConnectedHander.ServeHTTP(w, r)
+}
+
+func (s *Server) handleJoinChan(w http.ResponseWriter, r *http.Request, user *User) {
+	channel := ChannelUser{}
+	s.readJSON(r, &channel)
+	channel.User = user
+	s.joinChannelCh <- channel
+	s.sendJSON(w, &JSON{"Result": true})
+}
+
+func (s *Server) handleLeaveChan(w http.ResponseWriter, r *http.Request, user *User) {
+	channel := ChannelUser{}
+	s.readJSON(r, &channel)
+	channel.User = user
+	s.leaveChannelCh <- channel
+	s.sendJSON(w, &JSON{"Result": true})
+}
+
+func (s *Server) handleCreateChan(w http.ResponseWriter, r *http.Request, user *User) {
+	channel := &ChannelInfo{}
+	s.readJSON(r, channel)
+	s.Log("d", channel.Name)
+	s.createChannelCh <- channel
+	s.sendJSON(w, &JSON{"Result": true})
+}
+
+func (s *Server) handleListChan(w http.ResponseWriter, r *http.Request, user *User) {
+	channels := s.GetAllChannels()
+	s.sendJSON(w, channels)
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request, user *User) {
@@ -259,11 +327,39 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 	s.sendJSON(w, &JSON{"Result": user != nil, "User": user})
 }
 
-// Send a message to every client
-func (s *Server) sendAll(msg *Message) {
-	for _, c := range s.clients {
-		c.Send(msg)
+func (s *Server) send(msg *Message) {
+	channel := s.Channels[msg.ChannelId]
+	if channel == nil {
+		return
 	}
+	msg.Channel = channel
+	channel.AddMessage(msg)
+	for _, user := range channel.Users {
+		user.Client.Send(msg)
+	}
+}
+
+func (s *Server) joinChannel(cu ChannelUser) {
+	channel := s.GetChannel(cu.ChannelId)
+	channel.Join(cu.User)
+}
+
+func (s *Server) leaveChannel(cu ChannelUser) {
+	channel := s.GetChannel(cu.ChannelId)
+	channel.Leave(cu.User)
+}
+
+func (s *Server) createChannel(info *ChannelInfo) {
+	channel, err := NewChannel(info.Name, s)
+	if err != nil {
+		s.Err(err)
+		return
+	}
+	if channel == nil {
+		s.Log("e", "Could not create channel")
+		return
+	}
+	s.Channels[channel.Id] = channel
 }
 
 func (s *Server) readJSON(r *http.Request, obj interface{}) {
@@ -335,4 +431,8 @@ func (s *Server) endSession(w http.ResponseWriter, r *http.Request) error {
 // authNeededError returns an error to an unauthentificated client when the page requires authentification
 func (s *Server) authNeededError(w http.ResponseWriter) {
 	s.sendJSON(w, &JSON{"Response": "AUTH_NEEDED_ERROR"})
+}
+
+func (s *Server) makeServerUrl(url string) string {
+	return s.config.SiteRoot + url
 }

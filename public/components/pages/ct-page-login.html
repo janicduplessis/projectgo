@@ -7,8 +7,9 @@
 
 <polymer-element name="ct-page-login" extends="ct-module">
 	<template>
+		<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
 		<style>
-		.primary {
+			.primary {
     			color: #fff;
     			background-color: #03a9f4;
     		}
@@ -25,16 +26,19 @@
 		</style>
 
 		<ct-auth-service id="authService" on-ct-login="{{login}}"></ct-auth-service>
-
-		<h2>Login</h2>
-		<div on-keypress="{{onKeypress}}">
-			<paper-input id="username" label="Username" value="{{username}}" autofocus floatingLabel flex></paper-input>
-			<paper-input id="password" label="Password" type="password" value="{{password}}" floatingLabel></paper-input>
-			<div flex horizontal end-justified layout>
-				<paper-button raisedButton class="primary" label="Login" on-tap="{{submit}}"></paper-button>
+		<div class="card wide">
+			<h2>Login</h2>
+			<div on-keypress="{{onKeypress}}">
+				<paper-input id="username" label="Username" value="{{username}}" autofocus floatingLabel flex></paper-input>
+				<paper-input id="password" label="Password" type="password" value="{{password}}" floatingLabel></paper-input>
+				<div class="buttons" flex horizontal end-justified layout>
+					<paper-button raisedButton class="primary" label="Login" on-tap="{{submit}}"></paper-button>
+				</div>
 			</div>
 		</div>
-		<paper-toast id="toast" class="capsule" style="padding-right: 60px;" on-focus="{{fixFocus}}"></paper-toast>
+		<div flex vertical layout center>
+			<paper-toast id="toast" class="capsule" on-focus="{{fixFocus}}"></paper-toast>
+		</div>
 	</template>
 	<script>
 		Polymer('ct-page-login', {
@@ -61,7 +65,7 @@
 			    		this.$.toast.text = 'Invalid username or password';
 			    		this.$.password.focus();
 			    	}
-			    	this.$.toast.show();		    	
+			    	this.$.toast.show();
 			    }
 			    this.password = '';
 			},

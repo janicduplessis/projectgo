@@ -6,6 +6,7 @@
 
 <polymer-element name="ct-page-register" extends="ct-module">
 	<template>
+        <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
 		<style>
     		.primary {
     			color: #fff;
@@ -21,17 +22,19 @@
 
     	<ct-auth-service id="authService" on-ct-register="{{register}}"></ct-auth-service>
 
-    	<h2>Register</h2>
-        <div on-keypress="{{onKeypress}}">
-    		<paper-input id="username" label="Username" error="Username must be at least 6 charaters long." maxlength="40" value="{{username}}" flex></paper-input>
-    		<paper-input id="password" label="Password" error="Password must be at least 6 charaters long." maxlength="40" type="password" value="{{password}}"></paper-input>
-    		<paper-input id="passwordRepeat" label="Repeat password" error="Passwords don't match." maxlength="40" type="password" value="{{passwordRepeat}}"></paper-input>
-    		<paper-input id="firstName" label="First name" error="Please enter your first name." maxlength="40" value="{{firstName}}"></paper-input>
-    		<paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
-    		<paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
-    		<div flex horizontal end-justified layout>
-    			<paper-button raisedButton class="primary" label="Submit" on-tap="{{submit}}"></paper-button>
-    		</div>
+        <div class="card wide">
+        	<h2>Register</h2>
+            <div on-keypress="{{onKeypress}}">
+        		<paper-input id="username" label="Username" error="Username must be at least 6 charaters long." maxlength="40" value="{{username}}" flex></paper-input>
+        		<paper-input id="password" label="Password" error="Password must be at least 6 charaters long." maxlength="40" type="password" value="{{password}}"></paper-input>
+        		<paper-input id="passwordRepeat" label="Repeat password" error="Passwords don't match." maxlength="40" type="password" value="{{passwordRepeat}}"></paper-input>
+        		<paper-input id="firstName" label="First name" error="Please enter your first name." maxlength="40" value="{{firstName}}"></paper-input>
+        		<paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
+        		<paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
+        		<div class="buttons" flex horizontal end-justified layout>
+        			<paper-button raisedButton class="primary" label="Submit" on-tap="{{submit}}"></paper-button>
+        		</div>
+            </div>
         </div>
   	</template>
   	<script>

@@ -1,3 +1,6 @@
+<link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
+
 <link rel="import" href="/components/ct-send-box.html">
 <link rel="import" href="/components/ct-message-list.html">
 <link rel="import" href="/components/ct-module.html">
@@ -7,12 +10,31 @@
 		<style>
     		
     	</style>
+
+		<core-ajax id="create"
+		               url="/chan/create"
+		               method="POST"
+		               handleAs="json"
+		               on-core-response="{{createChannelResponse}}">
+		               </core-ajax>
+
+    	<paper-button raisedButton class="primary" label="Create" on-tap="{{createChannel}}"></paper-button>
 		<ct-message-list></ct-message-list>
 		<ct-send-box id="sendBox" label="Send message!" sender="{{user.UserName}}"></ct-send-box>
   	</template>
   	<script>
 			  Polymer('ct-page-chat', {
+			  	createChannel: function() {
+			  		var request = this.$.create;
+			  		request.body = JSON.stringify({
+			  			Name: "Test"
+			  		});
+			  		request.go();
+			  	},
 
+			  	createChannelResponse: function() {
+
+			  	}
 			  });
   	</script>
 </polymer-element>

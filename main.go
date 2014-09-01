@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +18,8 @@ func main() {
 
 	// Default config
 	config := ct.ServerConfig{
+		SiteRoot:   "/",
+		SitePort:   "8080",
 		DbUser:     "ct",
 		DbPassword: "***",
 		DbName:     "ct",
@@ -28,6 +31,7 @@ func main() {
 	file, err := ioutil.ReadFile(configFile)
 
 	if err != nil {
+		// No config found, we will create the default one and tell the user to set it up
 		data, err := json.Marshal(config)
 		if err != nil {
 			log.Fatal(err)
@@ -36,6 +40,9 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Println("No config found, created default config file. Please edit 'server.json' and try again.")
+		// Exit the program
+		return
 	} else {
 		if err = json.Unmarshal(file, &config); err != nil {
 			log.Fatal(err)
@@ -48,5 +55,5 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-	log.Fatal(http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.SitePort), context.ClearHandler(http.DefaultServeMux)))
 }

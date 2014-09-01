@@ -1,6 +1,6 @@
 .card.wide {
 	margin-top: 32px;
-	width: 512px;
+	width: 100%;
 	box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
 	border-radius: 2px;
 }
@@ -10,4 +10,12 @@
 	padding: 20px 16px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
+}
+
+.card h2 {
+	margin-top: 0px;
+}
+
+.card .buttons {
+	margin-top: 20px;
 }
