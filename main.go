@@ -9,6 +9,11 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/janicduplessis/projectgo/ct"
+
+	//"github.com/janicduplessis/projectgo/ct/domain"
+	"github.com/janicduplessis/projectgo/ct/infrastructure"
+	"github.com/janicduplessis/projectgo/ct/interfaces"
+	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
 const configFile = "server.json"
@@ -50,8 +55,46 @@ func main() {
 	}
 
 	// Chat server
-	server := ct.NewServer(&config)
-	go server.Listen()
+	//server := ct.NewServer(&config)
+	//go server.Listen()
+
+	//Console logger
+	logger := new(infrastructure.LoggerHandler)
+
+	// Crypto handler
+	crypto := new(infrastructure.CryptoHandler)
+
+	// Base webservice handler
+	webservice := infrastructure.NewWebserviceHandler(logger)
+
+	// Database
+	dbConfig := infrastructure.MySqlDbConfig{
+		User:     config.DbUser,
+		Password: config.DbPassword,
+		Name:     config.DbName,
+		Url:      config.DbUrl,
+		Port:     config.DbPort,
+	}
+	dbHandler := infrastructure.NewMySqlHandler(dbConfig)
+
+	// Database handlers for each repo
+	handlers := make(map[string]interfaces.DbHandler)
+	handlers["DbInitializerRepo"] = dbHandler
+	handlers["DbClientRepo"] = dbHandler
+	handlers["DbUserRepo"] = dbHandler
+
+	// Initialize the database
+	dbInit := interfaces.NewDbInitializerRepo(handlers)
+	dbInit.Init()
+
+	// Interactors
+	authInteractor := new(usecases.AuthentificationInteractor)
+	authInteractor.UserRepository = interfaces.NewDbUserRepo(handlers)
+	authInteractor.Crypto = crypto
+	authInteractor.Logger = logger
+
+	// Webservices
+	interfaces.NewAuthentificationWebservice(webservice, authInteractor)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 

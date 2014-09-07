@@ -54,7 +54,7 @@
         },
         login: function(username, password) {
           var loginInfo = {
-            UserName: username,
+            Username: username,
             Password: password
           }
           this.bodyLogin = JSON.stringify(loginInfo);
@@ -62,7 +62,7 @@
         },
         register: function(username, password, firstName, lastName, email) {
           var registerInfo = {
-            UserName: username,
+            Username: username,
             Password: password,
             FirstName: firstName,
             LastName: lastName,
