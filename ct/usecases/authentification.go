@@ -19,8 +19,9 @@ type Crypto interface {
 }
 
 type User struct {
-	Id     int64
-	Client *domain.Client
+	Id       int64
+	Username string
+	Client   *domain.Client
 }
 
 type RegisterInfo struct {

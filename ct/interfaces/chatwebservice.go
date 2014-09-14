@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"code.google.com/p/go.net/context"
+	"github.com/janicduplessis/projectgo/ct/domain"
 	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
@@ -12,7 +13,7 @@ const (
 )
 
 type ChatInteractor interface {
-	JoinServer(userId int64) error
+	JoinServer(userId int64) (*domain.Client, error)
 	JoinChannel(userId int64, channelId int64) error
 	SendMessage(userId int64, body string) error
 }
@@ -31,6 +32,11 @@ type ChatWebserviceHandler struct {
 	ChatInteractor ChatInteractor
 }
 
+type SenderHandler struct {
+	Handler WebsocketClient
+	Command WebsocketCommand
+}
+
 func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *ChatWebserviceHandler {
 	wsHandler := &ChatWebserviceHandler{
 		Webservice:     ws,
@@ -47,12 +53,14 @@ func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *Cha
 
 func (handler *ChatWebserviceHandler) JoinServer(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(KeyUser).(*usecases.User)
-	err := handler.ChatInteractor.JoinServer(user.Id)
+
+	client, err := handler.ChatInteractor.JoinServer(user.Id)
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return
 	}
-	handler.Websocket.AddClient(ctx, w, r, user.Client)
+
+	handler.Websocket.AddClient(ctx, w, r, client)
 }
 
 func (handler *ChatWebserviceHandler) SendMessage(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
@@ -82,5 +90,12 @@ func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client We
 	if err != nil {
 		client.Error(cmd, err)
 		return
+	}
+}
+
+func (sender *SenderHandler) Send(msg *domain.Message) {
+	sender.Command.SetType("SendMessage")
+	if err := sender.Handler.SendJson(sender.Command, msg); err != nil {
+		sender.Handler.Error(sender.Command, err)
 	}
 }

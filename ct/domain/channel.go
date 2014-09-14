@@ -5,7 +5,7 @@ import (
 )
 
 type ChannelRepository interface {
-	Channels() error
+	Channels() ([]*Channel, error)
 	Store(channel *Channel) error
 	FindById(id int64) (*Channel, error)
 }

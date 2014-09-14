@@ -10,11 +10,11 @@ type ClientSender interface {
 }
 
 type Client struct {
-	Id        int64
-	Username  string
-	FirstName string
-	LastName  string
-	Email     string
+	Id          int64
+	DisplayName string
+	FirstName   string
+	LastName    string
+	Email       string
 
 	Channel      *Channel
 	ClientSender ClientSender

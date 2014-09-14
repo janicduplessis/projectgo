@@ -8,6 +8,10 @@ var server *domain.Server
 
 type SingletonServerRepo struct{}
 
+func NewSingletonServerRepo() *SingletonServerRepo {
+	return new(SingletonServerRepo)
+}
+
 func (repo *SingletonServerRepo) Get() *domain.Server {
 	if server == nil {
 		channels := make(map[int64]*domain.Channel)

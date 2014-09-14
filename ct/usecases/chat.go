@@ -12,13 +12,14 @@ type ChatInteractor struct {
 	Logger            Logger
 }
 
-func (ci *ChatInteractor) JoinServer(clientId int64) error {
+func (ci *ChatInteractor) JoinServer(clientId int64) (*domain.Client, error) {
 	server := ci.ServerRepository.Get()
 	client, err := ci.ClientRepository.FindById(clientId)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return server.Join(client)
+
+	return client, server.Join(client)
 }
 
 func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {

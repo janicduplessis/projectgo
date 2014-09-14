@@ -30,23 +30,10 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 	}
 
 	// Register the user!
-	// Insert in client
-	res, err := repo.dbHandler.Execute(`INSERT INTO client (FirstName, LastName, Email)
-						   				VALUES (?, ?, ?)`, info.FirstName, info.LastName, info.Email)
-
-	if err != nil {
-		return nil, err
-	}
-
-	clientId, err := res.LastInsertId()
-	if err != nil {
-		return nil, err
-	}
-
 	// Insert in user
-	res, err = repo.dbHandler.Execute(`INSERT INTO user (Username, PasswordHash, ClientId)
-						   			   VALUES (?, ?, ?)`,
-		info.Username, info.Password, clientId)
+	res, err := repo.dbHandler.Execute(`INSERT INTO user (Username, PasswordHash)
+						   			   VALUES (?, ?)`,
+		info.Username, info.Password)
 
 	if err != nil {
 		return nil, err
@@ -57,12 +44,21 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 		return nil, err
 	}
 
+	// Insert in client
+	res, err = repo.dbHandler.Execute(`INSERT INTO client (ClientId, DisplayName, FirstName, LastName, Email)
+						   				VALUES (?, ?, ?, ?, ?)`, userId, info.Username, info.FirstName, info.LastName, info.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
 	// Create objects
 	client := &domain.Client{
-		Username:  info.Username,
-		FirstName: info.FirstName,
-		LastName:  info.LastName,
-		Email:     info.Email,
+		Id:          userId,
+		DisplayName: info.Username,
+		FirstName:   info.FirstName,
+		LastName:    info.LastName,
+		Email:       info.Email,
 	}
 
 	user := &usecases.User{
@@ -83,14 +79,15 @@ func (repo *DbUserRepo) FindByNameWithHash(name string) (*usecases.User, string,
 		userId       int64
 		username     string
 		passwordHash string
+		displayName  string
 		firstName    string
 		lastName     string
 		email        string
 	)
-	err := repo.dbHandler.QueryRow(`SELECT u.UserId, u.Username, u.PasswordHash, c.FirstName, c.LastName, c.Email
+	err := repo.dbHandler.QueryRow(`SELECT u.UserId, u.Username, u.PasswordHash, c.DisplayName, c.FirstName, c.LastName, c.Email
 				 	    		    FROM user u
-				 	    		    JOIN client c ON u.ClientId = c.ClientId
-				 	     		    WHERE u.Username = ?`, name).Scan(&userId, &username, &passwordHash, &firstName, &lastName, &email)
+				 	    		    JOIN client c ON u.UserId = c.ClientId
+				 	     		    WHERE u.Username = ?`, name).Scan(&userId, &username, &passwordHash, &displayName, &firstName, &lastName, &email)
 
 	if err != nil {
 		if err == ErrNoRows {
@@ -101,16 +98,17 @@ func (repo *DbUserRepo) FindByNameWithHash(name string) (*usecases.User, string,
 
 	// Create objects
 	client := &domain.Client{
-		Id:        userId,
-		Username:  username,
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
+		Id:          userId,
+		DisplayName: displayName,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       email,
 	}
 
 	user := &usecases.User{
-		Id:     userId,
-		Client: client,
+		Id:       userId,
+		Username: username,
+		Client:   client,
 	}
 
 	return user, passwordHash, nil

@@ -74,14 +74,26 @@ func (handler *WebsocketHandler) AddClient(ctx context.Context, w http.ResponseW
 			doneCh:           doneCh,
 			commandCh:        commandCh,
 		}
-
+		command := &WebsocketCommandHandler{
+			Client: clientHandler,
+		}
+		sender := &interfaces.SenderHandler{
+			Handler: clientHandler,
+			Command: command,
+		}
+		client.ClientSender = sender
 		handler.Clients[client.Id] = clientHandler
+
 		// Listen untill the client disconnects
 		clientHandler.listen()
 	}
 
 	onConnectedHander := websocket.Handler(onConnected)
 	onConnectedHander.ServeHTTP(w, r)
+}
+
+func (handler *WebsocketHandler) RemoveClient(ctx context.Context, client *domain.Client) {
+	//TODO: NYI
 }
 
 func (handler *WebsocketHandler) executeCommand(cmd *WebsocketCommandHandler) {

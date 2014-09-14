@@ -34,11 +34,12 @@ type RegisterResponseModel struct {
 }
 
 type UserModel struct {
-	Id        int64
-	Username  string
-	FirstName string
-	LastName  string
-	Email     string
+	Id          int64
+	Username    string
+	DisplayName string
+	FirstName   string
+	LastName    string
+	Email       string
 }
 
 func NewAuthentificationWebservice(ws Webservice, ai AuthentificationInteractor) *AuthentificationWebserviceHandler {
@@ -70,11 +71,12 @@ func (handler *AuthentificationWebserviceHandler) Login(ctx context.Context, w h
 
 	if user != nil {
 		userModel = &UserModel{
-			Id:        user.Id,
-			Username:  user.Client.Username,
-			FirstName: user.Client.FirstName,
-			LastName:  user.Client.LastName,
-			Email:     user.Client.Email,
+			Id:          user.Id,
+			Username:    user.Username,
+			DisplayName: user.Client.DisplayName,
+			FirstName:   user.Client.FirstName,
+			LastName:    user.Client.LastName,
+			Email:       user.Client.Email,
 		}
 
 		handler.Webservice.StartSession(ctx, w, r, user)
@@ -110,11 +112,12 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 
 	if user != nil {
 		userModel = &UserModel{
-			Id:        user.Id,
-			Username:  user.Client.Username,
-			FirstName: user.Client.FirstName,
-			LastName:  user.Client.LastName,
-			Email:     user.Client.Email,
+			Id:          user.Id,
+			Username:    user.Username,
+			DisplayName: user.Client.DisplayName,
+			FirstName:   user.Client.FirstName,
+			LastName:    user.Client.LastName,
+			Email:       user.Client.Email,
 		}
 
 		handler.Webservice.StartSession(ctx, w, r, user)

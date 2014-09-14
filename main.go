@@ -54,10 +54,6 @@ func main() {
 		}
 	}
 
-	// Chat server
-	//server := ct.NewServer(&config)
-	//go server.Listen()
-
 	//Console logger
 	logger := new(infrastructure.LoggerHandler)
 
@@ -66,6 +62,9 @@ func main() {
 
 	// Base webservice handler
 	webservice := infrastructure.NewWebserviceHandler(logger)
+
+	// Base websocket handler
+	websocket := infrastructure.NewWebsocketHandler(logger)
 
 	// Database
 	dbConfig := infrastructure.MySqlDbConfig{
@@ -82,6 +81,8 @@ func main() {
 	handlers["DbInitializerRepo"] = dbHandler
 	handlers["DbClientRepo"] = dbHandler
 	handlers["DbUserRepo"] = dbHandler
+	handlers["DbMessageRepo"] = dbHandler
+	handlers["DbChannelRepo"] = dbHandler
 
 	// Initialize the database
 	dbInit := interfaces.NewDbInitializerRepo(handlers)
@@ -93,8 +94,16 @@ func main() {
 	authInteractor.Crypto = crypto
 	authInteractor.Logger = logger
 
+	chatInteractor := new(usecases.ChatInteractor)
+	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo()
+	chatInteractor.ChannelRepository = interfaces.NewDbChannelRepo(handlers)
+	chatInteractor.MessageRepository = interfaces.NewDbMessageRepo(handlers)
+	chatInteractor.ClientRepository = interfaces.NewDbClientRepo(handlers)
+	chatInteractor.Logger = logger
+
 	// Webservices
 	interfaces.NewAuthentificationWebservice(webservice, authInteractor)
+	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
