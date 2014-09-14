@@ -19,3 +19,8 @@
 .card .buttons {
 	margin-top: 20px;
 }
+
+paper-toast {
+	position: relative;
+	margin-top: 40px;
+}

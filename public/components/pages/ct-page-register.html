@@ -1,5 +1,6 @@
 <link rel="import" href="/lib/paper-input/paper-input.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/paper-toast/paper-toast.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
 <link rel="import" href="/components/ct-module.html">
@@ -35,6 +36,9 @@
         			<paper-button raisedButton class="primary" label="Submit" on-tap="{{submit}}"></paper-button>
         		</div>
             </div>
+        </div>
+        <div flex vertical layout center>
+            <paper-toast id="toast" class="capsule"></paper-toast>
         </div>
   	</template>
   	<script>
@@ -89,7 +93,6 @@
                 }
 		  	},
 		    register: function(event) {
-                this.querySelector('paper-input');
 		    	var response = event.detail;
 		    	if(response.result) {
 		    		this.nav.route = 'home'
@@ -106,7 +109,8 @@
                     this.$.lastName.value = '';
                     this.$.email.value = '';
 		    	} else {
-                    
+                    this.$.toast.text = response.error;
+                    this.$.toast.show();
 		    	}
 		    },
             onKeypress: function(event) {

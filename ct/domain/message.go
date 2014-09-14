@@ -1,13 +1,13 @@
 package domain
 
 type MessageRepository interface {
-	Store(message *Message)
-	FindById(id int64) *Message
+	Store(message *Message) error
+	FindById(id int64) (*Message, error)
 }
 
 type Message struct {
 	Id      int64
-	Author  string
 	Body    string
+	Client  *Client
 	Channel *Channel
 }

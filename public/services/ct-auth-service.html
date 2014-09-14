@@ -102,7 +102,7 @@
             this.user.identity = null;
           }
           this.$.storage.value = this.user;
-          this.fire('ct-register', {result: response.Result, user: response.User});
+          this.fire('ct-register', {result: response.Result, user: response.User, error: response.Error});
         }
       });
     })();

@@ -30,6 +30,7 @@ type LoginResponseModel struct {
 type RegisterResponseModel struct {
 	Result bool
 	User   *UserModel
+	Error  string
 }
 
 type UserModel struct {
@@ -88,6 +89,7 @@ func (handler *AuthentificationWebserviceHandler) Login(ctx context.Context, w h
 }
 
 func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	var errorMessage string
 	info := new(usecases.RegisterInfo)
 	if err := handler.Webservice.ReadJson(w, r, info); err != nil {
 		handler.Webservice.Error(w, err)
@@ -96,8 +98,12 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 
 	user, err := handler.AuthentificationInteractor.Register(info)
 	if err != nil {
-		handler.Webservice.Error(w, err)
-		return
+		if err == usecases.ErrUserAlreadyExists {
+			errorMessage = err.Error()
+		} else {
+			handler.Webservice.Error(w, err)
+			return
+		}
 	}
 
 	var userModel *UserModel
@@ -117,6 +123,7 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 	response := &RegisterResponseModel{
 		Result: user != nil,
 		User:   userModel,
+		Error:  errorMessage,
 	}
 
 	handler.Webservice.SendJson(w, response)

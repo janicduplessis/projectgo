@@ -4,4 +4,5 @@ import (
 	"errors"
 )
 
-var ErrUserAlreadyExists = errors.New("The user with the specified name already exists")
+var ErrUserAlreadyExists = errors.New("Username unavailable")
+var ErrAccessDenied = errors.New("Access denied")

@@ -1,8 +1,12 @@
 package domain
 
 type ClientRepository interface {
-	Store(client *Client)
-	FindById(id int64) *Client
+	Store(client *Client) error
+	FindById(id int64) (*Client, error)
+}
+
+type ClientSender interface {
+	Send(message *Message)
 }
 
 type Client struct {
@@ -11,4 +15,7 @@ type Client struct {
 	FirstName string
 	LastName  string
 	Email     string
+
+	Channel      *Channel
+	ClientSender ClientSender
 }
