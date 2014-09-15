@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"reflect"
 
 	"code.google.com/p/go.net/context"
 	"code.google.com/p/go.net/websocket"
@@ -36,7 +37,7 @@ type WebsocketClientError struct {
 type WebsocketCommandHandler struct {
 	Command string
 	Data    interface{}
-	Client  *WebsocketClientHandler
+	client  *WebsocketClientHandler
 }
 
 func NewWebsocketHandler(logger usecases.Logger) *WebsocketHandler {
@@ -75,7 +76,7 @@ func (handler *WebsocketHandler) AddClient(ctx context.Context, w http.ResponseW
 			commandCh:        commandCh,
 		}
 		command := &WebsocketCommandHandler{
-			Client: clientHandler,
+			client: clientHandler,
 		}
 		sender := &interfaces.SenderHandler{
 			Handler: clientHandler,
@@ -96,14 +97,18 @@ func (handler *WebsocketHandler) RemoveClient(ctx context.Context, client *domai
 	//TODO: NYI
 }
 
+func (handler *WebsocketHandler) Log(msg string) {
+	handler.Logger.Log(msg)
+}
+
 func (handler *WebsocketHandler) executeCommand(cmd *WebsocketCommandHandler) {
 	fn := handler.Handlers[cmd.Command]
 	if fn == nil {
-		//cmd.Client.Error()
+		handler.Logger.Log("No handler for requested command")
 		return
 	}
 
-	fn(cmd.Client.Context, cmd.Client, cmd)
+	fn(cmd.client.Context, cmd.client, cmd)
 }
 
 func (client *WebsocketClientHandler) ReadJson(cmd interfaces.WebsocketCommand, obj interface{}) error {
@@ -111,7 +116,21 @@ func (client *WebsocketClientHandler) ReadJson(cmd interfaces.WebsocketCommand, 
 	if !ok {
 		return errors.New("Invalid command")
 	}
-	obj = cmdData.Data
+
+	// Need to use reflect to copy values into obj
+	dest := reflect.ValueOf(obj).Elem()
+	src, ok := cmdData.Data.(map[string]interface{})
+	if !ok {
+		return errors.New("Invalid command")
+	}
+	for srcKey, srcVal := range src {
+		destF := dest.FieldByName(srcKey)
+		srcF := reflect.ValueOf(srcVal)
+		if destF.IsValid() && srcF.Type().ConvertibleTo(destF.Type()) {
+			destF.Set(srcF.Convert(destF.Type()))
+		}
+	}
+
 	return nil
 }
 
@@ -144,7 +163,10 @@ func (client *WebsocketClientHandler) listenSend() {
 	for {
 		select {
 		case command := <-client.commandCh:
-			websocket.JSON.Send(client.conn, command)
+			err := websocket.JSON.Send(client.conn, command)
+			if err != nil {
+				client.Error(command, err)
+			}
 		}
 	}
 }
@@ -162,7 +184,7 @@ func (client *WebsocketClientHandler) listenReceive() {
 			} else if err != nil {
 				client.Error(command, err)
 			} else {
-				command.Client = client
+				command.client = client
 				go client.WebsocketHandler.executeCommand(command)
 			}
 		}

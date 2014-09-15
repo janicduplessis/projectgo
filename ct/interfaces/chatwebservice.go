@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"fmt"
 	"net/http"
 
 	"code.google.com/p/go.net/context"
@@ -15,6 +16,8 @@ const (
 type ChatInteractor interface {
 	JoinServer(userId int64) (*domain.Client, error)
 	JoinChannel(userId int64, channelId int64) error
+	Channels(clientId int64) (map[int64]*domain.Channel, error)
+	CreateChannel(clientId int64, name string) error
 	SendMessage(userId int64, body string) error
 }
 
@@ -24,6 +27,21 @@ type SendMessageRequest struct {
 
 type JoinChannelRequest struct {
 	ChannelId int64
+}
+
+type CreateChannelRequest struct {
+	Name string
+}
+
+type ChannelsResponse struct {
+	List []*domain.Channel
+}
+
+type SendMessageResponse struct {
+	Body      string
+	Author    string
+	ChannelId int64
+	ClientId  int64
 }
 
 type ChatWebserviceHandler struct {
@@ -40,6 +58,7 @@ type SenderHandler struct {
 func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *ChatWebserviceHandler {
 	wsHandler := &ChatWebserviceHandler{
 		Webservice:     ws,
+		Websocket:      wsocket,
 		ChatInteractor: ci,
 	}
 
@@ -47,6 +66,8 @@ func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *Cha
 
 	wsocket.AddHandler("SendMessage", wsHandler.SendMessage)
 	wsocket.AddHandler("JoinChannel", wsHandler.JoinChannel)
+	wsocket.AddHandler("CreateChannel", wsHandler.CreateChannel)
+	wsocket.AddHandler("Channels", wsHandler.Channels)
 
 	return wsHandler
 }
@@ -64,13 +85,17 @@ func (handler *ChatWebserviceHandler) JoinServer(ctx context.Context, w http.Res
 }
 
 func (handler *ChatWebserviceHandler) SendMessage(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
-	request := new(SendMessageRequest)
-	err := client.ReadJson(cmd, request)
+	request := SendMessageRequest{}
+	err := client.ReadJson(cmd, &request)
 	if err != nil {
 		client.Error(cmd, err)
 		return
 	}
+
 	user := ctx.Value(KeyUser).(*usecases.User)
+
+	handler.Webservice.Log(fmt.Sprintf("Sending message by id %d with content %s", user.Id, request.Message))
+
 	err = handler.ChatInteractor.SendMessage(user.Id, request.Message)
 	if err != nil {
 		client.Error(cmd, err)
@@ -79,14 +104,59 @@ func (handler *ChatWebserviceHandler) SendMessage(ctx context.Context, client We
 }
 
 func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
-	request := new(JoinChannelRequest)
-	err := client.ReadJson(cmd, request)
+	handler.Webservice.Log("Join channel request")
+	request := JoinChannelRequest{}
+	err := client.ReadJson(cmd, &request)
 	if err != nil {
 		client.Error(cmd, err)
 		return
 	}
 	user := ctx.Value(KeyUser).(*usecases.User)
+
+	handler.Webservice.Log(fmt.Sprintf("Joining channel with id %d for user %d", request.ChannelId, user.Id))
+
 	err = handler.ChatInteractor.JoinChannel(user.Id, request.ChannelId)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
+}
+
+func (handler *ChatWebserviceHandler) CreateChannel(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
+	handler.Webservice.Log("Create channel request")
+	request := CreateChannelRequest{}
+	err := client.ReadJson(cmd, &request)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
+	user := ctx.Value(KeyUser).(*usecases.User)
+	handler.Webservice.Log(fmt.Sprintf("Creating channel with name %s for user %d", request.Name, user.Id))
+	err = handler.ChatInteractor.CreateChannel(user.Id, request.Name)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
+}
+
+func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
+	handler.Webservice.Log("Channels request")
+	user := ctx.Value(KeyUser).(*usecases.User)
+	channels, err := handler.ChatInteractor.Channels(user.Id)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
+	channelsArr := make([]*domain.Channel, 0, len(channels))
+	for _, val := range channels {
+		channelsArr = append(channelsArr, val)
+	}
+
+	response := ChannelsResponse{
+		List: channelsArr,
+	}
+
+	err = client.SendJson(cmd, response)
 	if err != nil {
 		client.Error(cmd, err)
 		return
@@ -95,7 +165,13 @@ func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client We
 
 func (sender *SenderHandler) Send(msg *domain.Message) {
 	sender.Command.SetType("SendMessage")
-	if err := sender.Handler.SendJson(sender.Command, msg); err != nil {
+	response := &SendMessageResponse{
+		Body:      msg.Body,
+		Author:    msg.Client.DisplayName,
+		ChannelId: msg.Channel.Id,
+		ClientId:  msg.Client.Id,
+	}
+	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
 		sender.Handler.Error(sender.Command, err)
 	}
 }

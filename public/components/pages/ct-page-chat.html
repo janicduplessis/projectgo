@@ -4,36 +4,28 @@
 <link rel="import" href="/components/ct-send-box.html">
 <link rel="import" href="/components/ct-message-list.html">
 <link rel="import" href="/components/ct-module.html">
+<link rel="import" href="/services/ct-msg-service.html">
 
 <polymer-element name="ct-page-chat" extends="ct-module">
 	<template>
 		<style>
     		
     	</style>
-
-		<core-ajax id="create"
-		               url="/chan/create"
-		               method="POST"
-		               handleAs="json"
-		               on-core-response="{{createChannelResponse}}">
-		               </core-ajax>
+    	<ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
 
     	<paper-button raisedButton class="primary" label="Create" on-tap="{{createChannel}}"></paper-button>
+    	<paper-button raisedButton class="primary" label="Join" on-tap="{{joinChannel}}"></paper-button>
 		<ct-message-list></ct-message-list>
 		<ct-send-box id="sendBox" label="Send message!" sender="{{user.UserName}}"></ct-send-box>
   	</template>
   	<script>
 			  Polymer('ct-page-chat', {
 			  	createChannel: function() {
-			  		var request = this.$.create;
-			  		request.body = JSON.stringify({
-			  			Name: "Test"
-			  		});
-			  		request.go();
+			  		this.$.ctMsgService.createChannel("Test");
+			  		this.$.ctMsgService.updateChannels();
 			  	},
-
-			  	createChannelResponse: function() {
-
+			  	joinChannel: function() {
+			  		this.$.ctMsgService.joinChannel(this.channels.List[0].Id);
 			  	}
 			  });
   	</script>

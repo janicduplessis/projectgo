@@ -14,6 +14,7 @@ const (
 type Webservice interface {
 	SendJson(w http.ResponseWriter, obj interface{})
 	ReadJson(w http.ResponseWriter, r *http.Request, obj interface{}) error
+	Log(msg string)
 	Error(w http.ResponseWriter, err error)
 	StartSession(ctx context.Context, w http.ResponseWriter, r *http.Request, user *usecases.User) error
 	EndSession(ctx context.Context, w http.ResponseWriter, r *http.Request) error

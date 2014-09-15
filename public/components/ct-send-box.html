@@ -28,7 +28,7 @@
 
 			sendMessage: function() {
 				var msg = this.$.tbMessage.inputValue;
-				this.$.ctMsgService.sendMessage({Author: this.sender, Body: msg});
+				this.$.ctMsgService.sendMessage(msg);
 				this.$.tbMessage.inputValue = '';
 			},
 

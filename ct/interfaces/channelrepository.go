@@ -46,9 +46,41 @@ func (repo *DbChannelRepo) Channels() ([]*domain.Channel, error) {
 }
 
 func (repo *DbChannelRepo) Store(channel *domain.Channel) error {
+	res, err := repo.dbHandler.Execute(`INSERT INTO channel (Name)
+						   			    VALUES (?)`,
+		channel.Name)
+
+	if err != nil {
+		return err
+	}
+
+	chanId, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	channel.Id = chanId
+
 	return nil
 }
 
 func (repo *DbChannelRepo) FindById(id int64) (*domain.Channel, error) {
-	return nil, nil
+	var (
+		channelId int64
+		name      string
+	)
+	err := repo.dbHandler.QueryRow(`SELECT *
+				 	    		    FROM channel
+				 	     		    WHERE ChannelId = ?`, id).Scan(&channelId, &name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	channel := &domain.Channel{
+		Id:   channelId,
+		Name: name,
+	}
+
+	return channel, nil
 }

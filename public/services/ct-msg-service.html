@@ -1,4 +1,4 @@
-<polymer-element name="ct-msg-service" attributes="messages">
+<polymer-element name="ct-msg-service" attributes="messages channels">
   <template>
     <style>
         :host {
@@ -10,21 +10,28 @@
     (function() {
       var _ws = null,
           _messages = [];
+          _channels = {List: {}};
 
       function connect() {
         if (_ws !== null) {
           return;
         }
-        _ws = new WebSocket('ws://' + window.location.host + '/send'),
+        _ws = new WebSocket('ws://' + window.location.host + '/ct'),
 
         _ws.onopen = function(){
         }
    
-        _ws.onmessage = function(event){
-          var newMessages = JSON.parse(event.data);
-          for(var i = 0; i < newMessages.length; i++) {
-            _messages.push(newMessages[i]);
+        _ws.onmessage = function (event){
+          var cmd = JSON.parse(event.data);
+          switch(cmd.Command) {
+          case "SendMessage":
+            _messages.push(cmd.Data);
+            break;
+          case "Channels":
+            _channels.List = cmd.Data.List;
+            break;
           }
+          
         }
    
         _ws.onclose = function(){
@@ -35,6 +42,7 @@
       function disconnect() {
         _ws.onclose = function() {};
         _ws.close();
+        _ws = null;
       }
 
       document.addEventListener('log-in', function() {
@@ -48,6 +56,7 @@
 
         ready: function() {
           this.messages = _messages;
+          this.channels = _channels;
         },
 
         sendMessage: function(message) {
@@ -55,8 +64,40 @@
             return;
           }
 
-          _ws.send(JSON.stringify(message));
+          _ws.send(JSON.stringify({
+            Command: "SendMessage",
+            Data: {Message: message}
+         }));
         },
+        joinChannel: function(channelId) {
+          if(_ws === null) {
+            return;
+          }
+
+          _ws.send(JSON.stringify({
+            Command: "JoinChannel",
+            Data: {ChannelId: channelId}
+         }));
+        },
+        createChannel: function(name) {
+          if(_ws === null) {
+            return;
+          }
+
+          _ws.send(JSON.stringify({
+            Command: "CreateChannel",
+            Data: {Name: name}
+         }));
+        },
+        updateChannels: function() {
+          if(_ws === null) {
+            return;
+          }
+
+          _ws.send(JSON.stringify({
+            Command: "Channels"
+         }));
+        }
       });
   })();
     </script>

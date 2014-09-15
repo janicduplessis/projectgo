@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -29,6 +30,7 @@ type AuthNeededError struct {
 
 func NewWebserviceHandler(logger usecases.Logger) *WebserviceHandler {
 	store := sessions.NewCookieStore([]byte(sessionKey))
+	gob.Register(&usecases.User{})
 
 	return &WebserviceHandler{
 		Logger: logger,
@@ -61,6 +63,10 @@ func (handler *WebserviceHandler) SendJson(w http.ResponseWriter, obj interface{
 	w.Header().Set("Content-Type", "application/json")
 	//Write response body
 	w.Write(bytes)
+}
+
+func (handler *WebserviceHandler) Log(msg string) {
+	handler.Logger.Log(msg)
 }
 
 func (handler *WebserviceHandler) Error(w http.ResponseWriter, err error) {

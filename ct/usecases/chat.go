@@ -32,7 +32,7 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 		Channel: client.Channel,
 	}
 
-	if !client.Channel.HasAccess(client) {
+	if client.Channel == nil || !client.Channel.HasAccess(client) {
 		return ErrAccessDenied
 	}
 
@@ -47,6 +47,29 @@ func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 	server := ci.ServerRepository.Get()
 	client := server.Clients[clientId]
 	channel := server.Channels[channelId]
+	if channel == nil {
+		return ErrInvalidChannel
+	}
 
 	return channel.Join(client)
+}
+
+func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {
+	server := ci.ServerRepository.Get()
+
+	channel := domain.NewChannel(name)
+	err := ci.ChannelRepository.Store(channel)
+	if err != nil {
+		return err
+	}
+
+	server.Channels[channel.Id] = channel
+
+	return nil
+}
+
+func (ci *ChatInteractor) Channels(clientId int64) (map[int64]*domain.Channel, error) {
+	server := ci.ServerRepository.Get()
+
+	return server.Channels, nil
 }

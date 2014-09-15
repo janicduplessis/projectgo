@@ -4,5 +4,8 @@ import (
 	"errors"
 )
 
-var ErrUserAlreadyExists = errors.New("Username unavailable")
-var ErrAccessDenied = errors.New("Access denied")
+var (
+	ErrUserAlreadyExists = errors.New("Username unavailable")
+	ErrAccessDenied      = errors.New("Access denied")
+	ErrInvalidChannel    = errors.New("Invalid channel id")
+)
