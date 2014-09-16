@@ -32,7 +32,7 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 	// Register the user!
 	// Insert in user
 	res, err := repo.dbHandler.Execute(`INSERT INTO user (Username, PasswordHash)
-						   			   VALUES (?, ?)`,
+						   			    VALUES (?, ?)`,
 		info.Username, info.Password)
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 
 	// Insert in client
 	res, err = repo.dbHandler.Execute(`INSERT INTO client (ClientId, DisplayName, FirstName, LastName, Email)
-						   				VALUES (?, ?, ?, ?, ?)`, userId, info.Username, info.FirstName, info.LastName, info.Email)
+						   			   VALUES (?, ?, ?, ?, ?)`, userId, info.Username, info.FirstName, info.LastName, info.Email)
 
 	if err != nil {
 		return nil, err
@@ -62,8 +62,9 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 	}
 
 	user := &usecases.User{
-		Id:     userId,
-		Client: client,
+		Id:       userId,
+		Username: info.Username,
+		Client:   client,
 	}
 
 	return user, nil

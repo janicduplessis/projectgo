@@ -2,7 +2,7 @@
 <link rel="import" href="/lib/core-localstorage/core-localstorage.html">
 <link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
 
-<link rel="import" href="/components/ct-loading.html">
+<link rel="import" href="/lib/paper-spinner/paper-spinner.html">
 
 <polymer-element name="ct-controller" attributes="user">
   <template>
@@ -21,7 +21,7 @@
       </core-animated-pages>
     </template>
     <template if="{{updating}}">
-      <ct-loading></ct-loading>
+      <paper-spinner active></paper-spinner>
     </template>
 
   </template>

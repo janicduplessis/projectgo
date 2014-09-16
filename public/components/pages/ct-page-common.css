@@ -1,13 +1,12 @@
 .card.wide {
-	margin-top: 32px;
 	width: 100%;
 	box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
 	border-radius: 2px;
+	margin-bottom: 30px;
 }
 
 .card {
 	background-color: #fff;
-	padding: 20px 16px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 }
@@ -20,7 +19,20 @@
 	margin-top: 20px;
 }
 
+.card .header {
+	background-color: #eee;
+}
+
+.card.content, .card .content {
+	padding: 20px 25px;
+}
+
 paper-toast {
 	position: relative;
 	margin-top: 40px;
+}
+
+.primary {
+	color: #fff;
+	background-color: #0089BB;
 }
