@@ -3,7 +3,7 @@
 <link rel="import" href="/lib/paper-toast/paper-toast.html">
 <link rel="import" href="/lib/paper-tabs/paper-tabs.html">
 <link rel="import" href="/lib/paper-spinner/paper-spinner.html">
-<link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="/lib/core-pages/core-pages.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
 <link rel="import" href="/components/ct-module.html">
@@ -37,7 +37,6 @@
       }
 
       .header {
-        height: 120px;
         box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
         background-color: #FFFF8D;
         border-radius: 2px 2px 0 0;
@@ -61,17 +60,14 @@
         <div class="title">
           Welcome
         </div>
-        <paper-tabs selected="{{selected}}" valueattr="value" class="inverse" flex self-end>
-          <paper-tab value="login">Login</paper-tab>
-          <paper-tab value="register">Register</paper-tab>
-        </paper-tabs>
       </div>
-      <core-animated-pages transitions="cross-fade-all" selected="{{selected}}" valueattr="value">
+      <core-pages selected="{{selected}}" valueattr="value">
         <div value="login">
           <div class="card wide content" on-keypress="{{onKeypress}}">
             <paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
             <paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
             <div class="buttons" flex horizontal end-justified layout>
+              <paper-button id="switchRegister" label="Register" on-tap="{{switchRegister}}"></paper-button>
               <template if="{{loading}}">
                 <paper-spinner active self-center></paper-spinner>
               </template>
@@ -88,16 +84,17 @@
             <paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
             <paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
             <div class="buttons" flex horizontal end-justified layout>
+              <paper-button id="switchLogin" label="Login" on-tap="{{switchLogin}}"></paper-button>
               <template if="{{loading}}">
                 <paper-spinner active self-center></paper-spinner>
               </template>
-              <paper-button id="registerSubmit" raisedButton class="primary" label="Submit" on-tap="{{registerSubmit}}"></paper-button>
+              <paper-button id="registerSubmit" raisedButton class="primary" label="Register" on-tap="{{registerSubmit}}"></paper-button>
             </div>
           </div>
         </div>
-      </core-animated-pages>
+      </core-pages>
     <div flex vertical layout center>
-      <paper-toast id="toast" class="capsule" on-focus="{{fixFocus}}"></paper-toast>
+      <paper-toast id="toast" class="capsule"></paper-toast>
     </div>
   </template>
   <script>
@@ -211,6 +208,12 @@
           this.$.toast.show();
         }
       },
+      switchLogin: function() {
+        this.selected = 'login';
+      },
+      switchRegister: function() {
+        this.selected = 'register';
+      },
       onKeypress: function(event) {
         //Enter
         if(event.keyCode === 13) {
@@ -222,12 +225,6 @@
             this.registerSubmit();
           }
         }
-      },
-      //Hack to fix the fact that inputs lose focus when showing a toast
-      fixFocus: function(event) {
-        setTimeout(function() {
-          event.relatedTarget.focus();
-        }, 10);
       }
     });
   </script>
