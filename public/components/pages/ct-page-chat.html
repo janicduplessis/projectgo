@@ -19,15 +19,15 @@
 		<ct-send-box id="sendBox" label="Send message!" sender="{{user.UserName}}"></ct-send-box>
   	</template>
   	<script>
-			  Polymer('ct-page-chat', {
-			  	createChannel: function() {
-			  		this.$.ctMsgService.createChannel("Test");
-			  		this.$.ctMsgService.updateChannels();
-			  	},
-			  	joinChannel: function() {
-			  		this.$.ctMsgService.joinChannel(this.channels.List[0].Id);
-			  	}
-			  });
+		Polymer('ct-page-chat', {
+			createChannel: function() {
+				this.$.ctMsgService.createChannel("Test");
+				this.$.ctMsgService.updateChannels();
+			},
+			joinChannel: function() {
+				this.$.ctMsgService.joinChannel(this.channels.List[0].Id);
+			}
+		});
   	</script>
 </polymer-element>
 

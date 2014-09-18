@@ -104,6 +104,7 @@ func main() {
 	// Webservices
 	interfaces.NewAuthentificationWebservice(webservice, authInteractor)
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
+	interfaces.NewHomeWebservice(webservice)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 

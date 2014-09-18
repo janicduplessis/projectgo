@@ -29,9 +29,17 @@ core-toolbar .title {
   margin: 50px auto;
 }
 
+@media (max-width: 480px) {
+  paper-tab {
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+  }
+}
+
 @media (min-width: 481px) {
   paper-tabs {
-    max-width: 200px;
+    min-width: 200px;
   }
 }
 

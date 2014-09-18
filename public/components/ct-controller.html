@@ -11,12 +11,13 @@
                url="{{requestUrl}}"
                method="POST"
                handleAs="json"
-               on-core-response="{{requestResponse}}"></core-ajax>
+               on-core-response="{{requestResponse}}"
+               on-core-error="{{requestError}}"></core-ajax>
 
     <core-localstorage id="localStorage"></core-localstorage>
 
     <template if="{{!updating}}">
-      <core-animated-pages transitions="cross-fade-all" selected="{{nav.route}}" on-core-select="{{routeChanged}}" valueattr="name">
+      <core-animated-pages transitions="cross-fade-all" selected="{{curModule.name}}" valueattr="name">
         <content></content>
       </core-animated-pages>
     </template>
@@ -34,8 +35,7 @@
             var page = pages[i];
             page.user = this.user;
             page.nav = this.nav;
-            var name = page.name;
-            this.modules[name] = page;
+            this.modules[page.name] = page;
           }
           this.update();
         },
@@ -55,25 +55,27 @@
             return;
           }
           this.updating = true;
-          var modulePath = this.nav.route.replace('/', '.');
-          var module = this.modules[modulePath];
+          var module = this.modules[this.nav.route];
+          if(!module) {
+            //Nav to the error page
+            this.updating = false;
+            this.nav.route = "error";
+            return;
+          }
           if(this.curModule) {
             this.curModule.onUnload();
           }
           this.curModule = module;
           module.onLoad();
 
-          if(!module) {
-            //TODO: Show error page
-            return;
-          }
           if(module.hasModel) {
             this.$.localStorage.name = 'ct-' + module.name + '-model';
             var data = this.$.localStorage.value;
             if(!data) {
               this.model = {updating: true};
               // Capitalize first letter of the module
-              var upperModule = module.name.replace(/(?:^|\s)\w/g, function(match) {
+              var modulePaths = module.name.split('/');
+              var upperModule = modulePaths[modulePaths.length - 1].replace(/(?:^|\s)\w/g, function(match) {
                 return match.toUpperCase();
               });
               this.requestUrl = '/models/get' + upperModule + 'Model';
@@ -97,6 +99,10 @@
           this.updating = false;
           this.curModule.onModelReady();
           this.$.localStorage.value = response.Model;
+        },
+        requestError: function(event) {
+          this.updating = false;
+          this.nav.route = "error";
         }
       });
   </script>

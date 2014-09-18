@@ -11,6 +11,10 @@ const (
 	KeyUser string = "User"
 )
 
+type ModelResponse struct {
+	Model interface{}
+}
+
 type Webservice interface {
 	SendJson(w http.ResponseWriter, obj interface{})
 	ReadJson(w http.ResponseWriter, r *http.Request, obj interface{}) error
