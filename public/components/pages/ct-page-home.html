@@ -36,59 +36,54 @@
         margin-right: 20px;
       }
 
-      .header {
-        box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
-        background-color: #FFFF8D;
-        border-radius: 2px 2px 0 0;
-        border-bottom: solid 1px #eee;
-      }
-
-      .title {
-        padding: 20px 25px 10px 25px;
-        color: #006589;
-        font-size: 22px;
-        font-weight: bold;
-      }
-
-      .card.wide {
-        border-radius: 0 0 2px 2px;
+      #switchRegister, #switchLogin {
+        margin-right: 20px;
       }
     </style>
 
     <ct-auth-service id="authService" on-ct-login="{{login}}" on-ct-register="{{register}}"></ct-auth-service>
-      <div class="header" vertical layout>
-        <div class="title">
-          Welcome
-        </div>
-      </div>
       <core-pages selected="{{selected}}" valueattr="value">
         <div value="login">
-          <div class="card wide content" on-keypress="{{onKeypress}}">
-            <paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
-            <paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
-            <div class="buttons" flex horizontal end-justified layout>
-              <paper-button id="switchRegister" label="Register" on-tap="{{switchRegister}}"></paper-button>
-              <template if="{{loading}}">
-                <paper-spinner active self-center></paper-spinner>
-              </template>
-              <paper-button id="loginSubmit" raisedButton class="primary" label="Login" on-tap="{{loginSubmit}}"></paper-button>
+          <div class="card wide" on-keypress="{{onKeypress}}">
+            <div class="header">
+              <div class="title">
+                Welcome
+              </div>
+            </div>
+            <div class="content">
+              <paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
+              <paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
+              <div class="buttons" flex horizontal end-justified layout>
+                <paper-button id="switchRegister" label="Register" on-tap="{{switchRegister}}"></paper-button>
+                <template if="{{loading}}">
+                  <paper-spinner active self-center></paper-spinner>
+                </template>
+                <paper-button id="loginSubmit" raisedButton class="primary" label="Login" on-tap="{{loginSubmit}}"></paper-button>
+              </div>
             </div>
           </div>
         </div>
         <div value="register">
-          <div class="card wide content" on-keypress="{{onKeypress}}">
-            <paper-input id="rUsername" label="Username" error="Username must be at least 6 charaters long." maxlength="40" value="{{rUsername}}" flex></paper-input>
-            <paper-input id="rPassword" label="Password" error="Password must be at least 6 charaters long." maxlength="40" type="password" value="{{rPassword}}"></paper-input>
-            <paper-input id="passwordRepeat" label="Repeat password" error="Passwords don't match." maxlength="40" type="password" value="{{passwordRepeat}}"></paper-input>
-            <paper-input id="firstName" label="First name" error="Please enter your first name." maxlength="40" value="{{firstName}}"></paper-input>
-            <paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
-            <paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
-            <div class="buttons" flex horizontal end-justified layout>
-              <paper-button id="switchLogin" label="Login" on-tap="{{switchLogin}}"></paper-button>
-              <template if="{{loading}}">
-                <paper-spinner active self-center></paper-spinner>
-              </template>
-              <paper-button id="registerSubmit" raisedButton class="primary" label="Register" on-tap="{{registerSubmit}}"></paper-button>
+          <div class="card wide" on-keypress="{{onKeypress}}">
+            <div class="header">
+              <div class="title">
+                  Welcome
+              </div>
+            </div>
+            <div class="content">
+              <paper-input id="rUsername" label="Username" error="Username must be at least 6 charaters long." maxlength="40" value="{{rUsername}}" flex></paper-input>
+              <paper-input id="rPassword" label="Password" error="Password must be at least 6 charaters long." maxlength="40" type="password" value="{{rPassword}}"></paper-input>
+              <paper-input id="passwordRepeat" label="Repeat password" error="Passwords don't match." maxlength="40" type="password" value="{{passwordRepeat}}"></paper-input>
+              <paper-input id="firstName" label="First name" error="Please enter your first name." maxlength="40" value="{{firstName}}"></paper-input>
+              <paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
+              <paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
+              <div class="buttons" flex horizontal end-justified layout>
+                <paper-button id="switchLogin" label="Login" on-tap="{{switchLogin}}"></paper-button>
+                <template if="{{loading}}">
+                  <paper-spinner active self-center></paper-spinner>
+                </template>
+                <paper-button id="registerSubmit" raisedButton class="primary" label="Register" on-tap="{{registerSubmit}}"></paper-button>
+              </div>
             </div>
           </div>
         </div>
@@ -210,9 +205,11 @@
       },
       switchLogin: function() {
         this.selected = 'login';
+        this.scrollToTop();
       },
       switchRegister: function() {
         this.selected = 'register';
+        this.scrollToTop();
       },
       onKeypress: function(event) {
         //Enter

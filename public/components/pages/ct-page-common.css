@@ -1,3 +1,4 @@
+/* Cards */
 .card.wide {
 	width: 100%;
 	box-shadow: 0 2px 5px 0 rgba(0,0,0,.26);
@@ -20,19 +21,28 @@
 }
 
 .card .header {
-	background-color: #eee;
+	background-color: #FFFF8D;
+	border-bottom: solid 1px #eee;
 }
 
-.card.content, .card .content {
+.card .header .title {
+	padding: 12px 25px 12px 25px;
+	color: #006589;
+	font-size: 22px;
+	font-weight: bold;
+}
+
+.card .content {
 	padding: 20px 25px;
 }
 
-paper-toast {
-	position: relative;
-	margin-top: 40px;
-}
-
+/* Styles */
 .primary {
 	color: #fff;
 	background-color: #0089BB;
+}
+
+/* Controls */
+paper-input::shadow .focused-underline {
+	background-color: #006589;
 }

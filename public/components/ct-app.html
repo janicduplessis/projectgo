@@ -1,0 +1,148 @@
+<link rel="import" href="/lib/core-header-panel/core-header-panel.html">
+<link rel="import" href="/lib/core-toolbar/core-toolbar.html">
+<link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="/lib/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="/lib/core-item/core-item.html">
+<link rel="import" href="/lib/core-menu/core-menu.html">
+
+<link rel="import" href="/lib/paper-tabs/paper-tabs.html">
+<link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/lib/paper-item/paper-item.html">
+<link rel="import" href="/lib/flatiron-director/flatiron-director.html">
+
+<link rel="import" href="/components/pages/ct-pages.html">
+<link rel="import" href="/components/ct-controller.html">
+<link rel="import" href="/services/ct-auth-service.html">
+<link rel="import" href="/services/ct-msg-service.html">
+
+<polymer-element name="ct-app">
+  <template>
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <flatiron-director id="nav" route="{{route}}" autoHash
+            on-director-route="{{routeChanged}}"></flatiron-director>
+
+    <ct-auth-service id="auth"></ct-auth-service>
+    <ct-msg-service user="{{user}}"></ct-msg-service>
+
+    <core-drawer-panel id="drawer" narrow="{{narrow}}">
+      <core-header-panel drawer>
+        <core-toolbar class="theme">
+          <div class="title">Go Chat</div>
+        </core-toolbar>
+        <template if="{{user.logged}}">
+          Hello {{user.identity.Username}}!
+        </template>
+        <core-menu selected="{{subModule}}" valueattr="hash">
+          <template if="{{user.logged}}">
+            <core-item hash="profile" label="Profile" on-tap="{{profile}}"></core-item>
+            <core-item hash="settings" label="Settings"></core-item>
+            <core-item hash="feedback" label="Send Feedback"></core-item>
+            <core-item hash="help" label="Help"></core-item>
+            <core-item hash="signout" label="Sign Out" on-tap="{{logout}}"></core-item>
+          </template>
+          <template if="{{!user.logged}}">
+            <core-item hash="login" label="Login"></core-item>
+            <core-item hash="register" label="Register"></core-item>
+            <core-item hash="help" label="Help"></core-item>
+          </template>
+        </core-menu>
+      </core-header-panel>
+      <core-header-panel main id="mainContent">
+        <core-toolbar class="theme" vertical layout>
+          <template if="{{narrow}}">
+            <paper-icon-button icon="menu" on-tap="{{openMenu}}"></paper-icon-button>
+          </template>
+          <paper-tabs id="tabsLeft" selected="{{mainModule}}" valueattr="hash" self-end flex>
+            <paper-tab hash="home">Home</paper-tab>
+            <template if="{{user.logged}}">
+              <paper-tab hash="chat">Chat</paper-tab>
+            </template>
+          </paper-tabs>
+        </core-toolbar>
+
+        <div class="container" vertical layout center-justified>
+          <ct-controller id="controller" route="{{route}}" user="{{user}}">
+            <ct-page-home name="home"></ct-page-home>
+            <ct-page-chat name="chat"></ct-page-chat>
+            <ct-page-profile name="profile" model></ct-page-profile>
+          </ct-controller>
+        </div>
+      </core-header-panel>
+    </core-drawer-panel>
+  </template>
+  <script>
+    (function() {
+      var updating = false;
+      Polymer('ct-app', {
+        user: null,
+        route: null,
+        mainModule: null,
+        subModule: null,
+
+        ready: function() {
+          this.user = this.$.auth.user;
+          if(this.user.logged) {
+            this.route = this.route || 'home/profile';
+          } else {
+            this.route = this.route || 'home/login';
+          }
+          this.$.controller.nav = this.$.nav;
+          this.$.controller.init();
+        },
+
+        routeChanged: function() {
+          if(updating) {
+            return;
+          }
+          updating = true;
+          if(this.route) {
+            var parts = this.route.split('/');
+            if(parts[0]) {
+              this.mainModule = parts[0];
+            } else {
+              this.mainModule = null;
+            }
+            if(parts[1]) {
+              this.subModule = parts[1];
+            } else {
+              this.subModule = null;
+            }
+            document.title = "CT - " + this.route;
+          }
+          updating = false;
+        },
+
+        mainModuleChanged: function() {
+          if(updating) {
+            return;
+          }
+          updating = true;
+          this.route = this.mainModule + '/' + this.subModule;
+          updating = false;
+        },
+
+        subModuleChanged: function() {
+          if(updating) {
+            return;
+          }
+          updating = true;
+          this.route = this.mainModule + '/' + this.subModule;
+          updating = false;
+        },
+
+        logout: function() {
+          this.$.auth.logout();
+          this.route = 'home/login';
+        },
+
+        profile: function() {
+          this.route = 'home/profile';
+        },
+
+        openMenu: function() {
+          this.$.drawer.togglePanel();
+        },
+      });
+    })();
+  </script>
+</polymer-element>

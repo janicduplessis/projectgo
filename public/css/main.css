@@ -1,20 +1,3 @@
-html,body {
-  height: 100%;
-  margin: 0;
-}
-
-body {
-  background-color: #E5E5E5;
-  font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
-  color: #333;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-  -webkit-touch-callout: none;
-}
-
 core-header-panel {
   height: 100%;
 }
@@ -46,13 +29,9 @@ core-toolbar .title {
   margin: 50px auto;
 }
 
-paper-tabs {
-  width: 100%;
-}
-
 @media (min-width: 481px) {
   paper-tabs {
-    width: 200px;
+    max-width: 200px;
   }
 }
 
