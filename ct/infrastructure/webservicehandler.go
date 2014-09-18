@@ -108,6 +108,10 @@ func (handler *WebserviceHandler) AddHandler(url string, authenticated bool, fn 
 				handler.Error(w, err)
 				return
 			}
+			if session.Values["User"] == nil {
+				handler.SendJson(w, AuthNeededError{Response: "AUTH_NEEDED_ERROR"})
+				return
+			}
 			user, ok := session.Values["User"].(*usecases.User)
 			if !ok {
 				handler.SendJson(w, AuthNeededError{Response: "AUTH_NEEDED_ERROR"})
