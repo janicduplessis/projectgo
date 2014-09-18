@@ -30,7 +30,7 @@ core-toolbar .title {
 }
 
 @media (max-width: 480px) {
-  paper-tab {
+  paper-tabs {
     -ms-flex: 1;
     -webkit-flex: 1;
     flex: 1;
@@ -39,7 +39,7 @@ core-toolbar .title {
 
 @media (min-width: 481px) {
   paper-tabs {
-    min-width: 200px;
+    min-width: 300px;
   }
 }
 
