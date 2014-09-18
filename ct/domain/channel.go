@@ -39,6 +39,12 @@ func (c *Channel) Join(client *Client) error {
 		return errors.New("Channel is full")
 	}
 
+	for _, curClient := range c.Clients {
+		if curClient.Id == client.Id {
+			return errors.New("Client already in the channel")
+		}
+	}
+
 	c.Clients = append(c.Clients, client)
 	client.Channel = c
 	return nil
