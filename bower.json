@@ -19,5 +19,10 @@
     "paper-elements": "Polymer/paper-elements#master",
     "flatiron-director": "PolymerLabs/flatiron-director#master",
     "paper-spinner": "PolymerLabs/paper-spinner"
+  },
+  "resolutions": {
+    "polymer": "master",
+    "core-component-page": "master",
+    "platform": "master"
   }
 }
