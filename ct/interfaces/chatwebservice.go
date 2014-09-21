@@ -34,7 +34,18 @@ type CreateChannelRequest struct {
 }
 
 type ChannelsResponse struct {
-	List []*domain.Channel
+	List []ChannelModel
+}
+
+type ClientModel struct {
+	Id   int64
+	Name string
+}
+
+type ChannelModel struct {
+	Id      int64
+	Name    string
+	Clients []ClientModel
 }
 
 type SendMessageResponse struct {
@@ -147,9 +158,21 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 		client.Error(cmd, err)
 		return
 	}
-	channelsArr := make([]*domain.Channel, 0, len(channels))
-	for _, val := range channels {
-		channelsArr = append(channelsArr, val)
+	// Create the response model
+	channelsArr := make([]ChannelModel, len(channels))
+	for i, curChan := range channels {
+		clients := make([]ClientModel, len(curChan.Clients))
+		for j, curClient := range curChan.Clients {
+			clients[j] = ClientModel{
+				Id:   curClient.Id,
+				Name: curClient.DisplayName,
+			}
+		}
+		channelsArr[i] = ChannelModel{
+			Id:      curChan.Id,
+			Name:    curChan.Name,
+			Clients: clients,
+		}
 	}
 
 	response := ChannelsResponse{
