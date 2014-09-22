@@ -37,9 +37,12 @@
 }
 
 /* Styles */
-.primary {
+paper-button[raisedButton].primary {
 	color: #fff;
 	background-color: #0089BB;
+}
+paper-button.primary {
+	color: #0089BB;
 }
 
 /* Controls */

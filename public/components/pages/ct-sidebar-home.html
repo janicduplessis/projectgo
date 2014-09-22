@@ -1,0 +1,33 @@
+<link rel="import" href="/lib/core-item/core-item.html">
+<link rel="import" href="/lib/core-menu/core-menu.html">
+
+<polymer-element name="ct-sidebar-home" attributes="route user">
+  <template>
+    <style>
+
+    </style>
+
+    <core-menu selected="{{route}}" valueattr="hash">
+      <template if="{{user.logged}}">
+        <core-item hash="home/profile" label="Profile" on-tap="{{profile}}"></core-item>
+        <core-item hash="home/settings" label="Settings"></core-item>
+        <core-item hash="home/feedback" label="Send Feedback"></core-item>
+        <core-item hash="home/help" label="Help"></core-item>
+        <core-item label="Sign Out" on-tap="{{logout}}"></core-item>
+      </template>
+      <template if="{{!user.logged}}">
+        <core-item hash="home/login" label="Login"></core-item>
+        <core-item hash="home/register" label="Register"></core-item>
+        <core-item hash="home/help" label="Help"></core-item>
+      </template>
+    </core-menu>
+
+  </template>
+  <script>
+    Polymer('ct-sidebar-home', {
+      logout: function() {
+        this.route = 'home/login';
+      }
+    });
+  </script>
+</polymer-element>

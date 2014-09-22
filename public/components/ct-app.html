@@ -32,20 +32,11 @@
         <template if="{{user.logged}}">
           Hello {{user.identity.Username}}!
         </template>
-        <core-menu selected="{{route}}" valueattr="hash">
-          <template if="{{user.logged}}">
-            <core-item hash="home/profile" label="Profile" on-tap="{{profile}}"></core-item>
-            <core-item hash="home/settings" label="Settings"></core-item>
-            <core-item hash="home/feedback" label="Send Feedback"></core-item>
-            <core-item hash="home/help" label="Help"></core-item>
-            <core-item label="Sign Out" on-tap="{{logout}}"></core-item>
-          </template>
-          <template if="{{!user.logged}}">
-            <core-item hash="home/login" label="Login"></core-item>
-            <core-item hash="home/register" label="Register"></core-item>
-            <core-item hash="home/help" label="Help"></core-item>
-          </template>
-        </core-menu>
+      <core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name">
+        <ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
+        <ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
+      </core-animated-pages>
+        
       </core-header-panel>
       <core-header-panel main id="mainContent">
         <core-toolbar class="theme">
@@ -62,6 +53,7 @@
 
         <div class="container" vertical layout center-justified>
           <ct-controller id="controller" route="{{route}}" user="{{user}}">
+            <ct-page-home name="home"></ct-page-home>
             <ct-page-login name="home/login"></ct-page-login>
             <ct-page-register name="home/register"></ct-page-register>
             <ct-page-chat name="chat"></ct-page-chat>
@@ -134,11 +126,6 @@
           updating = true;
           this.route = this.mainModule + (this.subModule !== null ? '/' + this.subModule : "");
           updating = false;
-        },
-
-        logout: function() {
-          this.$.auth.logout();
-          this.route = 'home/login';
         },
 
         profile: function() {

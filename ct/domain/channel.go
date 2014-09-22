@@ -50,6 +50,18 @@ func (c *Channel) Join(client *Client) error {
 	return nil
 }
 
+func (c *Channel) Leave(client *Client) error {
+	for i, curClient := range c.Clients {
+		if curClient.Id == client.Id {
+			copy(c.Clients[i:], c.Clients[i+1:])
+			c.Clients[len(c.Clients)-1] = nil
+			c.Clients = c.Clients[:len(c.Clients)-1]
+			return nil
+		}
+	}
+	return errors.New("Client not found")
+}
+
 func (c *Channel) Send(message *Message) {
 	for _, client := range c.Clients {
 		client.ClientSender.Send(message)

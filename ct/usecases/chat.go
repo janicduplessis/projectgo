@@ -51,6 +51,10 @@ func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 		return ErrInvalidChannel
 	}
 
+	if client.Channel != nil {
+		client.Channel.Leave(client)
+	}
+
 	return channel.Join(client)
 }
 
@@ -64,6 +68,10 @@ func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {
 	}
 
 	server.Channels[channel.Id] = channel
+
+	for _, client := range server.Clients {
+		client.ClientSender.ChannelCreated(channel)
+	}
 
 	return nil
 }

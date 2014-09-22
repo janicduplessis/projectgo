@@ -1,6 +1,3 @@
-<link rel="import" href="/lib/paper-button/paper-button.html">
-<link rel="import" href="/lib/core-ajax/core-ajax.html">
-
 <link rel="import" href="/components/ct-send-box.html">
 <link rel="import" href="/components/ct-message-list.html">
 <link rel="import" href="/components/ct-module.html">
@@ -8,27 +5,12 @@
 
 <polymer-element name="ct-page-chat" extends="ct-module">
 	<template>
-		<style>
-    		
-    	</style>
-    	<ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
-
-    	<paper-button raisedButton class="primary" label="Create" on-tap="{{createChannel}}"></paper-button>
-    	<paper-button raisedButton class="primary" label="Join" on-tap="{{joinChannel}}"></paper-button>
 		<ct-message-list></ct-message-list>
 		<ct-send-box id="sendBox" label="Send message!" sender="{{user.UserName}}"></ct-send-box>
   	</template>
   	<script>
 		Polymer('ct-page-chat', {
-			createChannel: function() {
-				this.$.ctMsgService.createChannel("Test");
-				this.$.ctMsgService.updateChannels();
-			},
-			joinChannel: function() {
-				this.$.ctMsgService.joinChannel(this.channels.List[0].Id);
-			}
+
 		});
   	</script>
 </polymer-element>
-
-

@@ -1,0 +1,59 @@
+<link rel="import" href="/services/ct-msg-service.html">
+
+<link rel="import" href="/lib/core-item/core-item.html">
+<link rel="import" href="/lib/core-menu/core-menu.html">
+<link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/paper-dialog/paper-dialog.html">
+<link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
+
+<polymer-element name="ct-sidebar-chat" attributes="route user">
+  <template>
+    <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+    <style>
+      #controls {
+        padding: 10px 0 0 20px;
+      }
+    </style>
+
+    <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
+    <core-menu selected="{{currentChannelId}}" on-core-select="{{changeChannel}}" valueattr="channelId">
+      <template repeat="{{c in channels.List}}">
+        <core-item channelId="{{c.Id}}">{{c.Name}}</core-item>
+      </template>
+    </core-menu>
+
+    <div id="controls">
+      <paper-button raisedButton class="primar"y label="Create" on-tap="{{openCreateChannel}}"></paper-button>
+    </div>
+    <paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom">
+      <paper-input label="Name" maxlength="40" value="{{name}}"></paper-input>
+      <div flex horizontal end-justified layout>
+        <paper-button label="Cancel" on-tap="{{closeCreateChannel}}"></paper-button>
+        <paper-button class="primary" label="Accept" on-tap="{{createChannel}}"></paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+  <script>
+    Polymer('ct-sidebar-chat', {
+      openCreateChannel: function() {
+        this.name = '';
+        this.$.createDialog.toggle();      
+      },
+      createChannel: function() {
+        this.$.ctMsgService.createChannel(this.name);
+        this.$.createDialog.toggle();
+      },
+      closeCreateChannel: function() {
+        this.$.createDialog.toggle();
+      },
+      changeChannel: function() {
+        var chanId = parseInt(this.currentChannelId, 10);
+        if(chanId < 0) {
+          return;
+        }
+        this.$.ctMsgService.joinChannel(chanId);
+      }
+    });
+  </script>
+</polymer-element>

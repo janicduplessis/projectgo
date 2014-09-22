@@ -10,7 +10,10 @@
     (function() {
       var _ws = null,
           _messages = [];
-          _channels = {List: []};
+          _channels = {
+            List: [],
+            Current: -1
+          };
 
       function connect() {
         if (_ws !== null) {
@@ -20,6 +23,7 @@
         _ws = new WebSocket('ws://' + window.location.host + '/ct'),
 
         _ws.onopen = function(){
+          updateChannels();
         }
    
         _ws.onmessage = function (event){
@@ -30,6 +34,9 @@
             break;
           case "Channels":
             _channels.List = cmd.Data.List;
+            break;
+          case "CreateChannel":
+            _channels.List.push(cmd.Data);
             break;
           }
           
@@ -44,6 +51,17 @@
         _ws.onclose = function() {};
         _ws.close();
         _ws = null;
+      }
+
+      function updateChannels() {
+        if(_ws === null) {
+            console.log('Websocket not connected');
+            return;
+          }
+
+          _ws.send(JSON.stringify({
+            Command: "Channels"
+         }));
       }
 
       document.addEventListener('log-in', function() {
@@ -71,17 +89,19 @@
             Data: {Message: message}
          }));
         },
+
         joinChannel: function(channelId) {
           if(_ws === null) {
             console.log('Websocket not connected');
             return;
           }
-
+          this.channels.Current = channelId;
           _ws.send(JSON.stringify({
             Command: "JoinChannel",
             Data: {ChannelId: channelId}
          }));
         },
+
         createChannel: function(name) {
           if(_ws === null) {
             console.log('Websocket not connected');
@@ -93,15 +113,9 @@
             Data: {Name: name}
          }));
         },
-        updateChannels: function() {
-          if(_ws === null) {
-            console.log('Websocket not connected');
-            return;
-          }
 
-          _ws.send(JSON.stringify({
-            Command: "Channels"
-         }));
+        updateChannels: function() {
+          updateChannels();
         }
       });
   })();

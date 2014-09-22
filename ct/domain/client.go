@@ -7,6 +7,7 @@ type ClientRepository interface {
 
 type ClientSender interface {
 	Send(message *Message)
+	ChannelCreated(channel *Channel)
 }
 
 type Client struct {

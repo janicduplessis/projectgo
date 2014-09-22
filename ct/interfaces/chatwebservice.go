@@ -21,40 +21,6 @@ type ChatInteractor interface {
 	SendMessage(userId int64, body string) error
 }
 
-type SendMessageRequest struct {
-	Message string
-}
-
-type JoinChannelRequest struct {
-	ChannelId int64
-}
-
-type CreateChannelRequest struct {
-	Name string
-}
-
-type ChannelsResponse struct {
-	List []ChannelModel
-}
-
-type ClientModel struct {
-	Id   int64
-	Name string
-}
-
-type ChannelModel struct {
-	Id      int64
-	Name    string
-	Clients []ClientModel
-}
-
-type SendMessageResponse struct {
-	Body      string
-	Author    string
-	ChannelId int64
-	ClientId  int64
-}
-
 type ChatWebserviceHandler struct {
 	Webservice     Webservice
 	Websocket      Websocket
@@ -159,26 +125,21 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 		return
 	}
 	// Create the response model
-	channelsArr := make([]ChannelModel, len(channels))
+	channelsArr := make([]*ChannelModel, len(channels))
 	index := 0
 	for _, curChan := range channels {
-		clients := make([]ClientModel, len(curChan.Clients))
-		for j, curClient := range curChan.Clients {
-			clients[j] = ClientModel{
-				Id:   curClient.Id,
-				Name: curClient.DisplayName,
-			}
-		}
-		channelsArr[index] = ChannelModel{
-			Id:      curChan.Id,
-			Name:    curChan.Name,
-			Clients: clients,
-		}
+		channelsArr[index] = createChannelModel(curChan)
 		index++
 	}
 
+	var clientChannel int64 = -1
+	if server.Clients[user.Id].Channel != nil {
+		clientChannel = server.Clients[user.Id].Channel.Id
+	}
+
 	response := ChannelsResponse{
-		List: channelsArr,
+		List:    channelsArr,
+		Current: clientChannel,
 	}
 
 	err = client.SendJson(cmd, response)
@@ -188,6 +149,7 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 	}
 }
 
+// Sender handler
 func (sender *SenderHandler) Send(msg *domain.Message) {
 	sender.Command.SetType("SendMessage")
 	response := &SendMessageResponse{
@@ -198,5 +160,29 @@ func (sender *SenderHandler) Send(msg *domain.Message) {
 	}
 	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
 		sender.Handler.Error(sender.Command, err)
+	}
+}
+
+func (sender *SenderHandler) ChannelCreated(channel *domain.Channel) {
+	sender.Command.SetType("CreateChannel")
+	response := createChannelModel(channel)
+	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
+		sender.Handler.Error(sender.Command, err)
+	}
+}
+
+// Utils
+func createChannelModel(channel *domain.Channel) *ChannelModel {
+	clients := make([]ClientModel, len(channel.Clients))
+	for i, curClient := range channel.Clients {
+		clients[i] = ClientModel{
+			Id:   curClient.Id,
+			Name: curClient.DisplayName,
+		}
+	}
+	return &ChannelModel{
+		Id:      channel.Id,
+		Name:    channel.Name,
+		Clients: clients,
 	}
 }
