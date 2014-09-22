@@ -160,7 +160,8 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 	}
 	// Create the response model
 	channelsArr := make([]ChannelModel, len(channels))
-	for i, curChan := range channels {
+	index := 0
+	for _, curChan := range channels {
 		clients := make([]ClientModel, len(curChan.Clients))
 		for j, curClient := range curChan.Clients {
 			clients[j] = ClientModel{
@@ -168,11 +169,12 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 				Name: curClient.DisplayName,
 			}
 		}
-		channelsArr[i] = ChannelModel{
+		channelsArr[index] = ChannelModel{
 			Id:      curChan.Id,
 			Name:    curChan.Name,
 			Clients: clients,
 		}
+		index++
 	}
 
 	response := ChannelsResponse{
