@@ -19,6 +19,8 @@ type ChatInteractor interface {
 	Channels(clientId int64) (map[int64]*domain.Channel, error)
 	CreateChannel(clientId int64, name string) error
 	SendMessage(userId int64, body string) error
+	GetMessages(channelId int64) ([]*domain.Message, error)
+	Disconnect(userId int64) error
 }
 
 type ChatWebserviceHandler struct {
@@ -97,6 +99,31 @@ func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client We
 		client.Error(cmd, err)
 		return
 	}
+
+	messages, err := handler.ChatInteractor.GetMessages(request.ChannelId)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
+
+	messagesModel := make([]MessageModel, len(messages))
+	for i, curMessage := range messages {
+		messagesModel[i] = MessageModel{
+			Author: curMessage.Author,
+			Body:   curMessage.Body,
+		}
+	}
+
+	response := JoinChannelResponse{
+		Messages: messagesModel,
+		Result:   true,
+	}
+
+	err = client.SendJson(cmd, response)
+	if err != nil {
+		client.Error(cmd, err)
+		return
+	}
 }
 
 func (handler *ChatWebserviceHandler) CreateChannel(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
@@ -154,9 +181,9 @@ func (sender *SenderHandler) Send(msg *domain.Message) {
 	sender.Command.SetType("SendMessage")
 	response := &SendMessageResponse{
 		Body:      msg.Body,
-		Author:    msg.Client.DisplayName,
+		Author:    msg.Author,
 		ChannelId: msg.Channel.Id,
-		ClientId:  msg.Client.Id,
+		ClientId:  msg.ClientId,
 	}
 	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
 		sender.Handler.Error(sender.Command, err)

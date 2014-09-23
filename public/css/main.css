@@ -29,6 +29,10 @@ core-toolbar .title {
   margin: 50px auto;
 }
 
+#controller {
+  height: 100%;
+}
+
 @media (max-width: 480px) {
   paper-tabs {
     -ms-flex: 1;

@@ -9,9 +9,7 @@
 		<ct-msg-service user="{{user}}" id="ctMsgService"></ct-msg-service>
 
 		<div class="sendBox" horizontal layout>
-			<div flex>
-      			<paper-input id="tbMessage" multiline rows="{{rows}}" label="{{label}}" on-input="{{onInput}}" on-keypress="{{onKeypress}}"></paper-input>
-      		</div>
+      		<paper-input id="tbMessage" multiline rows="{{rows}}" label="{{label}}" on-input="{{onInput}}" on-keypress="{{onKeypress}}" flex></paper-input>
       		<div layout horizontal center>
       			<paper-fab id="btnSend" class="mini" icon="arrow-forward" on-tap="{{sendMessage}}" disabled="{{sendDisabled}}"></paper-fab>
       		</div>

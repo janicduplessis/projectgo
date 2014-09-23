@@ -6,8 +6,9 @@ type MessageRepository interface {
 }
 
 type Message struct {
-	Id      int64
-	Body    string
-	Client  *Client
-	Channel *Channel
+	Id       int64
+	Body     string
+	ClientId int64
+	Author   string
+	Channel  *Channel
 }

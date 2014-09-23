@@ -17,15 +17,18 @@ type Channel struct {
 	Public   bool
 	Capacity int
 	Clients  []*Client
+	Messages []*Message
 }
 
 func NewChannel(name string) *Channel {
 	clients := make([]*Client, 0)
+	messages := make([]*Message, 0)
 	return &Channel{
 		Name:     name,
 		Public:   true,
 		Capacity: 0,
 		Clients:  clients,
+		Messages: messages,
 	}
 }
 
@@ -39,9 +42,11 @@ func (c *Channel) Join(client *Client) error {
 		return errors.New("Channel is full")
 	}
 
+	// Check if the client is already in the channel
 	for _, curClient := range c.Clients {
 		if curClient.Id == client.Id {
-			return errors.New("Client already in the channel")
+			client.Channel = c
+			return nil
 		}
 	}
 
@@ -63,8 +68,17 @@ func (c *Channel) Leave(client *Client) error {
 }
 
 func (c *Channel) Send(message *Message) {
+	c.Messages = append(c.Messages, message)
 	for _, client := range c.Clients {
 		client.ClientSender.Send(message)
+	}
+	// If we have more than 100 messages delete the 50 oldest from memory
+	if len(c.Messages) > 100 {
+		// Nil pointers to prevent leaks
+		for i := 0; i < 50; i++ {
+			c.Messages[i] = nil
+		}
+		c.Messages = c.Messages[50:]
 	}
 }
 

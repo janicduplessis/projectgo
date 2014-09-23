@@ -51,17 +51,17 @@
           </paper-tabs>
         </core-toolbar>
 
-        <div class="container" vertical layout center-justified>
+        <div class="container" vertical layout center-justified fit>
           <ct-controller id="controller" route="{{route}}" user="{{user}}">
             <ct-page-home name="home"></ct-page-home>
             <ct-page-login name="home/login"></ct-page-login>
             <ct-page-register name="home/register"></ct-page-register>
-            <ct-page-chat name="chat"></ct-page-chat>
             <ct-page-profile name="home/profile" model></ct-page-profile>
             <ct-page-help name="home/help"></ct-page-help>
-            <ct-page-error name="error"></ct-page-error>
             <ct-page-feedback name="home/feedback"></ct-page-feedback>
             <ct-page-settings name="home/settings"></ct-page-settings>
+            <ct-page-chat name="chat"></ct-page-chat>
+            <ct-page-error name="error"></ct-page-error>
           </ct-controller>
         </div>
       </core-header-panel>

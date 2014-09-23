@@ -10,6 +10,7 @@ import (
 const (
 	urlLogin    string = "/login"
 	urlRegister string = "/register"
+	urlLogout   string = "/logout"
 )
 
 type AuthentificationInteractor interface {
@@ -20,6 +21,7 @@ type AuthentificationInteractor interface {
 type AuthentificationWebserviceHandler struct {
 	Webservice                 Webservice
 	AuthentificationInteractor AuthentificationInteractor
+	ChatInteractor             ChatInteractor
 }
 
 type LoginResponseModel struct {
@@ -33,6 +35,10 @@ type RegisterResponseModel struct {
 	Error  string
 }
 
+type LogoutResponseModel struct {
+	Result bool
+}
+
 type UserModel struct {
 	Id          int64
 	Username    string
@@ -42,14 +48,16 @@ type UserModel struct {
 	Email       string
 }
 
-func NewAuthentificationWebservice(ws Webservice, ai AuthentificationInteractor) *AuthentificationWebserviceHandler {
+func NewAuthentificationWebservice(ws Webservice, ai AuthentificationInteractor, ci ChatInteractor) *AuthentificationWebserviceHandler {
 	wsHandler := &AuthentificationWebserviceHandler{
 		Webservice:                 ws,
 		AuthentificationInteractor: ai,
+		ChatInteractor:             ci,
 	}
 
 	ws.AddHandler(urlLogin, false, wsHandler.Login)
 	ws.AddHandler(urlRegister, false, wsHandler.Register)
+	ws.AddHandler(urlLogout, true, wsHandler.Logout)
 
 	return wsHandler
 }
@@ -130,4 +138,21 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 	}
 
 	handler.Webservice.SendJson(w, response)
+}
+
+func (handler *AuthentificationWebserviceHandler) Logout(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	user := ctx.Value(KeyUser).(*usecases.User)
+
+	if err := handler.ChatInteractor.Disconnect(user.Id); err != nil {
+		handler.Webservice.Error(w, err)
+		return
+	}
+
+	handler.Webservice.EndSession(ctx, w, r)
+
+	reponse := &LogoutResponseModel{
+		Result: true,
+	}
+
+	handler.Webservice.SendJson(w, reponse)
 }

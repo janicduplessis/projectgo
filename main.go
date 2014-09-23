@@ -102,7 +102,7 @@ func main() {
 	chatInteractor.Logger = logger
 
 	// Webservices
-	interfaces.NewAuthentificationWebservice(webservice, authInteractor)
+	interfaces.NewAuthentificationWebservice(webservice, authInteractor, chatInteractor)
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
 	interfaces.NewHomeWebservice(webservice)
 

@@ -9,11 +9,15 @@
   <script>
     (function() {
       var _ws = null,
-          _messages = [];
+          _messages = {
+            List: [],
+            Total: 0
+          },
           _channels = {
             List: [],
             Current: -1
-          };
+          },
+          _handlers;
 
       function connect() {
         if (_ws !== null) {
@@ -28,18 +32,12 @@
    
         _ws.onmessage = function (event){
           var cmd = JSON.parse(event.data);
-          switch(cmd.Command) {
-          case "SendMessage":
-            _messages.push(cmd.Data);
-            break;
-          case "Channels":
-            _channels.List = cmd.Data.List;
-            break;
-          case "CreateChannel":
-            _channels.List.push(cmd.Data);
-            break;
+          if(!_handlers[cmd.Command]) {
+            console.log("invalid command");
+            return;
           }
           
+          _handlers[cmd.Command](cmd.Data);
         }
    
         _ws.onclose = function(){
@@ -70,6 +68,25 @@
       document.addEventListener('log-out', function() {
         disconnect();
       });
+
+      // Command handlers, function name must match command name
+      _handlers = {
+        SendMessage: function(data) {
+          _messages.List.push(data);
+        },
+        Channels: function(data) {
+          _channels.List = data.List;
+        },
+        CreateChannel: function(data) {
+          _channels.List.push(data);
+        },
+        JoinChannel: function(data) {
+          _messages.List = data.Messages;
+        },
+        Error: function(data) {
+          console.log(JSON.stringify(data));
+        }
+      }
 
       Polymer('ct-msg-service', {
 

@@ -6,7 +6,14 @@
 
 <polymer-element name="ct-controller" attributes="user">
   <template>
-    <style></style>
+    <style>
+      core-animated-pages {
+        height: 100%;
+      }
+      #loading {
+        height: 200px;
+      }
+    </style>
     <core-ajax id="request"
                url="{{requestUrl}}"
                method="POST"
@@ -16,94 +23,116 @@
 
     <core-localstorage id="localStorage"></core-localstorage>
 
-    <template if="{{!updating}}">
-      <core-animated-pages transitions="cross-fade-all" selected="{{curModule.name}}" valueattr="name">
-        <content></content>
-      </core-animated-pages>
-    </template>
-    <template if="{{updating}}">
-      <paper-spinner active></paper-spinner>
-    </template>
-
+    <core-animated-pages id="pages" transitions="cross-fade-all" selected="{{currentPage}}" valueattr="name">
+      <content></content>
+      <div id="loading" name="loading" vertical layout center-justified>
+        <div vertical layout center>
+          <paper-spinner active></paper-spinner>
+        </div>
+      </div>
+    </core-animated-pages>
   </template>
   <script>
-      Polymer('ct-controller', {
-        init: function() {
-          var pages = this.children;
-          this.modules = {};
-          for(var i = 0; i < pages.length; i++) {
-            var page = pages[i];
-            page.user = this.user;
-            page.nav = this.nav;
-            this.modules[page.name] = page;
-          }
-          this.update();
-        },
-        modules: null,
-        curModule: null,
-        updating: false,
-        nav: null,
+    Polymer('ct-controller', {
+      modules: null,
+      curModule: null,
+      updating: false,
+      nav: null,
 
-        routeChanged: function() {
-          if(this.modules === null) {
-            return;
-          }
-          this.update();
-        },
-        update: function() {
-          if(this.updating || !this.nav || !this.nav.route) {
-            return;
-          }
-          this.updating = true;
-          var module = this.modules[this.nav.route];
-          if(!module) {
-            //Nav to the error page
-            this.updating = false;
-            this.nav.route = "error";
-            return;
-          }
-          if(this.curModule) {
-            this.curModule.onUnload();
-          }
-          this.curModule = module;
-          module.onLoad();
+      init: function() {
+        var pages = this.children;
+        this.modules = {};
+        for(var i = 0; i < pages.length; i++) {
+          var page = pages[i];
+          page.user = this.user;
+          page.nav = this.nav;
+          this.modules[page.name] = page;
+        }
+        this.update();
+      },
 
-          if(module.hasModel) {
-            this.$.localStorage.name = 'ct-' + module.name + '-model';
-            var data = this.$.localStorage.value;
-            if(!data) {
-              this.model = {updating: true};
-              // Capitalize first letter of the module
-              var modulePaths = module.name.split('/');
-              var upperModule = modulePaths[modulePaths.length - 1].replace(/(?:^|\s)\w/g, function(match) {
-                return match.toUpperCase();
-              });
-              this.requestUrl = '/models/get' + upperModule + 'Model';
-              this.$.request.go();
-            } else {
-              module.model = data;
-              module.model.updating = false;
-              this.updating = false;
-              module.onModelReady();
-            }
-          } else {
-            module.model = {updating: false};
-            this.updating = false;
-            module.onModelReady();
-          }
-        },
-        requestResponse: function(event) {
-          var response = event.detail.response;
-          this.curModule.model = response.Model;
-          this.curModule.updating = false;
-          this.updating = false;
-          this.curModule.onModelReady();
-          this.$.localStorage.value = response.Model;
-        },
-        requestError: function(event) {
+      routeChanged: function() {
+        if(this.modules === null) {
+          return;
+        }
+        this.update();
+      },
+
+      update: function() {
+        if(this.updating || !this.nav || !this.nav.route) {
+          return;
+        }
+        this.updating = true;
+        var module = this.modules[this.nav.route];
+        if(!module) {
+          //Nav to the error page
           this.updating = false;
           this.nav.route = "error";
+          return;
         }
-      });
+        if(this.curModule) {
+          this.curModule.onUnload();
+        }
+        this.curModule = module;
+        module.onLoad();
+
+        if(!module.hasModel) {
+          this.stopLoading();
+          module.onModelReady();
+        } else {
+          // Check localstorage for the module
+          this.$.localStorage.name = 'ct-' + module.name + '-model';
+          var data = this.$.localStorage.value;
+          if(data) {
+            // We have the module in localstorage
+            module.model = data;
+            this.stopLoading();
+            module.onModelReady();
+          } else {
+            // We have to load the model from the server
+            this.startLoading();
+            // Capitalize first letter of the module
+            var modulePaths = module.name.split('/');
+            var upperModule = modulePaths[modulePaths.length - 1].replace(/(?:^|\s)\w/g, function(match) {
+              return match.toUpperCase();
+            });
+            this.requestUrl = '/models/get' + upperModule + 'Model';
+            this.$.request.go();
+          }
+        }
+      },
+
+      // Model request response
+      requestResponse: function(event) {
+        var response = event.detail.response;
+        // Set the model for the page
+        this.curModule.model = response.Model;
+        // Save the model in the localstorage
+        this.$.localStorage.value = response.Model;
+
+        this.stopLoading();
+
+        // Tell the module that its model is ready
+        this.curModule.onModelReady();
+      },
+
+      // Model request on-core-error
+      requestError: function(event) {
+        this.stopLoading();
+        this.nav.route = "error";
+      },
+
+      // Show the loading page
+      startLoading: function() {
+        this.updating = true;
+        this.currentPage = "loading";
+      },
+
+      // Show the current module
+      stopLoading: function() {
+        this.updating = false;
+        this.currentPage = this.curModule.name;
+      }
+    });
   </script>
 </polymer-element>

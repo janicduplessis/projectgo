@@ -1,11 +1,15 @@
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
 
+<link rel="import" href="/services/ct-auth-service.html">
+
 <polymer-element name="ct-sidebar-home" attributes="route user">
   <template>
     <style>
 
     </style>
+
+    <ct-auth-service id="auth"></ct-auth-service>
 
     <core-menu selected="{{route}}" valueattr="hash">
       <template if="{{user.logged}}">
@@ -26,6 +30,7 @@
   <script>
     Polymer('ct-sidebar-home', {
       logout: function() {
+        this.$.auth.logout();
         this.route = 'home/login';
       }
     });

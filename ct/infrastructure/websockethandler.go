@@ -145,7 +145,7 @@ func (client *WebsocketClientHandler) SendJson(cmd interfaces.WebsocketCommand, 
 }
 
 func (client *WebsocketClientHandler) Error(cmd interfaces.WebsocketCommand, err error) {
-	cmd.SetType("ERROR")
+	cmd.SetType("Error")
 	client.WebsocketHandler.Logger.Error(err)
 	client.SendJson(cmd, &WebsocketClientError{Message: "INTERNAL_SERVER_ERROR"})
 }
