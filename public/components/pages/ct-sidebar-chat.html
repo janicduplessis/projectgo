@@ -23,10 +23,12 @@
     </core-menu>
 
     <div id="controls">
-      <paper-button raisedButton class="primar"y label="Create" on-tap="{{openCreateChannel}}"></paper-button>
+      <paper-button raisedButton label="Create" on-tap="{{openCreateChannel}}"></paper-button>
     </div>
-    <paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom">
-      <paper-input label="Name" maxlength="40" value="{{name}}"></paper-input>
+    <paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
+        on-keypress="{{onKeypress}}">
+      <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+      <paper-input id="tbName" label="Name" maxlength="40" value="{{name}}"></paper-input>
       <div flex horizontal end-justified layout>
         <paper-button label="Cancel" on-tap="{{closeCreateChannel}}"></paper-button>
         <paper-button class="primary" label="Accept" on-tap="{{createChannel}}"></paper-button>
@@ -38,7 +40,11 @@
     Polymer('ct-sidebar-chat', {
       openCreateChannel: function() {
         this.name = '';
-        this.$.createDialog.toggle();      
+        this.$.createDialog.toggle();
+        var tbName = this.$.tbName;
+        setTimeout(function() {
+          tbName.focus();
+        }, 300);
       },
       createChannel: function() {
         this.$.ctMsgService.createChannel(this.name);
@@ -53,6 +59,14 @@
           return;
         }
         this.$.ctMsgService.joinChannel(chanId);
+      },
+      onKeypress: function(event) {
+        //Enter
+        if(event.keyCode === 13 && this.$.createDialog.opened) {
+          event.preventDefault();
+          this.$.tbName.blur();
+          this.createChannel();
+        }
       }
     });
   </script>
