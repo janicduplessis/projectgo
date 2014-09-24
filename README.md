@@ -7,11 +7,11 @@ CT is a chat server written in go and a web client using Polymer.
 
 Prerequisites
 ----------
-go
-git
-mercurial
-npm
-mysql
+-go
+-git
+-mercurial
+-npm
+-mysql
 
 Installation
 ----------
