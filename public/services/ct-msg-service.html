@@ -46,6 +46,9 @@
       }
 
       function disconnect() {
+        if(_ws === null) {
+          return;
+        }
         _ws.onclose = function() {};
         _ws.close();
         _ws = null;
