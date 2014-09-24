@@ -17,8 +17,8 @@ Installation
 ----------
 1. Get and build the code using
 
-	$ go get github.com/janicduplessis/projectgo
-	$ go install github.com/janicduplessis/projectgo
+        $ go get github.com/janicduplessis/projectgo
+        $ go install github.com/janicduplessis/projectgo
 
 2. Install build system globally
 
