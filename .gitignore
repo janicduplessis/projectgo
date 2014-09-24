@@ -25,5 +25,5 @@ _testmain.go
 #Project specific
 bower_components
 node_modules
-public/lib
+web/lib
 server.json

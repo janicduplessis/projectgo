@@ -106,7 +106,7 @@ func main() {
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
 	interfaces.NewHomeWebservice(webservice)
 
-	http.Handle("/", http.FileServer(http.Dir("public")))
+	http.Handle("/", http.FileServer(http.Dir("web")))
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.SitePort), context.ClearHandler(http.DefaultServeMux)))
 }
