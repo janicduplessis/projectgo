@@ -1,6 +1,7 @@
 <link rel="import" href="/services/ct-msg-service.html">
 
 <link rel="import" href="/lib/core-item/core-item.html">
+<link rel="import" href="/lib/core-menu/core-submenu.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog.html">
@@ -16,9 +17,13 @@
     </style>
 
     <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
-    <core-menu selected="{{currentChannelId}}" on-core-select="{{changeChannel}}" valueattr="channelId">
+    <core-menu selected="{{currentChannelId}}" on-core-select="{{switchChannel}}" valueattr="channelId">
       <template repeat="{{c in channels.List}}">
-        <core-item channelId="{{c.Id}}">{{c.Name}}</core-item>
+        <core-submenu channelId="{{c.Id}}" label="{{c.Name}}">
+          <template repeat="{{u in c.Clients}}">
+            <core-item label="{{u.Name}}" userId="{{u.Id}}"></core-item>
+          </template>
+        </core-submenu>
       </template>
     </core-menu>
 
@@ -53,12 +58,14 @@
       closeCreateChannel: function() {
         this.$.createDialog.toggle();
       },
-      changeChannel: function() {
-        var chanId = parseInt(this.currentChannelId, 10);
-        if(chanId < 0) {
-          return;
+      switchChannel: function(e, detail) {
+        if (detail.isSelected) {
+          var chanId = parseInt(this.currentChannelId, 10);
+          if(chanId < 0) {
+            return;
+          }
+          this.$.ctMsgService.joinChannel(chanId);
         }
-        this.$.ctMsgService.joinChannel(chanId);
       },
       onKeypress: function(event) {
         //Enter

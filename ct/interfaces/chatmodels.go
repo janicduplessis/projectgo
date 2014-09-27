@@ -47,3 +47,8 @@ type JoinChannelResponse struct {
 	Messages []MessageModel
 	Result   bool
 }
+
+type ChannelJoinedResponse struct {
+	ChannelId int64
+	ClientId  int64
+}

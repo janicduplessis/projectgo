@@ -198,6 +198,17 @@ func (sender *SenderHandler) ChannelCreated(channel *domain.Channel) {
 	}
 }
 
+func (sender *SenderHandler) ChannelJoined(channel *domain.Channel, client *domain.Client) {
+	sender.Command.SetType("ChannelJoined")
+	response := &ChannelJoinedResponse{
+		ChannelId: channel.Id,
+		ClientId:  client.Id,
+	}
+	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
+		sender.Handler.Error(sender.Command, err)
+	}
+}
+
 // Utils
 func createChannelModel(channel *domain.Channel) *ChannelModel {
 	clients := make([]ClientModel, len(channel.Clients))

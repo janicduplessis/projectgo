@@ -5,6 +5,7 @@ type MessageRepository interface {
 	FindById(id int64) (*Message, error)
 }
 
+// Message
 type Message struct {
 	Id       int64
 	Body     string

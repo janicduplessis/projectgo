@@ -53,10 +53,25 @@ func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 	}
 
 	if client.Channel != nil {
+		// If the client is already in the channel we have nothing to do
+		if client.Channel.Id == channelId {
+			return nil
+		}
+		// If the client is in a channel leave it
 		client.Channel.Leave(client)
 	}
 
-	return channel.Join(client)
+	// Try to join...
+	if err := channel.Join(client); err != nil {
+		return err
+	}
+
+	// Alert other clients
+	for _, c := range server.Clients {
+		c.ClientSender.ChannelJoined(channel, client)
+	}
+
+	return nil
 }
 
 func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {

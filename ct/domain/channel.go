@@ -11,6 +11,7 @@ type ChannelRepository interface {
 }
 
 // Chat channel
+// Goroutine safe
 type Channel struct {
 	Id       int64
 	Name     string
@@ -18,22 +19,68 @@ type Channel struct {
 	Capacity int
 	Clients  []*Client
 	Messages []*Message
+
+	joinCh  chan *Client
+	leaveCh chan *Client
+	sendCh  chan *Message
+	errCh   chan error
 }
 
 func NewChannel(name string) *Channel {
 	clients := make([]*Client, 0)
 	messages := make([]*Message, 0)
-	return &Channel{
+	channel := &Channel{
 		Name:     name,
 		Public:   true,
 		Capacity: 0,
 		Clients:  clients,
 		Messages: messages,
 	}
+
+	go channel.listen()
+	return channel
 }
 
-// Add adds a client to the channel
+// Join adds a client to the channel
 func (c *Channel) Join(client *Client) error {
+	c.joinCh <- client
+	return <-c.errCh
+}
+
+// Leave removes a client from the channel
+func (c *Channel) Leave(client *Client) error {
+	c.leaveCh <- client
+	return <-c.errCh
+}
+
+// Send sends a message to every client in the channel
+func (c *Channel) Send(message *Message) {
+	c.sendCh <- message
+}
+
+// HasAccess checks if the client has access to the channel
+func (c *Channel) HasAccess(client *Client) bool {
+	if c.Public {
+		return true
+	}
+	//TODO: Channel permissions
+	return false
+}
+
+func (c *Channel) listen() {
+	for {
+		select {
+		case client := <-c.joinCh:
+			c.errCh <- c.join(client)
+		case client := <-c.leaveCh:
+			c.errCh <- c.leave(client)
+		case message := <-c.sendCh:
+			c.send(message)
+		}
+	}
+}
+
+func (c *Channel) join(client *Client) error {
 	if !c.HasAccess(client) {
 		return errors.New("Client cannot join this channel")
 	}
@@ -55,7 +102,7 @@ func (c *Channel) Join(client *Client) error {
 	return nil
 }
 
-func (c *Channel) Leave(client *Client) error {
+func (c *Channel) leave(client *Client) error {
 	for i, curClient := range c.Clients {
 		if curClient.Id == client.Id {
 			copy(c.Clients[i:], c.Clients[i+1:])
@@ -67,7 +114,7 @@ func (c *Channel) Leave(client *Client) error {
 	return errors.New("Client not found")
 }
 
-func (c *Channel) Send(message *Message) {
+func (c *Channel) send(message *Message) {
 	c.Messages = append(c.Messages, message)
 	for _, client := range c.Clients {
 		client.ClientSender.Send(message)
@@ -80,12 +127,4 @@ func (c *Channel) Send(message *Message) {
 		}
 		c.Messages = c.Messages[50:]
 	}
-}
-
-func (c *Channel) HasAccess(client *Client) bool {
-	if c.Public {
-		return true
-	}
-	//TODO: Channel permissions
-	return false
 }

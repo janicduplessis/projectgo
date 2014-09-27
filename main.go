@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/context"
-	"github.com/janicduplessis/projectgo/ct"
 
 	//"github.com/janicduplessis/projectgo/ct/domain"
 	"github.com/janicduplessis/projectgo/ct/infrastructure"
@@ -18,11 +17,21 @@ import (
 
 const configFile = "server.json"
 
+type ServerConfig struct {
+	SiteRoot   string
+	SitePort   string
+	DbUser     string
+	DbPassword string
+	DbName     string
+	DbUrl      string
+	DbPort     string
+}
+
 func main() {
 	log.SetFlags(log.Lshortfile)
 
 	// Default config
-	config := ct.ServerConfig{
+	config := ServerConfig{
 		SiteRoot:   "/",
 		SitePort:   "8080",
 		DbUser:     "ct",
