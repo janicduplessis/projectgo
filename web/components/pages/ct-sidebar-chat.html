@@ -32,15 +32,15 @@
     </core-menu>
 
     <div id="controls">
-      <paper-button raisedButton label="Create" on-tap="{{openCreateChannel}}"></paper-button>
+      <paper-button raised on-tap="{{openCreateChannel}}">Create</paper-button>
     </div>
     <paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
         on-keypress="{{onKeypress}}">
       <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
       <paper-input id="tbName" label="Name" maxlength="40" value="{{name}}"></paper-input>
       <div flex horizontal end-justified layout>
-        <paper-button label="Cancel" on-tap="{{closeCreateChannel}}"></paper-button>
-        <paper-button class="primary" label="Accept" on-tap="{{createChannel}}"></paper-button>
+        <paper-button on-tap="{{closeCreateChannel}}">Cancel</paper-button>
+        <paper-button class="primary" on-tap="{{createChannel}}">Accept</paper-button>
       </div>
     </paper-dialog>
 

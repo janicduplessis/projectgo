@@ -39,11 +39,11 @@
         <paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
         <paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
         <div class="buttons" flex horizontal end-justified layout>
-          <paper-button id="switchRegister" label="Register" on-tap="{{switchRegister}}"></paper-button>
+          <paper-button id="switchRegister" on-tap="{{switchRegister}}">Register</paper-button>
           <template if="{{loading}}">
             <paper-spinner active self-center></paper-spinner>
           </template>
-          <paper-button id="loginSubmit" raisedButton class="primary" label="Login" on-tap="{{loginSubmit}}"></paper-button>
+          <paper-button id="loginSubmit" raised class="primary" on-tap="{{loginSubmit}}">Login</paper-button>
         </div>
       </div>
     </div>

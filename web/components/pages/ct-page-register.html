@@ -43,11 +43,11 @@
         <paper-input id="lastName" label="Last name" error="Please enter your last name." maxlength="40" value="{{lastName}}"></paper-input>
         <paper-input id="email" label="Email" type="email" maxlength="40" value="{{email}}"></paper-input>
         <div class="buttons" flex horizontal end-justified layout>
-          <paper-button id="switchLogin" label="Login" on-tap="{{switchLogin}}"></paper-button>
+          <paper-button id="switchLogin" on-tap="{{switchLogin}}">Login</paper-button>
           <template if="{{loading}}">
             <paper-spinner active self-center></paper-spinner>
           </template>
-          <paper-button id="registerSubmit" raisedButton class="primary" label="Submit" on-tap="{{registerSubmit}}"></paper-button>
+          <paper-button id="registerSubmit" raised class="primary" on-tap="{{registerSubmit}}">Submit</paper-button>
         </div>
       </div>
     </div>
