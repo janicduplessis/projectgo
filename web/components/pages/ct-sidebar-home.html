@@ -1,5 +1,7 @@
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
+<link rel="import" href="/lib/core-icons/core-icons.html">
+<link rel="import" href="/lib/core-icons/social-icons.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
 
@@ -13,11 +15,11 @@
 
     <core-menu selected="{{route}}" valueattr="hash">
       <template if="{{user.logged}}">
-        <core-item hash="home/profile" label="Profile" on-tap="{{profile}}"></core-item>
-        <core-item hash="home/settings" label="Settings"></core-item>
-        <core-item hash="home/feedback" label="Send Feedback"></core-item>
-        <core-item hash="home/help" label="Help"></core-item>
-        <core-item label="Sign Out" on-tap="{{logout}}"></core-item>
+        <core-item hash="home/profile" label="Profile" icon="account-box" on-tap="{{profile}}"></core-item>
+        <core-item hash="home/settings" label="Settings" icon="settings"></core-item>
+        <core-item hash="home/feedback" label="Send Feedback" icon="social:poll"></core-item>
+        <core-item hash="home/help" label="Help" icon="help"></core-item>
+        <core-item label="Sign Out" on-tap="{{logout}}" icon="home"></core-item>
       </template>
       <template if="{{!user.logged}}">
         <core-item hash="home/login" label="Login"></core-item>

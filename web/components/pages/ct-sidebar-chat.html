@@ -17,13 +17,17 @@
     </style>
 
     <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
+
     <core-menu selected="{{currentChannelId}}" on-core-select="{{switchChannel}}" valueattr="channelId">
       <template repeat="{{c in channels.List}}">
-        <core-submenu channelId="{{c.Id}}" label="{{c.Name}}">
-          <template repeat="{{u in c.Clients}}">
-            <core-item label="{{u.Name}}" userId="{{u.Id}}"></core-item>
-          </template>
-        </core-submenu>
+        <div channelId="{{c.Id}}">
+          <div>{{c.Name}}</div>
+          <ul>
+            <template repeat="{{u in c.Clients}}">
+              <li>{{u.Name}}</li>
+            </template>
+          </ul>
+        </div>
       </template>
     </core-menu>
 

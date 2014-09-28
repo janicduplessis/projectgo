@@ -206,7 +206,10 @@ func (sender *SenderHandler) ChannelJoined(channel *domain.Channel, client *doma
 	sender.Command.SetType("ChannelJoined")
 	response := &ChannelJoinedResponse{
 		ChannelId: channel.Id,
-		ClientId:  client.Id,
+		Client: ClientModel{
+			Id:   client.Id,
+			Name: client.DisplayName,
+		},
 	}
 	if err := sender.Handler.SendJson(sender.Command, response); err != nil {
 		sender.Handler.Error(sender.Command, err)

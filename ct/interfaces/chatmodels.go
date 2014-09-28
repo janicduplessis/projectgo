@@ -46,5 +46,5 @@ type JoinChannelResponse struct {
 
 type ChannelJoinedResponse struct {
 	ChannelId int64
-	ClientId  int64
+	Client    ClientModel
 }

@@ -86,6 +86,23 @@
         JoinChannel: function(data) {
           _messages.List = data.Messages;
         },
+        ChannelJoined: function(data) {
+          var channel;
+          for (var i = 0; i < _channels.List.length; i++) {
+            var curChan = _channels.List[i];
+            // Check if the client is already in a channel and remove it
+            var index = curChan.Clients.map(function(e) {return e.Id}).indexOf(data.Client.Id);
+            if(index !== -1) {
+              curChan.Clients.splice(index, 1);
+            }
+            
+            // Find the channel object by id
+            if(curChan.Id === data.ChannelId) {
+              channel = curChan;
+            }
+          }
+          channel.Clients.push(data.Client)
+        },
         Error: function(data) {
           console.log(JSON.stringify(data));
         }

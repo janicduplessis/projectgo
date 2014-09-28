@@ -4,6 +4,7 @@
 <link rel="import" href="/lib/core-drawer-panel/core-drawer-panel.html">
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
+<link rel="import" href="/lib/core-icons/communication-icons.html">
 
 <link rel="import" href="/lib/paper-tabs/paper-tabs.html">
 <link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
@@ -27,7 +28,7 @@
     <core-drawer-panel id="drawer" narrow="{{narrow}}">
       <core-header-panel drawer>
         <core-toolbar class="theme">
-          <div class="title">Go Chat</div>
+        <div class="title"><core-icon icon="communication:chat"></core-icon> Go Chat</div>
         </core-toolbar>
         <template if="{{user.logged}}">
           Hello {{user.identity.Username}}!
