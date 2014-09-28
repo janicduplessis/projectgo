@@ -5,7 +5,7 @@ import (
 )
 
 type ChannelRepository interface {
-	Channels() ([]*Channel, error)
+	GetChannels() (map[int64]*Channel, error)
 	Store(channel *Channel) error
 	FindById(id int64) (*Channel, error)
 }
@@ -29,12 +29,21 @@ type Channel struct {
 func NewChannel(name string) *Channel {
 	clients := make([]*Client, 0)
 	messages := make([]*Message, 0)
+	joinCh := make(chan *Client)
+	leaveCh := make(chan *Client)
+	sendCh := make(chan *Message)
+	errCh := make(chan error)
+
 	channel := &Channel{
 		Name:     name,
 		Public:   true,
 		Capacity: 0,
 		Clients:  clients,
 		Messages: messages,
+		joinCh:   joinCh,
+		leaveCh:  leaveCh,
+		sendCh:   sendCh,
+		errCh:    errCh,
 	}
 
 	go channel.listen()

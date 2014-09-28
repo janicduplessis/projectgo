@@ -104,7 +104,7 @@ func main() {
 	authInteractor.Logger = logger
 
 	chatInteractor := new(usecases.ChatInteractor)
-	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo()
+	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo(handlers)
 	chatInteractor.ChannelRepository = interfaces.NewDbChannelRepo(handlers)
 	chatInteractor.MessageRepository = interfaces.NewDbMessageRepo(handlers)
 	chatInteractor.ClientRepository = interfaces.NewDbClientRepo(handlers)

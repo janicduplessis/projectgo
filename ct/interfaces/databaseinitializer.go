@@ -21,7 +21,7 @@ func (repo *DbInitializerRepo) Init() {
 	// Check database version
 	_, err := repo.dbHandler.Execute(`CREATE TABLE IF NOT EXISTS db_info (
 										Version int(11) NOT NULL
-									 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+									 );`)
 
 	var version int
 	err = repo.dbHandler.QueryRow(`SELECT * FROM db_info;`).Scan(&version)
@@ -40,7 +40,7 @@ func (repo *DbInitializerRepo) Init() {
 
 	if version != DbVersion && CheckVersion {
 		// Drop all tables
-		_, err = repo.dbHandler.Execute(`DROP TABLE IF EXISTS client, user, channel;`)
+		_, err = repo.dbHandler.Execute(`DROP TABLE IF EXISTS client, user, channel, message;`)
 		if err != nil {
 			panic(err)
 		}
@@ -59,7 +59,7 @@ func (repo *DbInitializerRepo) Init() {
 										LastName varchar(255) NOT NULL,
 										Email varchar(255) NOT NULL,
 										PRIMARY KEY (ClientId)
-									 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+									 );`)
 
 	if err != nil {
 		panic(err)
@@ -70,7 +70,7 @@ func (repo *DbInitializerRepo) Init() {
 								 	 	Username varchar(64) NOT NULL,
 								  		PasswordHash varchar(64) NOT NULL,
 								  		PRIMARY KEY (UserId)
-									 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+									 );`)
 
 	if err != nil {
 		panic(err)
@@ -80,7 +80,32 @@ func (repo *DbInitializerRepo) Init() {
 								  	 	ChannelId int(11) NOT NULL AUTO_INCREMENT,
 								  	 	Name varchar(255) NOT NULL,
 								  	 	PRIMARY KEY (ChannelId)
-									 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
+									 );`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = repo.dbHandler.Execute(`CREATE TABLE IF NOT EXISTS ct.message (
+										MessageId INT NOT NULL AUTO_INCREMENT,
+										Body TEXT NOT NULL,
+										Time DATETIME NOT NULL,
+										ClientId INT NOT NULL,
+										ChannelId INT NOT NULL,
+										PRIMARY KEY (MessageId),
+										INDEX message_client_idx (ClientId ASC),
+										INDEX message_channel_idx (ChannelId ASC),
+										CONSTRAINT message_client
+										    FOREIGN KEY (ClientId)
+										    REFERENCES ct.client (ClientId)
+										    ON DELETE NO ACTION
+										    ON UPDATE NO ACTION,
+										CONSTRAINT message_channel
+										    FOREIGN KEY (ChannelId)
+										    REFERENCES ct.channel (ChannelId)
+										    ON DELETE NO ACTION
+										    ON UPDATE NO ACTION
+									);`)
 
 	if err != nil {
 		panic(err)

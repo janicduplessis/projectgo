@@ -27,6 +27,7 @@ func NewMySqlHandler(config MySqlDbConfig) *MySqlHandler {
 	}
 
 	interfaces.ErrNoRows = sql.ErrNoRows
+	conn.SetMaxOpenConns(10)
 
 	return &MySqlHandler{
 		Conn: conn,

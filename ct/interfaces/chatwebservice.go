@@ -109,8 +109,11 @@ func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client We
 	messagesModel := make([]MessageModel, len(messages))
 	for i, curMessage := range messages {
 		messagesModel[i] = MessageModel{
-			Author: curMessage.Author,
-			Body:   curMessage.Body,
+			Author:    curMessage.Author,
+			Body:      curMessage.Body,
+			UnixTime:  curMessage.Time.Unix(),
+			ChannelId: curMessage.ChannelId,
+			ClientId:  curMessage.ClientId,
 		}
 	}
 
@@ -179,10 +182,11 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 // Sender handler
 func (sender *SenderHandler) Send(msg *domain.Message) {
 	sender.Command.SetType("SendMessage")
-	response := &SendMessageResponse{
-		Body:      msg.Body,
+	response := &MessageModel{
 		Author:    msg.Author,
-		ChannelId: msg.Channel.Id,
+		Body:      msg.Body,
+		UnixTime:  msg.Time.Unix(),
+		ChannelId: msg.ChannelId,
 		ClientId:  msg.ClientId,
 	}
 	if err := sender.Handler.SendJson(sender.Command, response); err != nil {

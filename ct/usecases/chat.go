@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"time"
+
 	"github.com/janicduplessis/projectgo/ct/domain"
 )
 
@@ -27,10 +29,11 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 	client := server.Clients[clientId]
 
 	message := &domain.Message{
-		Body:     body,
-		ClientId: client.Id,
-		Author:   client.DisplayName,
-		Channel:  client.Channel,
+		Body:      body,
+		ClientId:  client.Id,
+		Author:    client.DisplayName,
+		Time:      time.Now(),
+		ChannelId: client.Channel.Id,
 	}
 
 	if client.Channel == nil || !client.Channel.HasAccess(client) {
@@ -39,9 +42,7 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 
 	client.Channel.Send(message)
 
-	go ci.MessageRepository.Store(message)
-
-	return nil
+	return ci.MessageRepository.Store(message)
 }
 
 func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {

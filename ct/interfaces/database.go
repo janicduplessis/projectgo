@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+const dbDateFormat = "2006-01-02 15:04:05"
+
 var ErrNoRows = errors.New("No rows")
 
 type DbHandler interface {
@@ -19,6 +21,7 @@ type Row interface {
 type Rows interface {
 	Scan(dest ...interface{}) error
 	Next() bool
+	Close() error
 }
 
 type Result interface {

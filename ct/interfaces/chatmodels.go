@@ -7,8 +7,11 @@ type ClientModel struct {
 }
 
 type MessageModel struct {
-	Author string
-	Body   string
+	Author    string
+	Body      string
+	UnixTime  int64
+	ChannelId int64
+	ClientId  int64
 }
 
 type ChannelModel struct {
@@ -31,13 +34,6 @@ type CreateChannelRequest struct {
 }
 
 // Responses
-type SendMessageResponse struct {
-	Body      string
-	Author    string
-	ChannelId int64
-	ClientId  int64
-}
-
 type ChannelsResponse struct {
 	List    []*ChannelModel
 	Current int64

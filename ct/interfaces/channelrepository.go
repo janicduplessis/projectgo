@@ -15,17 +15,18 @@ func NewDbChannelRepo(dbHandlers map[string]DbHandler) *DbChannelRepo {
 	}
 }
 
-func (repo *DbChannelRepo) Channels() ([]*domain.Channel, error) {
+func (repo *DbChannelRepo) GetChannels() (map[int64]*domain.Channel, error) {
 
-	channels := make([]*domain.Channel, 0)
+	channels := make(map[int64]*domain.Channel)
 
-	// Check if the username is available
 	rows, err := repo.dbHandler.Query(`SELECT *
 				 	    		 	   FROM channel`)
 
 	if err != nil && err != ErrNoRows {
-		return channels, err
+		return nil, err
 	}
+
+	defer rows.Close()
 
 	var (
 		id   int64
@@ -39,7 +40,7 @@ func (repo *DbChannelRepo) Channels() ([]*domain.Channel, error) {
 
 		channel := domain.NewChannel(name)
 		channel.Id = id
-		channels = append(channels, channel)
+		channels[channel.Id] = channel
 	}
 
 	return channels, nil
