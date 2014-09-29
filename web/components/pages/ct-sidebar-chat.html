@@ -3,6 +3,7 @@
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-submenu.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
+<link rel="import" href="/lib/core-icons/social-icons.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
@@ -14,22 +15,49 @@
       #controls {
         padding: 10px 0 0 20px;
       }
+
+      .chanTitle {
+        font-size: 18px;
+        color: #006589;
+        background-color: #F4F4F4;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin: 10px 10px 0 10px;
+        text-transform: none;
+        text-align: left;
+      }
+
+      .chanTitle.selected {
+        font-weight: bold;
+      }
+      .chanClients {
+        list-style: none;
+        padding-left: 15px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+      .chanClients core-icon {
+        margin-right: 10px;
+        color: #169827;
+      }
     </style>
 
     <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
 
-    <core-menu selected="{{currentChannelId}}" on-core-select="{{switchChannel}}" valueattr="channelId">
+    <div class="chanList">
       <template repeat="{{c in channels.List}}">
-        <div channelId="{{c.Id}}">
-          <div>{{c.Name}}</div>
-          <ul>
+        <div vertical layout stretch-start>
+          <paper-button class="chanTitle" on-tap="{{switchChannel}}" channelId="{{c.Id}}">{{c.Name}}</paper-button>
+          <ul class="chanClients">
             <template repeat="{{u in c.Clients}}">
-              <li>{{u.Name}}</li>
+              <li clientId="{{u.Id}}">
+                <core-icon icon="social:person"></core-icon>{{u.Name}}
+              </li>
             </template>
           </ul>
         </div>
       </template>
-    </core-menu>
+    </div>
 
     <div id="controls">
       <paper-button raised on-tap="{{openCreateChannel}}">Create</paper-button>
@@ -62,14 +90,20 @@
       closeCreateChannel: function() {
         this.$.createDialog.toggle();
       },
-      switchChannel: function(e, detail) {
-        if (detail.isSelected) {
-          var chanId = parseInt(this.currentChannelId, 10);
+      switchChannel: function(event) {
+          // Selected class
+          var chanTitles = this.shadowRoot.querySelectorAll('.chanTitle');
+          for(var i = 0; i < chanTitles.length; i++) {
+            chanTitles[i].classList.remove('selected');
+          }
+          event.target.classList.add('selected');
+
+          // Join the channel
+          var chanId = parseInt(event.target.getAttribute('channelId'), 10);
           if(chanId < 0) {
             return;
           }
           this.$.ctMsgService.joinChannel(chanId);
-        }
       },
       onKeypress: function(event) {
         //Enter

@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/janicduplessis/projectgo/ct/domain"
@@ -54,8 +55,10 @@ func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 	}
 
 	if client.Channel != nil {
+		ci.Logger.Log(fmt.Sprintf("Client %s is in channel %s", client.DisplayName, client.Channel.Name))
 		// If the client is already in the channel we have nothing to do
 		if client.Channel.Id == channelId {
+			ci.Logger.Log("Client already in the channel")
 			return nil
 		}
 		// If the client is in a channel leave it
