@@ -1,5 +1,6 @@
 <link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/lib/core-icons/core-icons.html">
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
 
 <link rel="import" href="/components/ct-module.html">
 
@@ -19,13 +20,25 @@
         .identifier:hover paper-icon-button {
           visibility: visible;
         }
+        #profileImage {
+          width: 64px;
+          height: 64px;
+          border-radius: 32px;
+        }
     </style>
+
+    <core-ajax id="request" url="/setProfileImage" method="POST"
+           handleAs="json" on-core-response="{{profileImageResponse}}"></core-ajax>
+
     <div class="card wide">
       <div class="header">
         <div class="title">Profile - {{model.Username}}</div>
       </div>
       <div class="content">
-    		<img src="{{model.ProfileImage}}" />
+    		<img id="profileImage" src="{{model.ProfileImage}}" />
+        <form>
+          <input type="file" name="File" id="file" accept="image/png" on-change="{{sendImage}}">
+        </form>
         <div id="firstName" class="identifier" horizontal layout center>
           <div class="label">First name: </div>
           <div class="value">{{model.FirstName}}</div>
@@ -48,7 +61,20 @@
   	Polymer('ct-page-profile', {
   		onModelReady: function() {
   			
-  		}
+  		},
+      sendImage: function(e, detail, sender) {
+        if(sender.files.length !== 1) {
+          return;
+        }
+        var formData = new FormData();
+        formData.append(sender.name, sender.files[0], sender.files[0].name);
+        this.$.request.body = formData;
+        this.$.request.contentType = null;
+        this.$.request.go();
+      },
+      profileImageResponse: function() {
+        this.$.profileImage.src = this.model.ProfileImage + '?cache=' + new Date().getTime();
+      }
   	});
   </script>
 </polymer-element>

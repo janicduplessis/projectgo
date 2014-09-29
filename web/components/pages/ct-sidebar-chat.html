@@ -1,61 +1,30 @@
 <link rel="import" href="/services/ct-msg-service.html">
+<link rel="import" href="/components/ct-channel-box.html">
 
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-submenu.html">
 <link rel="import" href="/lib/core-menu/core-menu.html">
 <link rel="import" href="/lib/core-icons/social-icons.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
 
-<polymer-element name="ct-sidebar-chat" attributes="route user">
+<polymer-element name="ct-sidebar-chat" attributes="route user" vertical layout>
   <template>
     <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
     <style>
       #controls {
-        padding: 10px 0 0 20px;
+        padding: 10px 10px 20px 20px;
       }
 
-      .chanTitle {
-        font-size: 18px;
-        color: #006589;
-        background-color: #F4F4F4;
-        padding: 5px 10px;
-        border-radius: 3px;
-        margin: 10px 10px 0 10px;
-        text-transform: none;
-        text-align: left;
-      }
-
-      .chanTitle.selected {
-        font-weight: bold;
-      }
-      .chanClients {
-        list-style: none;
-        padding-left: 15px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-      }
-      .chanClients core-icon {
-        margin-right: 10px;
-        color: #169827;
-      }
     </style>
 
     <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
 
-    <div class="chanList">
+    <div class="chanList" flex>
       <template repeat="{{c in channels.List}}">
-        <div vertical layout stretch-start>
-          <paper-button class="chanTitle" on-tap="{{switchChannel}}" channelId="{{c.Id}}">{{c.Name}}</paper-button>
-          <ul class="chanClients">
-            <template repeat="{{u in c.Clients}}">
-              <li clientId="{{u.Id}}">
-                <core-icon icon="social:person"></core-icon>{{u.Name}}
-              </li>
-            </template>
-          </ul>
-        </div>
+        <ct-channel-box channel="{{c}}" on-ct-channel-changed="{{switchChannel}}"></ct-channel-box>
       </template>
     </div>
 
@@ -91,19 +60,20 @@
         this.$.createDialog.toggle();
       },
       switchChannel: function(event) {
-          // Selected class
-          var chanTitles = this.shadowRoot.querySelectorAll('.chanTitle');
-          for(var i = 0; i < chanTitles.length; i++) {
-            chanTitles[i].classList.remove('selected');
-          }
-          event.target.classList.add('selected');
+        var chanId = event.detail.Id;
+        if(chanId < 0 || chanId === this.channels.Current) {
+          return;
+        }
 
-          // Join the channel
-          var chanId = parseInt(event.target.getAttribute('channelId'), 10);
-          if(chanId < 0) {
-            return;
-          }
-          this.$.ctMsgService.joinChannel(chanId);
+        // Selected class
+        var chanTitles = this.shadowRoot.querySelectorAll('ct-channel-box');
+        for(var i = 0; i < chanTitles.length; i++) {
+          chanTitles[i].classList.remove('selected');
+        }
+        event.target.classList.add('selected');
+
+        // Join the channel
+        this.$.ctMsgService.joinChannel(chanId);
       },
       onKeypress: function(event) {
         //Enter

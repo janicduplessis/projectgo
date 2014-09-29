@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/context"
 
@@ -61,6 +62,12 @@ func main() {
 		if err = json.Unmarshal(file, &config); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	//TODO move this elsewhere
+	_, err = os.Stat("upload")
+	if os.IsNotExist(err) {
+		os.Mkdir("upload", 0777)
 	}
 
 	//Console logger

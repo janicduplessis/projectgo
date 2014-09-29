@@ -33,7 +33,7 @@
         <template if="{{user.logged}}">
           Hello {{user.identity.Username}}!
         </template>
-      <core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name">
+      <core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name" fit>
         <ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
         <ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
       </core-animated-pages>
