@@ -25,6 +25,9 @@
           height: 64px;
           border-radius: 32px;
         }
+        #file {
+          
+        }
     </style>
 
     <core-ajax id="request" url="/setProfileImage" method="POST"
@@ -35,7 +38,7 @@
         <div class="title">Profile - {{model.Username}}</div>
       </div>
       <div class="content">
-    		<img id="profileImage" src="{{model.ProfileImage}}" />
+    		<img id="profileImage" src="{{model.ProfileImage}}" on-tap="{{changePicture}}"/>
         <form>
           <input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
         </form>
@@ -62,6 +65,9 @@
   		onModelReady: function() {
   			
   		},
+      changePicture: function() {
+        this.$.file.click();
+      },
       sendImage: function(e, detail, sender) {
         if(sender.files.length !== 1) {
           return;
@@ -73,7 +79,7 @@
         this.$.request.go();
       },
       profileImageResponse: function() {
-        this.$.profileImage.src = this.model.ProfileImage + '?cache=' + new Date().getTime();
+        this.$.profileImage.src = this.model.ProfileImage + '? clientId=' + this.user.Id + '&cache=' + new Date().getTime();
       }
   	});
   </script>

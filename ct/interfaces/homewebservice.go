@@ -54,7 +54,7 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 		FirstName:    user.Client.FirstName,
 		LastName:     user.Client.LastName,
 		Email:        user.Client.Email,
-		ProfileImage: "/getProfileImage",
+		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", user.Id),
 	}
 	response := ModelResponse{
 		Model: model,
@@ -63,8 +63,8 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 }
 
 func (handler *HomeWebserviceHandler) GetProfileImage(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	user := ctx.Value(KeyUser).(*usecases.User)
-	imageUrl := fmt.Sprintf("upload/profile_%d.png", user.Id)
+	clientId := r.FormValue("clientId")
+	imageUrl := fmt.Sprintf("upload/profile_%s.png", clientId)
 	_, err := os.Stat(imageUrl)
 	if os.IsNotExist(err) {
 		imageUrl = "images/no-profile.png"

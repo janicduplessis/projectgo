@@ -1,6 +1,8 @@
 <link rel="import" href="/lib/core-icons/social-icons.html">
 <link rel="import" href="/lib/paper-button/paper-button.html">
 <link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/lib/core-dropdown/core-dropdown.html">
+<link rel="import" href="/lib/paper-item/paper-item.html">
 
 <polymer-element name="ct-channel-box" attributes="channel" vertical layout stretch-start>
   <template>
@@ -63,13 +65,21 @@
       <core-collapse id="collapse" opened>
         <div class="chanClients" vertical layout stretch-start>
           <template repeat="{{u in channel.Clients}}">
-            <paper-button clientId="{{u.Id}}">
+            <paper-button clientId="{{u.Id}}" on-tap="{{onClientTouch}}">
               <core-icon icon="social:person"></core-icon>{{u.Name}}
             </paper-button>
           </template>
         </div>
       </core-collapse>
     </div>
+    <core-dropdown id="ddmenu">
+      <paper-shadow id="shadow" z="1" target="{{$.ddmenu}}"></paper-shadow>
+      
+      <paper-item label="Profile" on-tap="{{profile}}"></paper-item>
+      <paper-item label="Whisper" on-tap="{{whisper}}"></paper-item>
+      <paper-item label="Add friend" on-tap="{{addFriend}}"></paper-item>
+      <paper-item label="Report" on-tap="{{report}}"></paper-item>
+    </core-dropdown>
   </template>
   <script>
     Polymer('ct-channel-box', {
@@ -84,6 +94,22 @@
         }
         
         this.$.collapse.toggle();
+      },
+      onClientTouch: function(e, detail, target) {
+        this.$.ddmenu.relatedTarget = target;
+        this.$.ddmenu.opened = true;
+      },
+      profile: function() {
+        this.$.ddmenu.opened = false;
+      },
+      whisper: function() {
+        this.$.ddmenu.opened = false;
+      },
+      addFriend: function() {
+        this.$.ddmenu.opened = false;
+      },
+      report: function() {
+        this.$.ddmenu.opened = false;
       }
     });
   </script>
