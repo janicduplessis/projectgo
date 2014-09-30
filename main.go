@@ -82,6 +82,8 @@ func main() {
 	// Base websocket handler
 	websocket := infrastructure.NewWebsocketHandler(logger)
 
+	imageUtils := new(infrastructure.ImageUtilsHandler)
+
 	// Database
 	dbConfig := infrastructure.MySqlDbConfig{
 		User:     config.DbUser,
@@ -120,7 +122,7 @@ func main() {
 	// Webservices
 	interfaces.NewAuthentificationWebservice(webservice, authInteractor, chatInteractor)
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
-	interfaces.NewHomeWebservice(webservice)
+	interfaces.NewHomeWebservice(webservice, imageUtils)
 
 	http.Handle("/", http.FileServer(http.Dir("web")))
 

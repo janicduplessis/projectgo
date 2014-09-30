@@ -1,13 +1,9 @@
 package interfaces
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"code.google.com/p/go.net/context"
 	"github.com/janicduplessis/projectgo/ct/usecases"
@@ -21,6 +17,7 @@ const (
 
 type HomeWebserviceHandler struct {
 	Webservice Webservice
+	ImageUtils ImageUtils
 }
 
 type ProfileModel struct {
@@ -36,9 +33,10 @@ type SetProfileImageResponse struct {
 	Result bool
 }
 
-func NewHomeWebservice(ws Webservice) *HomeWebserviceHandler {
+func NewHomeWebservice(ws Webservice, imageUtils ImageUtils) *HomeWebserviceHandler {
 	wsHandler := &HomeWebserviceHandler{
 		Webservice: ws,
+		ImageUtils: imageUtils,
 	}
 
 	ws.AddHandler(urlGetProfileModel, true, wsHandler.GetProfileModel)
@@ -86,20 +84,15 @@ func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w htt
 
 	handler.Webservice.Log(fmt.Sprintf("Upload file %s", hndl.Filename))
 
-	ext := strings.ToLower(filepath.Ext(hndl.Filename))
-	// TODO: support more formats
-	if ext != ".png" {
-		handler.Webservice.Error(w, errors.New("Invalid file format"))
-		return
-	}
-
-	data, err := ioutil.ReadAll(file)
+	image, err := handler.ImageUtils.Load(file)
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("upload/profile_%d.png", user.Id), data, 0777)
+	image = handler.ImageUtils.Resize(image, 192, 192)
+
+	err = handler.ImageUtils.Save(image, fmt.Sprintf("upload/profile_%d.png", user.Id))
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return

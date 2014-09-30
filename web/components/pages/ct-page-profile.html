@@ -37,7 +37,7 @@
       <div class="content">
     		<img id="profileImage" src="{{model.ProfileImage}}" />
         <form>
-          <input type="file" name="File" id="file" accept="image/png" on-change="{{sendImage}}">
+          <input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
         </form>
         <div id="firstName" class="identifier" horizontal layout center>
           <div class="label">First name: </div>
