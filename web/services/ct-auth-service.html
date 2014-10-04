@@ -56,7 +56,7 @@
           var loginInfo = {
             Username: username,
             Password: password
-          }
+          };
           this.bodyLogin = JSON.stringify(loginInfo);
           this.$.login.go();
         },
@@ -67,7 +67,7 @@
             FirstName: firstName,
             LastName: lastName,
             Email: email
-          }
+          };
           this.bodyRegister = JSON.stringify(registerInfo);
           this.$.register.go();
         },

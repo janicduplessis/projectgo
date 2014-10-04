@@ -67,7 +67,7 @@
         if(!module) {
           //Nav to the error page
           this.updating = false;
-          this.nav.route = "error";
+          this.nav.route = 'error';
           return;
         }
         if(this.curModule) {
@@ -119,13 +119,13 @@
       // Model request on-core-error
       requestError: function(event) {
         this.stopLoading();
-        this.nav.route = "error";
+        this.nav.route = 'error';
       },
 
       // Show the loading page
       startLoading: function() {
         this.updating = true;
-        this.currentPage = "loading";
+        this.currentPage = 'loading';
       },
 
       // Show the current module

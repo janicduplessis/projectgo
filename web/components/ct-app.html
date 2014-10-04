@@ -106,7 +106,7 @@
             } else {
               this.subModule = null;
             }
-            document.title = "CT - " + this.route;
+            document.title = 'CT - ' + this.route;
           }
           updating = false;
         },
@@ -125,8 +125,9 @@
             return;
           }
           updating = true;
-          this.route = this.mainModule + (this.subModule !== null ? '/' + this.subModule : "");
+          this.route = this.mainModule + (this.subModule !== null ? '/' + this.subModule : '');
           updating = false;
+          this.$.drawer.toggle();
         },
 
         profile: function() {
