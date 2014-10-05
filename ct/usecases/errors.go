@@ -5,7 +5,11 @@ import (
 )
 
 var (
-	ErrUserAlreadyExists = errors.New("Username unavailable")
-	ErrAccessDenied      = errors.New("Access denied")
-	ErrInvalidChannelId  = errors.New("Invalid channel id")
+	// Registration
+	ErrUserAlreadyExists   = errors.New("Username unavailable")
+	ErrInvalidRegisterInfo = errors.New("Invalid registration info")
+
+	// Others
+	ErrAccessDenied     = errors.New("Access denied")
+	ErrInvalidChannelId = errors.New("Invalid channel id")
 )

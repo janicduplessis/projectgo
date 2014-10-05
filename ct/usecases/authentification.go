@@ -4,6 +4,7 @@ import (
 	"github.com/janicduplessis/projectgo/ct/domain"
 
 	"fmt"
+	"regexp"
 )
 
 type UserRepository interface {
@@ -70,6 +71,28 @@ func (ai *AuthentificationInteractor) Login(info *LoginInfo) (*User, error) {
 }
 
 func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error) {
+	// Validate infos
+	if len(info.Username) < 4 || len(info.Username) > 40 {
+		return nil, ErrInvalidRegisterInfo
+	}
+	if len(info.Password) < 6 || len(info.Password) > 40 {
+		return nil, ErrInvalidRegisterInfo
+	}
+	if len(info.FirstName) < 1 || len(info.FirstName) > 40 {
+		return nil, ErrInvalidRegisterInfo
+	}
+	if len(info.LastName) < 1 || len(info.LastName) > 40 {
+		return nil, ErrInvalidRegisterInfo
+	}
+	if len(info.Email) < 1 || len(info.Email) > 40 {
+		return nil, ErrInvalidRegisterInfo
+	}
+	// Simple email regex
+	r := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if !r.MatchString(info.Email) {
+		return nil, ErrInvalidRegisterInfo
+	}
+
 	// Hash the password
 	hash, err := ai.Crypto.GenerateFromPassword(info.Password)
 	if err != nil {
@@ -77,8 +100,6 @@ func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error
 	}
 
 	info.Password = hash
-
-	// TODO: Validate infos
 
 	return ai.UserRepository.Create(info)
 }
