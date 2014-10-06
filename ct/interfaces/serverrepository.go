@@ -37,10 +37,7 @@ func (repo *SingletonServerRepo) Get() *domain.Server {
 
 		clients := make(map[int64]*domain.Client)
 
-		server = &domain.Server{
-			Channels: channels,
-			Clients:  clients,
-		}
+		server = domain.NewServer(channels, clients)
 	}
 
 	return server

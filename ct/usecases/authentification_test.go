@@ -94,10 +94,7 @@ func (handler *FakeLoggerHandler) Error(err error) {
 }
 
 func InitAuthentificationInteractor() *AuthentificationInteractor {
-	authInteractor := new(AuthentificationInteractor)
-	authInteractor.UserRepository = NewFakeUserRepository()
-	authInteractor.Crypto = new(FakeCryptoHandler)
-	authInteractor.Logger = new(FakeLoggerHandler)
+	authInteractor := NewAuthentificationInteractor(NewFakeUserRepository(), new(FakeCryptoHandler), new(FakeLoggerHandler))
 
 	//Fake data
 	authInteractor.UserRepository.Create(&RegisterInfo{

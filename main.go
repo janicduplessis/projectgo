@@ -107,10 +107,7 @@ func main() {
 	dbInit.Init()
 
 	// Interactors
-	authInteractor := new(usecases.AuthentificationInteractor)
-	authInteractor.UserRepository = interfaces.NewDbUserRepo(handlers)
-	authInteractor.Crypto = crypto
-	authInteractor.Logger = logger
+	authInteractor := usecases.NewAuthentificationInteractor(interfaces.NewDbUserRepo(handlers), crypto, logger)
 
 	chatInteractor := new(usecases.ChatInteractor)
 	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo(handlers)

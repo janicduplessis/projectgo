@@ -162,9 +162,11 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 		index++
 	}
 
+	//TODO: not nice!
 	var clientChannel int64 = -1
-	if server.Clients[user.Id].Channel != nil {
-		clientChannel = server.Clients[user.Id].Channel.Id
+	userClient := server.GetClient(user.Id)
+	if userClient.Channel != nil {
+		clientChannel = userClient.Channel.Id
 	}
 
 	response := ChannelsResponse{

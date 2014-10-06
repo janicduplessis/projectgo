@@ -5,6 +5,7 @@ import (
 
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type UserRepository interface {
@@ -42,6 +43,19 @@ type AuthentificationInteractor struct {
 	UserRepository UserRepository
 	Crypto         Crypto
 	Logger         Logger
+
+	emailRegexp *regexp.Regexp
+}
+
+func NewAuthentificationInteractor(userRepository UserRepository, crypto Crypto, logger Logger) *AuthentificationInteractor {
+	emailRegexp := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$`)
+
+	return &AuthentificationInteractor{
+		UserRepository: userRepository,
+		Crypto:         crypto,
+		Logger:         logger,
+		emailRegexp:    emailRegexp,
+	}
 }
 
 func (ai *AuthentificationInteractor) Login(info *LoginInfo) (*User, error) {
@@ -71,6 +85,8 @@ func (ai *AuthentificationInteractor) Login(info *LoginInfo) (*User, error) {
 }
 
 func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error) {
+	info.Email = strings.ToLower(info.Email)
+
 	// Validate infos
 	if len(info.Username) < 4 || len(info.Username) > 40 {
 		return nil, ErrInvalidRegisterInfo
@@ -88,8 +104,7 @@ func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error
 		return nil, ErrInvalidRegisterInfo
 	}
 	// Simple email regex
-	r := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !r.MatchString(info.Email) {
+	if !ai.emailRegexp.MatchString(info.Email) {
 		return nil, ErrInvalidRegisterInfo
 	}
 

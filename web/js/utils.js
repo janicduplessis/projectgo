@@ -1,7 +1,7 @@
 /* global console */
 (function() {
-	ct = ct || {};
-	ct.utils = {
+	window.ct = window.ct || {};
+	window.ct.utils = {
 		scrollMainContentTop: function() {
 			document.querySelector('#mainContainer').scroller.scrollTop = 0;
 		},

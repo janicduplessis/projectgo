@@ -22,12 +22,12 @@ func (ci *ChatInteractor) JoinServer(clientId int64) (*domain.Client, error) {
 		return nil, err
 	}
 
-	return client, server.Join(client)
+	return client, server.AddClient(client)
 }
 
 func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 	server := ci.ServerRepository.Get()
-	client := server.Clients[clientId]
+	client := server.GetClient(clientId)
 
 	message := &domain.Message{
 		Body:      body,
@@ -48,8 +48,8 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 
 func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 	server := ci.ServerRepository.Get()
-	client := server.Clients[clientId]
-	channel := server.Channels[channelId]
+	client := server.GetClient(clientId)
+	channel := server.GetChannel(channelId)
 	if channel == nil {
 		return ErrInvalidChannelId
 	}
@@ -71,7 +71,7 @@ func (ci *ChatInteractor) JoinChannel(clientId int64, channelId int64) error {
 	}
 
 	// Alert other clients
-	for _, c := range server.Clients {
+	for _, c := range server.GetClients() {
 		c.ClientSender.ChannelJoined(channel, client)
 	}
 
@@ -87,9 +87,9 @@ func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {
 		return err
 	}
 
-	server.Channels[channel.Id] = channel
+	server.AddChannel(channel)
 
-	for _, client := range server.Clients {
+	for _, client := range server.GetClients() {
 		client.ClientSender.ChannelCreated(channel)
 	}
 
@@ -99,13 +99,13 @@ func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {
 func (ci *ChatInteractor) Channels(clientId int64) (map[int64]*domain.Channel, error) {
 	server := ci.ServerRepository.Get()
 
-	return server.Channels, nil
+	return server.GetChannels(), nil
 }
 
 func (ci *ChatInteractor) Disconnect(clientId int64) error {
 	server := ci.ServerRepository.Get()
-	client := server.Clients[clientId]
-
+	client := server.GetClient(clientId)
+	server.RemoveClient(clientId)
 	if client.Channel != nil {
 		client.Channel.Leave(client)
 	}
@@ -115,7 +115,7 @@ func (ci *ChatInteractor) Disconnect(clientId int64) error {
 
 func (ci *ChatInteractor) GetMessages(channelId int64) ([]*domain.Message, error) {
 	server := ci.ServerRepository.Get()
-	channel := server.Channels[channelId]
+	channel := server.GetChannel(channelId)
 	if channel == nil {
 		return nil, ErrInvalidChannelId
 	}
