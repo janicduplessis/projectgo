@@ -1,0 +1,49 @@
+<link rel="import" href="/lib/core-ajax/core-ajax.html">
+
+<link rel="import" href="/lib/paper-button/paper-button.html">
+<link rel="import" href="/lib/paper-dialog/paper-dialog.html">
+<link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
+<link rel="import" href="/lib/paper-spinner/paper-spinner.html">
+
+<polymer-element name="ct-profile-dialog">
+	<template>
+		<core-ajax id="request"
+				 url="/models/getClientProfileModel"
+				 method="POST"
+				 handleAs="json"
+				 body="{{params}}"
+				 on-core-response="{{requestResponse}}"></core-ajax>
+
+		<paper-dialog id="dialog" heading="Profile" transition="paper-dialog-transition-bottom" backdrop="true" layered="true">
+			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+			<template if="{{model === null}}">
+				<paper-spinner active></paper-spinner>
+			</template>
+			<template if="{{model !== null}}">
+				<img id="profileImage" src="{{model.ProfileImage}}"/>
+				<div id="username">{{model.Username}}</div>
+			</template>
+			<paper-button class="primary" on-tap="{{close}}" affirmative autofocus>Close</paper-button>
+		</paper-dialog>
+	</template>
+	<script>
+		Polymer('ct-profile-dialog', {
+			model: null,
+			show: function(clientId) {
+				this.model = null;
+				this.$.dialog.toggle();
+				this.params = JSON.stringify({
+					ClientId: clientId
+				});
+				this.$.request.go();
+			},
+			close: function() {
+				this.$.dialog.toggle();
+			},
+			requestResponse: function(event) {
+				var response = event.detail.response;
+				this.model = response.Model;
+			}
+		});
+	</script>
+</polymer-element>

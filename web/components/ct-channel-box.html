@@ -83,8 +83,9 @@
 	</template>
 	<script>
 		Polymer('ct-channel-box', {
+			clientId: -1,
 			switchChannel: function(event) {
-					this.fire('ct-channel-changed', this.channel);
+				this.fire('ct-channel-changed', this.channel);
 			},
 			toggle: function() {
 				if(this.$.collapse.opened) {
@@ -98,9 +99,11 @@
 			onClientTouch: function(e, detail, target) {
 				this.$.ddmenu.relatedTarget = target;
 				this.$.ddmenu.opened = true;
+				this.clientId = parseInt(target.getAttribute('clientId'), 10);
 			},
 			profile: function() {
 				this.$.ddmenu.opened = false;
+				this.fire('ct-show-profile', this.clientId);
 			},
 			whisper: function() {
 				this.$.ddmenu.opened = false;

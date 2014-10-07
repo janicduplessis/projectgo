@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	urlGetProfileModel string = "/models/getProfileModel"
-	urlGetProfileImage string = "/getProfileImage"
-	urlSetProfileImage string = "/setProfileImage"
+	urlGetProfileModel       string = "/models/getProfileModel"
+	urlGetClientProfileModel string = "/models/getClientProfileModel"
+	urlGetProfileImage       string = "/getProfileImage"
+	urlSetProfileImage       string = "/setProfileImage"
 )
 
 type HomeWebserviceHandler struct {
@@ -29,6 +30,15 @@ type ProfileModel struct {
 	ProfileImage string
 }
 
+type GetClientProfileModelRequest struct {
+	ClientId int64
+}
+
+type GetClientProfileModelResponse struct {
+	Username     string
+	ProfileImage string
+}
+
 type SetProfileImageResponse struct {
 	Result bool
 }
@@ -40,6 +50,7 @@ func NewHomeWebservice(ws Webservice, imageUtils ImageUtils) *HomeWebserviceHand
 	}
 
 	ws.AddHandler(urlGetProfileModel, true, wsHandler.GetProfileModel)
+	ws.AddHandler(urlGetClientProfileModel, true, wsHandler.GetClientProfileModel)
 	ws.AddHandler(urlGetProfileImage, true, wsHandler.GetProfileImage)
 	ws.AddHandler(urlSetProfileImage, true, wsHandler.SetProfileImage)
 
@@ -56,6 +67,21 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 		Email:        user.Client.Email,
 		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", user.Id),
 	}
+	response := ModelResponse{
+		Model: model,
+	}
+	handler.Webservice.SendJson(w, response)
+}
+
+func (handler *HomeWebserviceHandler) GetClientProfileModel(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	request := new(GetClientProfileModelRequest)
+	handler.Webservice.ReadJson(w, r, request)
+
+	model := &GetClientProfileModelResponse{
+		Username:     "lalala",
+		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", request.ClientId),
+	}
+
 	response := ModelResponse{
 		Model: model,
 	}

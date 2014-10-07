@@ -1,5 +1,6 @@
 <link rel="import" href="/services/ct-msg-service.html">
 <link rel="import" href="/components/ct-channel-box.html">
+<link rel="import" href="/components/ct-profile-dialog.html">
 
 <link rel="import" href="/lib/core-item/core-item.html">
 <link rel="import" href="/lib/core-menu/core-submenu.html">
@@ -24,7 +25,9 @@
 
 		<div class="chanList" flex>
 			<template repeat="{{c in channels.List}}">
-				<ct-channel-box channel="{{c}}" on-ct-channel-changed="{{switchChannel}}"></ct-channel-box>
+				<ct-channel-box channel="{{c}}" 
+						on-ct-channel-changed="{{switchChannel}}"
+						on-ct-show-profile="{{showProfile}}"></ct-channel-box>
 			</template>
 		</div>
 
@@ -39,13 +42,7 @@
 			<paper-button on-tap="{{closeCreateChannel}}" affirmative>Cancel</paper-button>
 		</paper-dialog>
 
-		<paper-dialog id="createDialog" heading="Profile" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
-				on-keypress="{{onKeypress}}">
-			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-			<paper-input id="tbName" label="Name" maxlength="40" value="{{name}}" autofocus></paper-input>
-			<paper-button class="primary" on-tap="{{createChannel}}" affirmative>Accept</paper-button>
-			<paper-button on-tap="{{closeCreateChannel}}" affirmative>Cancel</paper-button>
-		</paper-dialog>
+		<ct-profile-dialog id="profileDialog"></ct-profile-dialog>
 
 	</template>
 	<script>
@@ -79,6 +76,11 @@
 
 				// Join the channel
 				this.$.ctMsgService.joinChannel(chanId);
+			},
+
+			showProfile: function(event) {
+				var clientId = event.detail;
+				this.$.profileDialog.show(clientId);
 			},
 
 			onKeypress: function(event) {
