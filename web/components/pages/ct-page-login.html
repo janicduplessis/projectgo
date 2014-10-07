@@ -9,95 +9,95 @@
 <link rel="import" href="/components/ct-module.html">
 
 <polymer-element name="ct-page-login" extends="ct-module">
-    <template>
-    <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-    <style>
-      paper-input {
-        width: 100%;
-      }
-      paper-button {
-        margin-left: 10px;
-      }
+		<template>
+		<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+		<style>
+			paper-input {
+				width: 100%;
+			}
+			paper-button {
+				margin-left: 10px;
+			}
 
-      paper-spinner {
-        margin-right: 20px;
-      }
+			paper-spinner {
+				margin-right: 20px;
+			}
 
-      #switchRegister {
-        margin-right: 20px;
-      }
-    </style>
+			#switchRegister {
+				margin-right: 20px;
+			}
+		</style>
 
-    <ct-auth-service id="authService" on-ct-login="{{login}}"></ct-auth-service>
-    <div class="card wide" on-keypress="{{onKeypress}}">
-      <div class="header">
-        <div class="title">
-          Welcome
-        </div>
-      </div>
-      <div class="content">
-        <paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
-        <paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
-        <div class="buttons" flex horizontal end-justified layout>
-          <paper-button id="switchRegister" on-tap="{{switchRegister}}">Register</paper-button>
-          <template if="{{loading}}">
-            <paper-spinner active self-center></paper-spinner>
-          </template>
-          <paper-button id="loginSubmit" raised class="primary" on-tap="{{loginSubmit}}">Login</paper-button>
-        </div>
-      </div>
-    </div>
-    <div flex vertical layout center>
-      <paper-toast id="toast" class="capsule"></paper-toast>
-    </div>
-  </template>
-  <script>
-    Polymer('ct-page-login', {
-      loading: false,
+		<ct-auth-service id="authService" on-ct-login="{{login}}"></ct-auth-service>
+		<div class="card wide" on-keypress="{{onKeypress}}">
+			<div class="header">
+				<div class="title">
+					Welcome
+				</div>
+			</div>
+			<div class="content">
+				<paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
+				<paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
+				<div class="buttons" flex horizontal end-justified layout>
+					<paper-button id="switchRegister" on-tap="{{switchRegister}}">Register</paper-button>
+					<template if="{{loading}}">
+						<paper-spinner active self-center></paper-spinner>
+					</template>
+					<paper-button id="loginSubmit" raised class="primary" on-tap="{{loginSubmit}}">Login</paper-button>
+				</div>
+			</div>
+		</div>
+		<div flex vertical layout center>
+			<paper-toast id="toast" class="capsule"></paper-toast>
+		</div>
+	</template>
+	<script>
+		Polymer('ct-page-login', {
+			loading: false,
 
-      loginSubmit: function() {
-        this.loading = true;
-        this.$.loginSubmit.setAttribute('disabled', true);
-        this.$.authService.login(this.lUsername, this.lPassword);
-      },
-      login: function(event) {
-          var response = event.detail;
-          this.loading = false;
-          this.$.loginSubmit.removeAttribute('disabled');
-          if(response.result) {
-            this.nav.route = 'home/profile';
-            this.lUsername = '';
-          } else {
-            //show error message
-            if(this.lPassword === '' && this.lUsername === '') {
-              this.$.toast.text = 'Please enter your username and password';
-              this.$.lUsername.focus();
-            } else if(this.lPassword === '') {
-              this.$.toast.text = 'Please enter your password';
-              this.$.lPassword.focus();
-            } else if(this.lUsername === '') {
-              this.$.toast.text = 'Please enter your username';
-              this.$.lUsername.focus();
-            } else {
-              this.$.toast.text = 'Invalid username or password';
-              this.$.lPassword.focus();
-            }
-            this.$.toast.show();
-          }
-          this.lPassword = '';
-      },
-      switchRegister: function() {
-        this.nav.route = 'home/register';
-        this.scrollToTop();
-      },
-      onKeypress: function(event) {
-        //Enter
-        if(event.keyCode === 13) {
-          event.target.blur();
-          event.preventDefault();
-          this.loginSubmit();
-        }
-      }
-    });
-  </script>
+			loginSubmit: function() {
+				this.loading = true;
+				this.$.loginSubmit.setAttribute('disabled', true);
+				this.$.authService.login(this.lUsername, this.lPassword);
+			},
+			login: function(event) {
+					var response = event.detail;
+					this.loading = false;
+					this.$.loginSubmit.removeAttribute('disabled');
+					if(response.result) {
+						this.nav.route = 'home/profile';
+						this.lUsername = '';
+					} else {
+						//show error message
+						if(this.lPassword === '' && this.lUsername === '') {
+							this.$.toast.text = 'Please enter your username and password';
+							this.$.lUsername.focus();
+						} else if(this.lPassword === '') {
+							this.$.toast.text = 'Please enter your password';
+							this.$.lPassword.focus();
+						} else if(this.lUsername === '') {
+							this.$.toast.text = 'Please enter your username';
+							this.$.lUsername.focus();
+						} else {
+							this.$.toast.text = 'Invalid username or password';
+							this.$.lPassword.focus();
+						}
+						this.$.toast.show();
+					}
+					this.lPassword = '';
+			},
+			switchRegister: function() {
+				this.nav.route = 'home/register';
+				this.scrollToTop();
+			},
+			onKeypress: function(event) {
+				//Enter
+				if(event.keyCode === 13) {
+					event.target.blur();
+					event.preventDefault();
+					this.loginSubmit();
+				}
+			}
+		});
+	</script>
 </polymer-element>

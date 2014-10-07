@@ -5,134 +5,134 @@
 <link rel="import" href="/lib/paper-spinner/paper-spinner.html">
 
 <polymer-element name="ct-controller" attributes="user">
-  <template>
-    <style>
-      core-animated-pages {
-        height: 100%;
-      }
-      #loading {
-        height: 200px;
-      }
-    </style>
-    <core-ajax id="request"
-               url="{{requestUrl}}"
-               method="POST"
-               handleAs="json"
-               on-core-response="{{requestResponse}}"
-               on-core-error="{{requestError}}"></core-ajax>
+	<template>
+		<style>
+			core-animated-pages {
+				height: 100%;
+			}
+			#loading {
+				height: 200px;
+			}
+		</style>
+		<core-ajax id="request"
+				 url="{{requestUrl}}"
+				 method="POST"
+				 handleAs="json"
+				 on-core-response="{{requestResponse}}"
+				 on-core-error="{{requestError}}"></core-ajax>
 
-    <core-localstorage id="localStorage"></core-localstorage>
+		<core-localstorage id="localStorage"></core-localstorage>
 
-    <core-animated-pages id="pages" transitions="cross-fade-all" selected="{{currentPage}}" valueattr="name">
-      <content></content>
-      <div id="loading" name="loading" vertical layout center-justified>
-        <div vertical layout center>
-          <paper-spinner active></paper-spinner>
-        </div>
-      </div>
-    </core-animated-pages>
-  </template>
-  <script>
-    Polymer('ct-controller', {
-      modules: null,
-      curModule: null,
-      updating: false,
-      nav: null,
+		<core-animated-pages id="pages" transitions="cross-fade-all" selected="{{currentPage}}" valueattr="name">
+			<content></content>
+			<div id="loading" name="loading" vertical layout center-justified>
+				<div vertical layout center>
+					<paper-spinner active></paper-spinner>
+				</div>
+			</div>
+		</core-animated-pages>
+	</template>
+	<script>
+		Polymer('ct-controller', {
+			modules: null,
+			curModule: null,
+			updating: false,
+			nav: null,
 
-      init: function() {
-        var pages = this.children;
-        this.modules = {};
-        for(var i = 0; i < pages.length; i++) {
-          var page = pages[i];
-          page.user = this.user;
-          page.nav = this.nav;
-          this.modules[page.name] = page;
-        }
-        this.update();
-      },
+			init: function() {
+				var pages = this.children;
+				this.modules = {};
+				for(var i = 0; i < pages.length; i++) {
+					var page = pages[i];
+					page.user = this.user;
+					page.nav = this.nav;
+					this.modules[page.name] = page;
+				}
+				this.update();
+			},
 
-      routeChanged: function() {
-        if(this.modules === null) {
-          return;
-        }
-        this.update();
-      },
+			routeChanged: function() {
+				if(this.modules === null) {
+					return;
+				}
+				this.update();
+			},
 
-      update: function() {
-        if(this.updating || !this.nav || !this.nav.route) {
-          return;
-        }
-        this.updating = true;
-        var module = this.modules[this.nav.route];
-        if(!module) {
-          //Nav to the error page
-          this.updating = false;
-          this.nav.route = 'error';
-          return;
-        }
-        if(this.curModule) {
-          this.curModule.onUnload();
-        }
-        this.curModule = module;
-        module.onLoad();
+			update: function() {
+				if(this.updating || !this.nav || !this.nav.route) {
+					return;
+				}
+				this.updating = true;
+				var module = this.modules[this.nav.route];
+				if(!module) {
+					//Nav to the error page
+					this.updating = false;
+					this.nav.route = 'error';
+					return;
+				}
+				if(this.curModule) {
+					this.curModule.onUnload();
+				}
+				this.curModule = module;
+				module.onLoad();
 
-        if(!module.hasModel) {
-          this.stopLoading();
-          module.onModelReady();
-        } else {
-          // Check localstorage for the module
-          this.$.localStorage.name = 'ct-' + module.name + '-model';
-          var data = this.$.localStorage.value;
-          if(data) {
-            // We have the module in localstorage
-            module.model = data;
-            this.stopLoading();
-            module.onModelReady();
-          } else {
-            // We have to load the model from the server
-            this.startLoading();
-            // Capitalize first letter of the module
-            var modulePaths = module.name.split('/');
-            var upperModule = modulePaths[modulePaths.length - 1].replace(/(?:^|\s)\w/g, function(match) {
-              return match.toUpperCase();
-            });
-            this.requestUrl = '/models/get' + upperModule + 'Model';
-            this.$.request.go();
-          }
-        }
-      },
+				if(!module.hasModel) {
+					this.stopLoading();
+					module.onModelReady();
+				} else {
+					// Check localstorage for the module
+					this.$.localStorage.name = 'ct-' + module.name + '-model';
+					var data = this.$.localStorage.value;
+					if(data) {
+						// We have the module in localstorage
+						module.model = data;
+						this.stopLoading();
+						module.onModelReady();
+					} else {
+						// We have to load the model from the server
+						this.startLoading();
+						// Capitalize first letter of the module
+						var modulePaths = module.name.split('/');
+						var upperModule = modulePaths[modulePaths.length - 1].replace(/(?:^|\s)\w/g, function(match) {
+							return match.toUpperCase();
+						});
+						this.requestUrl = '/models/get' + upperModule + 'Model';
+						this.$.request.go();
+					}
+				}
+			},
 
-      // Model request response
-      requestResponse: function(event) {
-        var response = event.detail.response;
-        // Set the model for the page
-        this.curModule.model = response.Model;
-        // Save the model in the localstorage
-        this.$.localStorage.value = response.Model;
+			// Model request response
+			requestResponse: function(event) {
+				var response = event.detail.response;
+				// Set the model for the page
+				this.curModule.model = response.Model;
+				// Save the model in the localstorage
+				this.$.localStorage.value = response.Model;
 
-        this.stopLoading();
+				this.stopLoading();
 
-        // Tell the module that its model is ready
-        this.curModule.onModelReady();
-      },
+				// Tell the module that its model is ready
+				this.curModule.onModelReady();
+			},
 
-      // Model request on-core-error
-      requestError: function(event) {
-        this.stopLoading();
-        this.nav.route = 'error';
-      },
+			// Model request on-core-error
+			requestError: function(event) {
+				this.stopLoading();
+				this.nav.route = 'error';
+			},
 
-      // Show the loading page
-      startLoading: function() {
-        this.updating = true;
-        this.currentPage = 'loading';
-      },
+			// Show the loading page
+			startLoading: function() {
+				this.updating = true;
+				this.currentPage = 'loading';
+			},
 
-      // Show the current module
-      stopLoading: function() {
-        this.updating = false;
-        this.currentPage = this.curModule.name;
-      }
-    });
-  </script>
+			// Show the current module
+			stopLoading: function() {
+				this.updating = false;
+				this.currentPage = this.curModule.name;
+			}
+		});
+	</script>
 </polymer-element>

@@ -5,112 +5,112 @@
 <link rel="import" href="/lib/paper-item/paper-item.html">
 
 <polymer-element name="ct-channel-box" attributes="channel" vertical layout stretch-start>
-  <template>
-    <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-    <style>
-      .chanTitle {
-        font-size: 18px;
-        color: #006589;
-        background-color: #F4F4F4;
-        border-radius: 3px;
-        margin: 10px 10px 0 10px;
-        height: 32px;
-      }
+	<template>
+		<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+		<style>
+			.chanTitle {
+				font-size: 18px;
+				color: #006589;
+				background-color: #F4F4F4;
+				border-radius: 3px;
+				margin: 10px 10px 0 10px;
+				height: 32px;
+			}
 
-      .chanTitle paper-button {
-        text-transform: none;
-        text-align: left;
-        padding: 0;
-        padding-left: 10px;
-        margin: 0;
-      }
+			.chanTitle paper-button {
+				text-transform: none;
+				text-align: left;
+				padding: 0;
+				padding-left: 10px;
+				margin: 0;
+			}
 
-      .chanTitle paper-icon-button {
-        padding: 0;
-        height: 32px;
-        width: 32px;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-      }
+			.chanTitle paper-icon-button {
+				padding: 0;
+				height: 32px;
+				width: 32px;
+				display: -webkit-flex;
+				display: flex;
+				-webkit-flex-direction: row;
+				flex-direction: row;
+				-webkit-align-items: center;
+				align-items: center;
+				-webkit-justify-content: center;
+				justify-content: center;
+			}
 
-      :host(.selected) .chanTitle {
-        font-weight: bold;
-      }
-      .chanClients {
-        margin-top: 5px;
-        margin-bottom: 5px;
-      }
-      .chanClients core-icon {
-        margin-right: 10px;
-        color: #169827;
-      }
-      .chanClients paper-button {
-        text-align: left;
-        margin: 0 10px 0 10px;
-        text-transform: none;
-      }
-    </style>
+			:host(.selected) .chanTitle {
+				font-weight: bold;
+			}
+			.chanClients {
+				margin-top: 5px;
+				margin-bottom: 5px;
+			}
+			.chanClients core-icon {
+				margin-right: 10px;
+				color: #169827;
+			}
+			.chanClients paper-button {
+				text-align: left;
+				margin: 0 10px 0 10px;
+				text-transform: none;
+			}
+		</style>
 
-    <div vertical layout stretch-start>
-      <div class="chanTitle" horizontal layout stretch-center>
-        <paper-button on-tap="{{switchChannel}}" flex horizontal layout center>{{channel.Name}}</paper-button>
-        <paper-icon-button id="toggleCollapse" icon="expand-less" on-tap="{{toggle}}"></paper-icon-button>
-      </div>
-      <core-collapse id="collapse" opened>
-        <div class="chanClients" vertical layout stretch-start>
-          <template repeat="{{u in channel.Clients}}">
-            <paper-button clientId="{{u.Id}}" on-tap="{{onClientTouch}}">
-              <core-icon icon="social:person"></core-icon>{{u.Name}}
-            </paper-button>
-          </template>
-        </div>
-      </core-collapse>
-    </div>
-    <core-dropdown id="ddmenu">
-      <paper-shadow id="shadow" z="1" target="{{$.ddmenu}}"></paper-shadow>
-      
-      <paper-item label="Profile" on-tap="{{profile}}"></paper-item>
-      <paper-item label="Whisper" on-tap="{{whisper}}"></paper-item>
-      <paper-item label="Add friend" on-tap="{{addFriend}}"></paper-item>
-      <paper-item label="Report" on-tap="{{report}}"></paper-item>
-    </core-dropdown>
-  </template>
-  <script>
-    Polymer('ct-channel-box', {
-      switchChannel: function(event) {
-          this.fire('ct-channel-changed', this.channel);
-      },
-      toggle: function() {
-        if(this.$.collapse.opened) {
-          this.$.toggleCollapse.setAttribute('icon', 'expand-more');
-        } else {
-          this.$.toggleCollapse.setAttribute('icon', 'expand-less');
-        }
-        
-        this.$.collapse.toggle();
-      },
-      onClientTouch: function(e, detail, target) {
-        this.$.ddmenu.relatedTarget = target;
-        this.$.ddmenu.opened = true;
-      },
-      profile: function() {
-        this.$.ddmenu.opened = false;
-      },
-      whisper: function() {
-        this.$.ddmenu.opened = false;
-      },
-      addFriend: function() {
-        this.$.ddmenu.opened = false;
-      },
-      report: function() {
-        this.$.ddmenu.opened = false;
-      }
-    });
-  </script>
+		<div vertical layout stretch-start>
+			<div class="chanTitle" horizontal layout stretch-center>
+				<paper-button on-tap="{{switchChannel}}" flex horizontal layout center>{{channel.Name}}</paper-button>
+				<paper-icon-button id="toggleCollapse" icon="expand-less" on-tap="{{toggle}}"></paper-icon-button>
+			</div>
+			<core-collapse id="collapse" opened>
+				<div class="chanClients" vertical layout stretch-start>
+					<template repeat="{{u in channel.Clients}}">
+						<paper-button clientId="{{u.Id}}" on-tap="{{onClientTouch}}">
+							<core-icon icon="social:person"></core-icon>{{u.Name}}
+						</paper-button>
+					</template>
+				</div>
+			</core-collapse>
+		</div>
+		<core-dropdown id="ddmenu">
+			<paper-shadow id="shadow" z="1" target="{{$.ddmenu}}"></paper-shadow>
+			
+			<paper-item label="Profile" on-tap="{{profile}}"></paper-item>
+			<paper-item label="Whisper" on-tap="{{whisper}}"></paper-item>
+			<paper-item label="Add friend" on-tap="{{addFriend}}"></paper-item>
+			<paper-item label="Report" on-tap="{{report}}"></paper-item>
+		</core-dropdown>
+	</template>
+	<script>
+		Polymer('ct-channel-box', {
+			switchChannel: function(event) {
+					this.fire('ct-channel-changed', this.channel);
+			},
+			toggle: function() {
+				if(this.$.collapse.opened) {
+					this.$.toggleCollapse.setAttribute('icon', 'expand-more');
+				} else {
+					this.$.toggleCollapse.setAttribute('icon', 'expand-less');
+				}
+				
+				this.$.collapse.toggle();
+			},
+			onClientTouch: function(e, detail, target) {
+				this.$.ddmenu.relatedTarget = target;
+				this.$.ddmenu.opened = true;
+			},
+			profile: function() {
+				this.$.ddmenu.opened = false;
+			},
+			whisper: function() {
+				this.$.ddmenu.opened = false;
+			},
+			addFriend: function() {
+				this.$.ddmenu.opened = false;
+			},
+			report: function() {
+				this.$.ddmenu.opened = false;
+			}
+		});
+	</script>
 </polymer-element>

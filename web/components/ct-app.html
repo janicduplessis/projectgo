@@ -9,6 +9,7 @@
 <link rel="import" href="/lib/paper-tabs/paper-tabs.html">
 <link rel="import" href="/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/lib/paper-item/paper-item.html">
+<link rel="import" href="/lib/paper-dialog/paper-dialog.html">
 <link rel="import" href="/lib/flatiron-director/flatiron-director.html">
 
 <link rel="import" href="/components/pages/ct-pages.html">
@@ -17,127 +18,141 @@
 <link rel="import" href="/services/ct-msg-service.html">
 
 <polymer-element name="ct-app">
-  <template>
-    <link rel="stylesheet" type="text/css" href="/css/main.css">
-    <flatiron-director id="nav" route="{{route}}" autoHash
-            on-director-route="{{routeChanged}}"></flatiron-director>
+	<template>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<flatiron-director id="nav" route="{{route}}" autoHash
+				on-director-route="{{routeChanged}}"></flatiron-director>
 
-    <ct-auth-service id="auth"></ct-auth-service>
-    <ct-msg-service user="{{user}}"></ct-msg-service>
+		<ct-auth-service id="auth"></ct-auth-service>
+		<ct-msg-service id="msgService" user="{{user}}" on-ct-disconnect="{{toggleConnectionDialog}}"></ct-msg-service>
 
-    <core-drawer-panel id="drawer" narrow="{{narrow}}">
-      <core-header-panel drawer>
-        <core-toolbar class="theme">
-        <div class="title"><core-icon icon="communication:chat"></core-icon> Go Chat</div>
-        </core-toolbar>
-        <template if="{{user.logged}}">
-          Hello {{user.identity.Username}}!
-        </template>
-      <core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name" fit>
-        <ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
-        <ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
-      </core-animated-pages>
-        
-      </core-header-panel>
-      <core-header-panel main id="mainContent">
-        <core-toolbar class="theme">
-          <template if="{{narrow}}">
-            <paper-icon-button icon="menu" on-tap="{{openMenu}}"></paper-icon-button>
-          </template>
-          <paper-tabs id="tabsLeft" selected="{{mainModule}}" valueattr="hash" self-end>
-            <paper-tab hash="home" flex>Home</paper-tab>
-            <template if="{{user.logged}}">
-              <paper-tab hash="chat" flex>Chat</paper-tab>
-            </template>
-          </paper-tabs>
-        </core-toolbar>
+		<paper-dialog id="connectionDialog" heading="Connection lost" transition="paper-dialog-transition-bottom" backdrop="true" layered="true">
+			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+			<p>Connection lost to the chat servers. Try to reconnect?</p>
+			<paper-button class="primary" on-tap="{{reconnect}}" affirmative autofocus>Yes</paper-button>
+			<paper-button on-tap="{{toggleConnectionDialog}}" affirmative>No</paper-button>
+		</paper-dialog>
 
-        <div class="container" vertical layout center-justified fit>
-          <ct-controller id="controller" route="{{route}}" user="{{user}}">
-            <ct-page-home name="home"></ct-page-home>
-            <ct-page-login name="home/login"></ct-page-login>
-            <ct-page-register name="home/register"></ct-page-register>
-            <ct-page-profile name="home/profile" model></ct-page-profile>
-            <ct-page-help name="home/help"></ct-page-help>
-            <ct-page-feedback name="home/feedback"></ct-page-feedback>
-            <ct-page-settings name="home/settings"></ct-page-settings>
-            <ct-page-chat name="chat"></ct-page-chat>
-            <ct-page-error name="error"></ct-page-error>
-          </ct-controller>
-        </div>
-      </core-header-panel>
-    </core-drawer-panel>
-  </template>
-  <script>
-    (function() {
-      var updating = false;
-      Polymer('ct-app', {
-        user: null,
-        route: null,
-        mainModule: null,
-        subModule: null,
+		<core-drawer-panel id="drawer" narrow="{{narrow}}">
+			<core-header-panel drawer>
+				<core-toolbar class="theme">
+				<div class="title"><core-icon icon="communication:chat"></core-icon> Go Chat</div>
+				</core-toolbar>
+				<template if="{{user.logged}}">
+					Hello {{user.identity.Username}}!
+				</template>
+			<core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name" fit>
+				<ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
+				<ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
+			</core-animated-pages>
+				
+			</core-header-panel>
+			<core-header-panel main id="mainContent">
+				<core-toolbar class="theme">
+					<template if="{{narrow}}">
+						<paper-icon-button icon="menu" on-tap="{{openMenu}}"></paper-icon-button>
+					</template>
+					<paper-tabs id="tabsLeft" selected="{{mainModule}}" valueattr="hash" self-end>
+						<paper-tab hash="home" flex>Home</paper-tab>
+						<template if="{{user.logged}}">
+							<paper-tab hash="chat" flex>Chat</paper-tab>
+						</template>
+					</paper-tabs>
+				</core-toolbar>
 
-        ready: function() {
-          this.user = this.$.auth.user;
-          if(this.user.logged) {
-            this.route = this.route || 'home/profile';
-          } else {
-            this.route = this.route || 'home/login';
-          }
-          this.$.controller.nav = this.$.nav;
-          this.$.controller.init();
-        },
+				<div class="container" vertical layout center-justified fit>
+					<ct-controller id="controller" route="{{route}}" user="{{user}}">
+						<ct-page-home name="home"></ct-page-home>
+						<ct-page-login name="home/login"></ct-page-login>
+						<ct-page-register name="home/register"></ct-page-register>
+						<ct-page-profile name="home/profile" model></ct-page-profile>
+						<ct-page-help name="home/help"></ct-page-help>
+						<ct-page-feedback name="home/feedback"></ct-page-feedback>
+						<ct-page-settings name="home/settings"></ct-page-settings>
+						<ct-page-chat name="chat"></ct-page-chat>
+						<ct-page-error name="error"></ct-page-error>
+					</ct-controller>
+				</div>
+			</core-header-panel>
+		</core-drawer-panel>
+	</template>
+	<script>
+		(function() {
+			var updating = false;
+			Polymer('ct-app', {
+				user: null,
+				route: null,
+				mainModule: null,
+				subModule: null,
 
-        routeChanged: function() {
-          this.$.controller.routeChanged();
-          if(updating) {
-            return;
-          }
-          updating = true;
-          if(this.route) {
-            var parts = this.route.split('/');
-            if(parts[0]) {
-              this.mainModule = parts[0];
-            } else {
-              this.mainModule = null;
-            }
-            if(parts[1]) {
-              this.subModule = parts[1];
-            } else {
-              this.subModule = null;
-            }
-            document.title = 'CT - ' + this.route;
-          }
-          updating = false;
-        },
+				ready: function() {
+					this.user = this.$.auth.user;
+					if(this.user.logged) {
+						this.route = this.route || 'home/profile';
+					} else {
+						this.route = this.route || 'home/login';
+					}
+					this.$.controller.nav = this.$.nav;
+					this.$.controller.init();
+				},
 
-        mainModuleChanged: function() {
-          if(updating) {
-            return;
-          }
-          updating = true;
-          this.route = this.mainModule;
-          updating = false;
-        },
+				routeChanged: function() {
+					this.$.controller.routeChanged();
+					if(updating) {
+						return;
+					}
+					updating = true;
+					if(this.route) {
+						var parts = this.route.split('/');
+						if(parts[0]) {
+							this.mainModule = parts[0];
+						} else {
+							this.mainModule = null;
+						}
+						if(parts[1]) {
+							this.subModule = parts[1];
+						} else {
+							this.subModule = null;
+						}
+						document.title = 'CT - ' + this.route;
+					}
+					updating = false;
+				},
 
-        subModuleChanged: function() {
-          if(updating) {
-            return;
-          }
-          updating = true;
-          this.route = this.mainModule + (this.subModule !== null ? '/' + this.subModule : '');
-          updating = false;
-          this.$.drawer.closeDrawer();
-        },
+				mainModuleChanged: function() {
+					if(updating) {
+						return;
+					}
+					updating = true;
+					this.route = this.mainModule;
+					updating = false;
+				},
 
-        profile: function() {
-          this.route = 'home/profile';
-        },
+				subModuleChanged: function() {
+					if(updating) {
+						return;
+					}
+					updating = true;
+					this.route = this.mainModule + (this.subModule !== null ? '/' + this.subModule : '');
+					updating = false;
+					this.$.drawer.closeDrawer();
+				},
 
-        openMenu: function() {
-          this.$.drawer.togglePanel();
-        },
-      });
-    })();
-  </script>
+				profile: function() {
+					this.route = 'home/profile';
+				},
+
+				openMenu: function() {
+					this.$.drawer.togglePanel();
+				},
+				reconnect: function() {
+					this.$.msgService.connect();
+					this.$.connectionDialog.toggle();
+				},
+				toggleConnectionDialog: function() {
+					this.$.connectionDialog.toggle();
+				}
+			});
+		})();
+	</script>
 </polymer-element>

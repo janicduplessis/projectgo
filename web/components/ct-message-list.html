@@ -2,55 +2,55 @@
 <link rel="import" href="../lib/core-animation/core-animation.html">
 
 <polymer-element name="ct-message-list">
-  <template>
-    <style>
-      .msg {
-        background-color: #F4F4F4;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 10px;
-        width: 100%;
-      }
-      .msgAuthor {
-        font-weight: bold;
-      }
-      .msgBody {
-        word-break: break-all;
-      }
-      #msgList {
+	<template>
+		<style>
+			.msg {
+				background-color: #F4F4F4;
+				border-radius: 5px;
+				padding: 15px;
+				margin-bottom: 10px;
+				width: 100%;
+			}
+			.msgAuthor {
+				font-weight: bold;
+			}
+			.msgBody {
+				word-break: break-all;
+			}
+			#msgList {
 
-      }
-    </style>
+			}
+		</style>
 
-    <ct-msg-service id="ctMsgService" messages="{{messages}}"></ct-msg-service>
+		<ct-msg-service id="ctMsgService" messages="{{messages}}"></ct-msg-service>
 
-    <core-animation id="fadein" duration="300">
-      <core-animation-keyframe>
-        <core-animation-prop name="opacity" value="0"></core-animation-prop>
-        <core-animation-prop name="transform" value="translate(-50px, 0)"></core-animation-prop>
-      </core-animation-keyframe>
-      <core-animation-keyframe>
-        <core-animation-prop name="opacity" value="1"></core-animation-prop>
-        <core-animation-prop name="transform" value="translate(0, 0)"></core-animation-prop>
-      </core-animation-keyframe>
-    </core-animation>
-    
-    <div id="msgList" layout vertical center>
-      <template repeat="{{m in messages.List}}">
-        <div class="msg">
-          <span class="msgAuthor">{{m.Author}} : </span>
-          <span class="msgBody">{{m.Body}}</span>
-        </div>
-      </template>
-    </div>
-  </template>
+		<core-animation id="fadein" duration="300">
+			<core-animation-keyframe>
+				<core-animation-prop name="opacity" value="0"></core-animation-prop>
+				<core-animation-prop name="transform" value="translate(-50px, 0)"></core-animation-prop>
+			</core-animation-keyframe>
+			<core-animation-keyframe>
+				<core-animation-prop name="opacity" value="1"></core-animation-prop>
+				<core-animation-prop name="transform" value="translate(0, 0)"></core-animation-prop>
+			</core-animation-keyframe>
+		</core-animation>
 
-  <script>
-  Polymer('ct-message-list', {
-    messagesChanged: function() {
-      this.$.fadein.target = this.$.msgList.children[this.$.msgList.children.length - 1];
-      this.$.fadein.play();
-    }
-  });
-  </script>
+		<div id="msgList" layout vertical center>
+			<template repeat="{{m in messages.List}}">
+				<div class="msg">
+					<span class="msgAuthor">{{m.Author}} :</span>
+					<span class="msgBody">{{m.Body}}</span>
+				</div>
+			</template>
+		</div>
+	</template>
+
+	<script>
+		Polymer('ct-message-list', {
+			messagesChanged: function() {
+				this.$.fadein.target = this.$.msgList.children[this.$.msgList.children.length - 1];
+				this.$.fadein.play();
+			}
+		});
+	</script>
 </polymer-element>

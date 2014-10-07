@@ -1,165 +1,195 @@
 <polymer-element name="ct-msg-service" attributes="messages channels">
-  <template>
-    <style>
-        :host {
-            display: none;
-        }
-      </style>
-  </template>
-  <script>
-    (function() {
-      var _ws = null,
-          _messages = {
-            List: [],
-            Total: 0
-          },
-          _channels = {
-            List: [],
-            Current: -1
-          },
-          _handlers;
+	<template>
+		<style>
+				:host {
+					display: none;
+				}
+			</style>
+	</template>
+	<script>
+		(function() {
+			var _ws = null,
+				_messages = {
+					List: [],
+					Total: 0
+				},
+				_channels = {
+					List: [],
+					Current: -1
+				},
+				_services = [],
+				_handlers;
 
-      function connect() {
-        if (_ws !== null) {
-          ct.utils.log('Websocket not connected');
-          return;
-        }
-        _ws = new WebSocket('ws://' + window.location.host + '/ct');
+			function connect() {
+				if (_ws !== null) {
+					return;
+				}
+				_ws = new WebSocket('ws://' + window.location.host + '/ct');
 
-        _ws.onopen = function(){
-          updateChannels();
-        };
-   
-        _ws.onmessage = function (event){
-          var cmd = JSON.parse(event.data);
-          if(!_handlers[cmd.Command]) {
-            ct.utils.log('invalid command');
-            return;
-          }
-          
-          _handlers[cmd.Command](cmd.Data);
-        };
-   
-        _ws.onclose = function(){
-          _ws = null;
-        };
-      }
+				_ws.onopen = function(){
+					updateChannels();
+				};
+	 
+				_ws.onmessage = function (event){
+					var cmd = JSON.parse(event.data);
+					if(!_handlers[cmd.Command]) {
+						ct.utils.log('invalid command');
+						return;
+					}
+					
+					_handlers[cmd.Command](cmd.Data);
+				};
+	 
+				_ws.onclose = function(){
+					_ws = null;
+					for(var i = 0; i < _services.length; i++) {
+						_services[i].disconnected();
+					}
+				};
+			}
 
-      function disconnect() {
-        if(_ws === null) {
-          return;
-        }
-        _ws.onclose = function() {};
-        _ws.close();
-        _ws = null;
-      }
+			function disconnect() {
+				if(_ws === null) {
+					return;
+				}
+				_ws.onclose = function() {};
+				_ws.close();
+				_ws = null;
+			}
 
-      function updateChannels() {
-        if(_ws === null) {
-            ct.utils.log('Websocket not connected');
-            return;
-          }
+			function updateChannels() {
+				if(_ws === null) {
+						ct.utils.log('Websocket not connected');
+						return;
+					}
 
-          _ws.send(JSON.stringify({
-            Command: 'Channels'
-         }));
-      }
+					_ws.send(JSON.stringify({
+						Command: 'Channels'
+				 }));
+			}
 
-      document.addEventListener('log-in', function() {
-        connect();
-      });
-      document.addEventListener('log-out', function() {
-        disconnect();
-      });
+			document.addEventListener('log-in', function() {
+				connect();
+			});
+			document.addEventListener('log-out', function() {
+				disconnect();
+			});
 
-      // Command handlers, function name must match command name
-      _handlers = {
-        SendMessage: function(data) {
-          _messages.List.push(data);
-        },
-        Channels: function(data) {
-          _channels.List = data.List;
-        },
-        CreateChannel: function(data) {
-          _channels.List.push(data);
-        },
-        JoinChannel: function(data) {
-          _messages.List = data.Messages;
-        },
-        ChannelJoined: function(data) {
-          function mapClients(e) {
-            return e.Id;
-          }
+			// Command handlers, function name must match command name
+			_handlers = {
+				SendMessage: function(data) {
+					_messages.List.push(data);
+				},
+				Channels: function(data) {
+					_channels.List = data.List;
+				},
+				CreateChannel: function(data) {
+					_channels.List.push(data);
+				},
+				JoinChannel: function(data) {
+					_messages.List = data.Messages;
+				},
+				ChannelJoined: function(data) {
+					function mapClients(e) {
+						return e.Id;
+					}
 
-          var channel;
+					var channel;
 
-          for (var i = 0; i < _channels.List.length; i++) {
-            var curChan = _channels.List[i];
-            // Check if the client is already in a channel and remove it
-            var index = curChan.Clients.map(mapClients).indexOf(data.Client.Id);
-            if(index !== -1) {
-              curChan.Clients.splice(index, 1);
-            }
-            
-            // Find the channel object by id
-            if(curChan.Id === data.ChannelId) {
-              channel = curChan;
-            }
-          }
-          channel.Clients.push(data.Client);
-        },
-        Error: function(data) {
-          ct.utils.log(JSON.stringify(data));
-        }
-      };
+					for (var i = 0; i < _channels.List.length; i++) {
+						var curChan = _channels.List[i];
+						// Check if the client is already in a channel and remove it
+						var index = curChan.Clients.map(mapClients).indexOf(data.Client.Id);
+						if(index !== -1) {
+							curChan.Clients.splice(index, 1);
+						}
+						
+						// Find the channel object by id
+						if(curChan.Id === data.ChannelId) {
+							channel = curChan;
+						}
+					}
+					channel.Clients.push(data.Client);
+				},
+				Error: function(data) {
+					ct.utils.log(JSON.stringify(data));
+				}
+			};
 
-      Polymer('ct-msg-service', {
+			Polymer('ct-msg-service', {
 
-        ready: function() {
-          this.messages = _messages;
-          this.channels = _channels;
-        },
+				messages: null,
+				channels: null,
+				websocket: null,
 
-        sendMessage: function(message) {
-          if(_ws === null) {
-            ct.utils.log('Websocket not connected');
-            return;
-          }
+				attached: function() {
+					_services.push(this);
+				},
 
-          _ws.send(JSON.stringify({
-            Command: 'SendMessage',
-            Data: {Message: message}
-         }));
-        },
+				detached: function() {
+					_services.remove(this);
+				},
 
-        joinChannel: function(channelId) {
-          if(_ws === null) {
-            ct.utils.log('Websocket not connected');
-            return;
-          }
-          this.channels.Current = channelId;
-          _ws.send(JSON.stringify({
-            Command: 'JoinChannel',
-            Data: {ChannelId: channelId}
-         }));
-        },
+				ready: function() {
+					this.messages = _messages;
+					this.channels = _channels;
+					this.websocket = _ws;
+				},
 
-        createChannel: function(name) {
-          if(_ws === null) {
-            ct.utils.log('Websocket not connected');
-            return;
-          }
+				websocketChanged: function() {
+					if(this.websocket === null) {
+						this.fire('ct-msg-service-conn-lost');
+					}
+				},
 
-          _ws.send(JSON.stringify({
-            Command: 'CreateChannel',
-            Data: {Name: name}
-         }));
-        },
+				connect: function() {
+					connect();
+				},
 
-        updateChannels: function() {
-          updateChannels();
-        }
-      });
-  })();
-    </script>
+				sendMessage: function(message) {
+					if(_ws === null) {
+						ct.utils.log('Websocket not connected');
+						return;
+					}
+
+					_ws.send(JSON.stringify({
+						Command: 'SendMessage',
+						Data: {Message: message}
+				 }));
+				},
+
+				joinChannel: function(channelId) {
+					if(_ws === null) {
+						ct.utils.log('Websocket not connected');
+						return;
+					}
+					this.channels.Current = channelId;
+					_ws.send(JSON.stringify({
+						Command: 'JoinChannel',
+						Data: {ChannelId: channelId}
+				 }));
+				},
+
+				createChannel: function(name) {
+					if(_ws === null) {
+						ct.utils.log('Websocket not connected');
+						return;
+					}
+
+					_ws.send(JSON.stringify({
+						Command: 'CreateChannel',
+						Data: {Name: name}
+				 }));
+				},
+
+				updateChannels: function() {
+					updateChannels();
+				},
+
+				disconnected: function() {
+					this.fire('ct-disconnect');
+				}
+			});
+		})();
+	</script>
 </polymer-element>

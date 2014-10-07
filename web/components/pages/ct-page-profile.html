@@ -6,83 +6,83 @@
 
 <polymer-element name="ct-page-profile" extends="ct-module">
 	<template>
-	  <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+		<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
 		<style>
-        .label {
-          margin-right: 10px;
-        }
-        paper-icon-button {
-          visibility: hidden;
-        }
-        .identifier:hover {
-          background-color: #ddd;
-        }
-        .identifier:hover paper-icon-button {
-          visibility: visible;
-        }
-        #profileImage {
-          width: 64px;
-          height: 64px;
-          border-radius: 32px;
-        }
-        #file {
-          
-        }
-    </style>
+			.label {
+				margin-right: 10px;
+			}
+			paper-icon-button {
+				visibility: hidden;
+			}
+			.identifier:hover {
+				background-color: #ddd;
+			}
+			.identifier:hover paper-icon-button {
+				visibility: visible;
+			}
+			#profileImage {
+				width: 64px;
+				height: 64px;
+				border-radius: 32px;
+			}
+			#file {
+				
+				}
+		</style>
 
-    <core-ajax id="request" url="/setProfileImage" method="POST"
-           handleAs="json" on-core-response="{{profileImageResponse}}"></core-ajax>
+		<core-ajax id="request" url="/setProfileImage" method="POST"
+					 handleAs="json" on-core-response="{{profileImageResponse}}"></core-ajax>
 
-    <div class="card wide">
-      <div class="header">
-        <div class="title">Profile - {{model.Username}}</div>
-      </div>
-      <div class="content">
-    		<img id="profileImage" src="{{model.ProfileImage}}" on-tap="{{changePicture}}"/>
-        <form>
-          <input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
-        </form>
-        <div id="firstName" class="identifier" horizontal layout center>
-          <div class="label">First name: </div>
-          <div class="value">{{model.FirstName}}</div>
-          <paper-icon-button icon="create"></paper-icon-button>
-        </div>
-        <div id="lastName" class="identifier" horizontal layout center>
-          <div class="label">Last name: </div>
-          <div class="value">{{model.LastName}}</div>
-          <paper-icon-button icon="create"></paper-icon-button>
-        </div>
-        <div id="email" class="identifier" horizontal layout center>
-          <div class="label">Email: </div>
-          <div class="value">{{model.Email}}</div>
-          <paper-icon-button icon="create"></paper-icon-button>
-        </div>
-      </div>
-  	</div>
-  </template>
-  <script>
-  	Polymer('ct-page-profile', {
-  		onModelReady: function() {
-  			
-  		},
-      changePicture: function() {
-        this.$.file.click();
-      },
-      sendImage: function(e, detail, sender) {
-        if(sender.files.length !== 1) {
-          return;
-        }
-        var formData = new FormData();
-        formData.append(sender.name, sender.files[0], sender.files[0].name);
-        this.$.request.body = formData;
-        this.$.request.contentType = null;
-        this.$.request.go();
-      },
-      profileImageResponse: function() {
-        this.$.profileImage.src = this.model.ProfileImage + '? clientId=' + this.user.Id + '&cache=' + new Date().getTime();
-      }
-  	});
-  </script>
+		<div class="card wide">
+			<div class="header">
+				<div class="title">Profile - {{model.Username}}</div>
+			</div>
+			<div class="content">
+				<img id="profileImage" src="{{model.ProfileImage}}" on-tap="{{changePicture}}"/>
+				<form>
+					<input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
+				</form>
+				<div id="firstName" class="identifier" horizontal layout center>
+					<div class="label">First name: </div>
+					<div class="value">{{model.FirstName}}</div>
+					<paper-icon-button icon="create"></paper-icon-button>
+				</div>
+				<div id="lastName" class="identifier" horizontal layout center>
+					<div class="label">Last name: </div>
+					<div class="value">{{model.LastName}}</div>
+					<paper-icon-button icon="create"></paper-icon-button>
+				</div>
+				<div id="email" class="identifier" horizontal layout center>
+					<div class="label">Email: </div>
+					<div class="value">{{model.Email}}</div>
+					<paper-icon-button icon="create"></paper-icon-button>
+				</div>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer('ct-page-profile', {
+			onModelReady: function() {
+				
+			},
+			changePicture: function() {
+				this.$.file.click();
+			},
+			sendImage: function(e, detail, sender) {
+				if(sender.files.length !== 1) {
+					return;
+				}
+				var formData = new FormData();
+				formData.append(sender.name, sender.files[0], sender.files[0].name);
+				this.$.request.body = formData;
+				this.$.request.contentType = null;
+				this.$.request.go();
+			},
+			profileImageResponse: function() {
+				this.$.profileImage.src = this.model.ProfileImage + '? clientId=' + this.user.Id + '&cache=' + new Date().getTime();
+			}
+		});
+	</script>
 </polymer-element>
 
 

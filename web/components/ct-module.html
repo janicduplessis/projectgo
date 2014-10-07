@@ -3,28 +3,27 @@
 <link rel="import" href="/lib/core-animated-pages/core-animated-pages.html">
 
 <polymer-element name="ct-module" attributes="name model user">
-  <template>
-  </template>
-  <script>
-      Polymer('ct-module', {
-        model: null,
-        name: '',
-        nav: null,
-        get hasModel() {
-          return this.getAttribute('model') !== null;
-        },
-        onLoad: function() {
+	<template></template>
+	<script>
+		Polymer('ct-module', {
+			model: null,
+			name: '',
+			nav: null,
+			get hasModel() {
+				return this.getAttribute('model') !== null;
+			},
+			onLoad: function() {
 
-        },
-        onModelReady: function() {
+			},
+			onModelReady: function() {
 
-        },
-        onUnload: function() {
+			},
+			onUnload: function() {
 
-        },
-        scrollToTop: function() {
-          document.querySelector('#mainContent').scroller.scrollTop = 0;
-        }
-      });
-  </script>
+			},
+			scrollToTop: function() {
+				document.querySelector('#mainContent').scroller.scrollTop = 0;
+			}
+		});
+	</script>
 </polymer-element>

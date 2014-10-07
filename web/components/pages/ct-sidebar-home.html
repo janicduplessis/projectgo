@@ -7,34 +7,34 @@
 
 <polymer-element name="ct-sidebar-home" attributes="route user">
   <template>
-    <style>
+	<style>
 
-    </style>
+	</style>
 
-    <ct-auth-service id="auth"></ct-auth-service>
+	<ct-auth-service id="auth"></ct-auth-service>
 
-    <core-menu selected="{{route}}" valueattr="hash">
-      <template if="{{user.logged}}">
-        <core-item hash="home/profile" label="Profile" icon="account-box"></core-item>
-        <core-item hash="home/settings" label="Settings" icon="settings"></core-item>
-        <core-item hash="home/feedback" label="Send Feedback" icon="social:poll"></core-item>
-        <core-item hash="home/help" label="Help" icon="help"></core-item>
-        <core-item label="Sign Out" on-tap="{{logout}}" icon="home"></core-item>
-      </template>
-      <template if="{{!user.logged}}">
-        <core-item hash="home/login" label="Login"></core-item>
-        <core-item hash="home/register" label="Register"></core-item>
-        <core-item hash="home/help" label="Help"></core-item>
-      </template>
-    </core-menu>
+	<core-menu selected="{{route}}" valueattr="hash">
+	  <template if="{{user.logged}}">
+		<core-item hash="home/profile" label="Profile" icon="account-box"></core-item>
+		<core-item hash="home/settings" label="Settings" icon="settings"></core-item>
+		<core-item hash="home/feedback" label="Send Feedback" icon="social:poll"></core-item>
+		<core-item hash="home/help" label="Help" icon="help"></core-item>
+		<core-item label="Sign Out" on-tap="{{logout}}" icon="home"></core-item>
+	</template>
+	<template if="{{!user.logged}}">
+		<core-item hash="home/login" label="Login"></core-item>
+		<core-item hash="home/register" label="Register"></core-item>
+		<core-item hash="home/help" label="Help"></core-item>
+	  </template>
+	</core-menu>
 
   </template>
   <script>
-    Polymer('ct-sidebar-home', {
-      logout: function() {
-        this.$.auth.logout();
-        this.route = 'home/login';
-      }
-    });
+	Polymer('ct-sidebar-home', {
+	  logout: function() {
+		this.$.auth.logout();
+		this.route = 'home/login';
+	  }
+	});
   </script>
 </polymer-element>

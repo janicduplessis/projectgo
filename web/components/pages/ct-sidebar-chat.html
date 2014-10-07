@@ -11,78 +11,84 @@
 <link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
 
 <polymer-element name="ct-sidebar-chat" attributes="route user" vertical layout>
-  <template>
-    <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-    <style>
-      #controls {
-        padding: 10px 10px 20px 20px;
-      }
+	<template>
+		<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+		<style>
+			#controls {
+				padding: 10px 10px 20px 20px;
+			}
 
-    </style>
+		</style>
 
-    <ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
+		<ct-msg-service id="ctMsgService" channels="{{channels}}"></ct-msg-service>
 
-    <div class="chanList" flex>
-      <template repeat="{{c in channels.List}}">
-        <ct-channel-box channel="{{c}}" on-ct-channel-changed="{{switchChannel}}"></ct-channel-box>
-      </template>
-    </div>
+		<div class="chanList" flex>
+			<template repeat="{{c in channels.List}}">
+				<ct-channel-box channel="{{c}}" on-ct-channel-changed="{{switchChannel}}"></ct-channel-box>
+			</template>
+		</div>
 
-    <div id="controls">
-      <paper-button raised on-tap="{{openCreateChannel}}">Create</paper-button>
-    </div>
-    <paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
-        on-keypress="{{onKeypress}}">
-      <link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-      <paper-input id="tbName" label="Name" maxlength="40" value="{{name}}"></paper-input>
-      <div flex horizontal end-justified layout>
-        <paper-button on-tap="{{closeCreateChannel}}">Cancel</paper-button>
-        <paper-button class="primary" on-tap="{{createChannel}}">Accept</paper-button>
-      </div>
-    </paper-dialog>
+		<div id="controls">
+			<paper-button raised on-tap="{{openCreateChannel}}">Create</paper-button>
+		</div>
+		<paper-dialog id="createDialog" heading="Create channel" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
+				on-keypress="{{onKeypress}}">
+			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+			<paper-input id="tbName" label="Name" maxlength="40" value="{{name}}" autofocus></paper-input>
+			<paper-button class="primary" on-tap="{{createChannel}}" affirmative>Accept</paper-button>
+			<paper-button on-tap="{{closeCreateChannel}}" affirmative>Cancel</paper-button>
+		</paper-dialog>
 
-  </template>
-  <script>
-    Polymer('ct-sidebar-chat', {
-      openCreateChannel: function() {
-        this.name = '';
-        this.$.createDialog.toggle();
-        var tbName = this.$.tbName;
-        setTimeout(function() {
-          tbName.focus();
-        }, 300);
-      },
-      createChannel: function() {
-        this.$.ctMsgService.createChannel(this.name);
-        this.$.createDialog.toggle();
-      },
-      closeCreateChannel: function() {
-        this.$.createDialog.toggle();
-      },
-      switchChannel: function(event) {
-        var chanId = event.detail.Id;
-        if(chanId < 0 || chanId === this.channels.Current) {
-          return;
-        }
+		<paper-dialog id="createDialog" heading="Profile" transition="paper-dialog-transition-bottom" backdrop="true" layered="true" 
+				on-keypress="{{onKeypress}}">
+			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
+			<paper-input id="tbName" label="Name" maxlength="40" value="{{name}}" autofocus></paper-input>
+			<paper-button class="primary" on-tap="{{createChannel}}" affirmative>Accept</paper-button>
+			<paper-button on-tap="{{closeCreateChannel}}" affirmative>Cancel</paper-button>
+		</paper-dialog>
 
-        // Selected class
-        var chanTitles = this.shadowRoot.querySelectorAll('ct-channel-box');
-        for(var i = 0; i < chanTitles.length; i++) {
-          chanTitles[i].classList.remove('selected');
-        }
-        event.target.classList.add('selected');
+	</template>
+	<script>
+		Polymer('ct-sidebar-chat', {
+			openCreateChannel: function() {
+				this.name = '';
+				this.$.createDialog.toggle();
+			},
 
-        // Join the channel
-        this.$.ctMsgService.joinChannel(chanId);
-      },
-      onKeypress: function(event) {
-        //Enter
-        if(event.keyCode === 13 && this.$.createDialog.opened) {
-          event.preventDefault();
-          this.$.tbName.blur();
-          this.createChannel();
-        }
-      }
-    });
-  </script>
+			createChannel: function() {
+				this.$.ctMsgService.createChannel(this.name);
+				this.$.createDialog.toggle();
+			},
+
+			closeCreateChannel: function() {
+				this.$.createDialog.toggle();
+			},
+
+			switchChannel: function(event) {
+				var chanId = event.detail.Id;
+				if(chanId < 0 || chanId === this.channels.Current) {
+					return;
+				}
+
+				// Selected class
+				var chanTitles = this.shadowRoot.querySelectorAll('ct-channel-box');
+				for(var i = 0; i < chanTitles.length; i++) {
+					chanTitles[i].classList.remove('selected');
+				}
+				event.target.classList.add('selected');
+
+				// Join the channel
+				this.$.ctMsgService.joinChannel(chanId);
+			},
+
+			onKeypress: function(event) {
+				//Enter
+				if(event.keyCode === 13 && this.$.createDialog.opened) {
+					event.preventDefault();
+					this.$.tbName.blur();
+					this.createChannel();
+				}
+			}
+		});
+	</script>
 </polymer-element>
