@@ -4,9 +4,13 @@
 <link rel="import" href="/lib/paper-dialog/paper-dialog.html">
 <link rel="import" href="/lib/paper-dialog/paper-dialog-transition.html">
 <link rel="import" href="/lib/paper-spinner/paper-spinner.html">
+<link rel="import" href="/lib/paper-fab/paper-fab.html">
 
 <polymer-element name="ct-profile-dialog">
 	<template>
+		<style>
+
+		</style>
 		<core-ajax id="request"
 				 url="/models/getClientProfileModel"
 				 method="POST"
@@ -15,14 +19,33 @@
 				 on-core-response="{{requestResponse}}"></core-ajax>
 
 		<paper-dialog id="dialog" heading="Profile" transition="paper-dialog-transition-bottom" backdrop="true" layered="true">
+			<style>
+				#profileImage {
+					width: 128px;
+					height: 128px;
+					border-radius: 64px;
+					margin-top: 25px;
+				}
+				#username {
+					font-size: 20px;
+					text-align: center;
+					margin-top: 25px;
+					font-weight: bold;
+				}
+				.popupContent {
+					min-width: 300px;
+				}
+			</style>
 			<link rel="stylesheet" type="text/css" href="/components/pages/ct-page-common.css">
-			<template if="{{model === null}}">
-				<paper-spinner active></paper-spinner>
-			</template>
-			<template if="{{model !== null}}">
-				<img id="profileImage" src="{{model.ProfileImage}}"/>
-				<div id="username">{{model.Username}}</div>
-			</template>
+			<div class="popupContent" vertical layout center>
+				<template if="{{model === null}}">
+					<paper-spinner active></paper-spinner>
+				</template>
+				<template if="{{model !== null}}">
+					<img id="profileImage" src="{{model.ProfileImage}}"/>
+					<div id="username">{{model.Username}}</div>
+				</template>
+			</div>
 			<paper-button class="primary" on-tap="{{close}}" affirmative autofocus>Close</paper-button>
 		</paper-dialog>
 	</template>

@@ -9,7 +9,10 @@ var (
 	ErrUserAlreadyExists   = errors.New("Username unavailable")
 	ErrInvalidRegisterInfo = errors.New("Invalid registration info")
 
-	// Others
-	ErrAccessDenied     = errors.New("Access denied")
+	// Invalid ids
 	ErrInvalidChannelId = errors.New("Invalid channel id")
+	ErrInvalidClientId  = errors.New("Invalid client id")
+
+	// Others
+	ErrAccessDenied = errors.New("Access denied")
 )

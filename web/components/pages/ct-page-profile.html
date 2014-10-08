@@ -20,14 +20,62 @@
 			.identifier:hover paper-icon-button {
 				visibility: visible;
 			}
-			#profileImage {
-				width: 64px;
-				height: 64px;
-				border-radius: 32px;
-			}
 			#file {
-				
-				}
+				width: 128px;
+				height: 128px;
+				visibility: hidden;
+				margin-bottom: 20px;
+			}
+			#file:before {
+				display: inline-block;
+				visibility: visible;
+				position: absolute;
+				content: "";
+				width: 128px;
+				height: 128px;
+				outline: none;
+				z-index: 12;
+			}
+			#fileButton {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 128px;
+				height: 128px;
+				border-radius: 64px;
+				-webkit-box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
+				-moz-box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
+				box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
+				z-index: 10;
+			}
+			#fileOverlay {
+				display: none;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 128px;
+				height: 128px;
+				border-radius: 64px;
+				background-color: #000;
+				opacity: 0.6;
+				z-index: 11;
+				color: #fff;
+				font-size: 20px;
+				-webkit-flex-direction: row;
+				flex-direction: row;
+				-webkit-align-items: center;
+				align-items: center;
+				-webkit-justify-content: center;
+				justify-content: center;
+				text-align: center;
+			}
+			#fileContainer {
+				position: relative;
+			}
+			#fileContainer:hover #fileOverlay {
+				display: -webkit-flex;
+				display: flex;
+			}
 		</style>
 
 		<core-ajax id="request" url="/setProfileImage" method="POST"
@@ -38,9 +86,12 @@
 				<div class="title">Profile - {{model.Username}}</div>
 			</div>
 			<div class="content">
-				<img id="profileImage" src="{{model.ProfileImage}}" on-tap="{{changePicture}}"/>
-				<form>
-					<input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
+				<form vertical layout center>
+					<div id="fileContainer">
+						<input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
+						<div id="fileOverlay" vertical layout center>Edit<br />picture</div>
+						<div id="fileButton"></div>
+					</div>
 				</form>
 				<div id="firstName" class="identifier" horizontal layout center>
 					<div class="label">First name: </div>
@@ -63,10 +114,7 @@
 	<script>
 		Polymer('ct-page-profile', {
 			onModelReady: function() {
-				
-			},
-			changePicture: function() {
-				this.$.file.click();
+				this.$.fileButton.style.backgroundImage = 'url(' + this.model.ProfileImage + '&cache=' + new Date().getTime() + ')';
 			},
 			sendImage: function(e, detail, sender) {
 				if(sender.files.length !== 1) {
@@ -79,7 +127,7 @@
 				this.$.request.go();
 			},
 			profileImageResponse: function() {
-				this.$.profileImage.src = this.model.ProfileImage + '? clientId=' + this.user.Id + '&cache=' + new Date().getTime();
+				this.$.fileButton.style.backgroundImage = 'url(' + this.model.ProfileImage + '&cache=' + new Date().getTime() + ')';
 			}
 		});
 	</script>

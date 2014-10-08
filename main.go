@@ -106,6 +106,9 @@ func main() {
 	dbInit := interfaces.NewDbInitializerRepo(handlers)
 	dbInit.Init()
 
+	//Repos
+	clientRepo := interfaces.NewDbClientRepo(handlers)
+
 	// Interactors
 	authInteractor := usecases.NewAuthentificationInteractor(interfaces.NewDbUserRepo(handlers), crypto, logger)
 
@@ -113,13 +116,15 @@ func main() {
 	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo(handlers)
 	chatInteractor.ChannelRepository = interfaces.NewDbChannelRepo(handlers)
 	chatInteractor.MessageRepository = interfaces.NewDbMessageRepo(handlers)
-	chatInteractor.ClientRepository = interfaces.NewDbClientRepo(handlers)
+	chatInteractor.ClientRepository = clientRepo
 	chatInteractor.Logger = logger
+
+	homeInteractor := usecases.NewHomeInteractor(clientRepo, logger)
 
 	// Webservices
 	interfaces.NewAuthentificationWebservice(webservice, authInteractor, chatInteractor)
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
-	interfaces.NewHomeWebservice(webservice, imageUtils)
+	interfaces.NewHomeWebservice(webservice, homeInteractor, imageUtils)
 
 	http.Handle("/", http.FileServer(http.Dir("web")))
 

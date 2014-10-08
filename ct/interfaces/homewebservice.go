@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"code.google.com/p/go.net/context"
+
+	"github.com/janicduplessis/projectgo/ct/domain"
 	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
@@ -16,37 +18,21 @@ const (
 	urlSetProfileImage       string = "/setProfileImage"
 )
 
+type HomeInteractor interface {
+	GetClient(clientId int64) (*domain.Client, error)
+}
+
 type HomeWebserviceHandler struct {
-	Webservice Webservice
-	ImageUtils ImageUtils
+	Webservice     Webservice
+	HomeInteractor HomeInteractor
+	ImageUtils     ImageUtils
 }
 
-type ProfileModel struct {
-	Username     string
-	DisplayName  string
-	FirstName    string
-	LastName     string
-	Email        string
-	ProfileImage string
-}
-
-type GetClientProfileModelRequest struct {
-	ClientId int64
-}
-
-type GetClientProfileModelResponse struct {
-	Username     string
-	ProfileImage string
-}
-
-type SetProfileImageResponse struct {
-	Result bool
-}
-
-func NewHomeWebservice(ws Webservice, imageUtils ImageUtils) *HomeWebserviceHandler {
+func NewHomeWebservice(ws Webservice, hi HomeInteractor, imageUtils ImageUtils) *HomeWebserviceHandler {
 	wsHandler := &HomeWebserviceHandler{
-		Webservice: ws,
-		ImageUtils: imageUtils,
+		Webservice:     ws,
+		HomeInteractor: hi,
+		ImageUtils:     imageUtils,
 	}
 
 	ws.AddHandler(urlGetProfileModel, true, wsHandler.GetProfileModel)
@@ -59,13 +45,18 @@ func NewHomeWebservice(ws Webservice, imageUtils ImageUtils) *HomeWebserviceHand
 
 func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(KeyUser).(*usecases.User)
+	client, err := handler.HomeInteractor.GetClient(user.Id)
+	if err != nil {
+		handler.Webservice.Error(w, err)
+	}
+
 	model := &ProfileModel{
 		Username:     user.Username,
-		DisplayName:  user.Client.DisplayName,
-		FirstName:    user.Client.FirstName,
-		LastName:     user.Client.LastName,
-		Email:        user.Client.Email,
-		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", user.Id),
+		DisplayName:  client.DisplayName,
+		FirstName:    client.FirstName,
+		LastName:     client.LastName,
+		Email:        client.Email,
+		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", client.Id),
 	}
 	response := ModelResponse{
 		Model: model,
@@ -75,13 +66,22 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 
 func (handler *HomeWebserviceHandler) GetClientProfileModel(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	request := new(GetClientProfileModelRequest)
-	handler.Webservice.ReadJson(w, r, request)
-
-	model := &GetClientProfileModelResponse{
-		Username:     "lalala",
-		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", request.ClientId),
+	err := handler.Webservice.ReadJson(w, r, request)
+	if err != nil {
+		handler.Webservice.Error(w, err)
+		return
 	}
 
+	client, err := handler.HomeInteractor.GetClient(request.ClientId)
+	if err != nil {
+		handler.Webservice.Error(w, err)
+		return
+	}
+
+	model := &GetClientProfileModelResponse{
+		Username:     client.DisplayName,
+		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", client.Id),
+	}
 	response := ModelResponse{
 		Model: model,
 	}
@@ -89,6 +89,7 @@ func (handler *HomeWebserviceHandler) GetClientProfileModel(ctx context.Context,
 }
 
 func (handler *HomeWebserviceHandler) GetProfileImage(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	// Get request with query params
 	clientId := r.FormValue("clientId")
 	imageUrl := fmt.Sprintf("upload/profile_%s.png", clientId)
 	_, err := os.Stat(imageUrl)

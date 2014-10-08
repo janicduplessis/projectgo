@@ -28,6 +28,9 @@ func (repo *DbClientRepo) FindById(id int64) (*domain.Client, error) {
 				 	     		    WHERE ClientId = ?`, id).Scan(&clientId, &displayName, &firstName, &lastName, &email)
 
 	if err != nil {
+		if err == ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
