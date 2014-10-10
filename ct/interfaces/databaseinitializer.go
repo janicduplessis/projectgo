@@ -1,12 +1,14 @@
 package interfaces
 
+// The DbInitializerRepo is an utility type to initialize the database
 type DbInitializerRepo DbRepo
 
 const (
-	DbVersion    int  = 2    // Will DELETE all data when you increment this number
-	CheckVersion bool = true // Set to false in production environnement to ignore DbVersions
+	dbVersion    int  = 2    // Will DELETE all data when you increment this number
+	checkVersion bool = true // Set to false in production environnement to ignore DbVersions
 )
 
+// NewDbInitializerRepo ctor
 func NewDbInitializerRepo(dbHandlers map[string]DbHandler) *DbInitializerRepo {
 	dbHandler := dbHandlers["DbInitializerRepo"]
 
@@ -16,6 +18,7 @@ func NewDbInitializerRepo(dbHandlers map[string]DbHandler) *DbInitializerRepo {
 	}
 }
 
+// Init initialize the database
 func (repo *DbInitializerRepo) Init() {
 
 	// Check database version
@@ -28,7 +31,7 @@ func (repo *DbInitializerRepo) Init() {
 	if err != nil {
 		if err == ErrNoRows {
 			// No db config yet
-			_, err = repo.dbHandler.Execute(`INSERT INTO db_info VALUES(?);`, DbVersion)
+			_, err = repo.dbHandler.Execute(`INSERT INTO db_info VALUES(?);`, dbVersion)
 			if err != nil {
 				panic(err)
 			}
@@ -38,14 +41,14 @@ func (repo *DbInitializerRepo) Init() {
 		}
 	}
 
-	if version != DbVersion && CheckVersion {
+	if version != dbVersion && checkVersion {
 		// Drop all tables
 		_, err = repo.dbHandler.Execute(`DROP TABLE IF EXISTS client, user, channel, message;`)
 		if err != nil {
 			panic(err)
 		}
 		// Update the version
-		_, err = repo.dbHandler.Execute(`UPDATE db_info SET Version = ?;`, DbVersion)
+		_, err = repo.dbHandler.Execute(`UPDATE db_info SET Version = ?;`, dbVersion)
 		if err != nil {
 			panic(err)
 		}

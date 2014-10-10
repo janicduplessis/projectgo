@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	urlLogin    string = "/login"
-	urlRegister string = "/register"
-	urlLogout   string = "/logout"
+	urlLogin       string = "/login"
+	urlRegister    string = "/register"
+	UrlOAuth2Login string = "/oauth2login"
+	urlLogout      string = "/logout"
 )
 
 type AuthentificationInteractor interface {
@@ -20,42 +21,21 @@ type AuthentificationInteractor interface {
 
 type AuthentificationWebserviceHandler struct {
 	Webservice                 Webservice
+	OAuth2                     OAuth2
 	AuthentificationInteractor AuthentificationInteractor
 	ChatInteractor             ChatInteractor
 }
 
-type LoginResponseModel struct {
-	Result bool
-	User   *UserModel
-}
-
-type RegisterResponseModel struct {
-	Result bool
-	User   *UserModel
-	Error  string
-}
-
-type LogoutResponseModel struct {
-	Result bool
-}
-
-type UserModel struct {
-	Id          int64
-	Username    string
-	DisplayName string
-	FirstName   string
-	LastName    string
-	Email       string
-}
-
-func NewAuthentificationWebservice(ws Webservice, ai AuthentificationInteractor, ci ChatInteractor) *AuthentificationWebserviceHandler {
+func NewAuthentificationWebservice(ws Webservice, oauth2 OAuth2, ai AuthentificationInteractor, ci ChatInteractor) *AuthentificationWebserviceHandler {
 	wsHandler := &AuthentificationWebserviceHandler{
-		Webservice:                 ws,
+		Webservice: ws,
+		OAuth2:     oauth2,
 		AuthentificationInteractor: ai,
 		ChatInteractor:             ci,
 	}
 
 	ws.AddHandler(urlLogin, false, wsHandler.Login)
+	ws.AddHandler(UrlOAuth2Login, false, wsHandler.OAuth2Login)
 	ws.AddHandler(urlRegister, false, wsHandler.Register)
 	ws.AddHandler(urlLogout, true, wsHandler.Logout)
 
@@ -138,6 +118,15 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 	}
 
 	handler.Webservice.SendJson(w, response)
+}
+
+func (handler *AuthentificationWebserviceHandler) OAuth2Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	_, err := handler.OAuth2.GetProfile(ctx, w, r)
+	if err != nil {
+		handler.Webservice.Error(w, err)
+		return
+	}
+
 }
 
 func (handler *AuthentificationWebserviceHandler) Logout(ctx context.Context, w http.ResponseWriter, r *http.Request) {
