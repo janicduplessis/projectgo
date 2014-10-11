@@ -1,0 +1,25 @@
+<polymer-element name="ct-navigator">
+	<template>
+		<style>
+			::host {
+				display: none;
+			}
+		</style>
+	</template>
+	<script>
+		(function() {
+			var _navigator = null;
+			Polymer('ct-navigator', {
+				get route() {
+					return _navigator.route;
+				},
+				set route(route) {
+					_navigator.route = route;
+				},
+				setNavigator: function(nav) {
+					_navigator = nav;
+				}
+			});
+		})();	
+	</script>
+</polymer-element>

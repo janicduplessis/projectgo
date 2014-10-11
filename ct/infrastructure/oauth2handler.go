@@ -1,16 +1,17 @@
 package infrastructure
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"errors"
 	"log"
 	"net/http"
 
 	"code.google.com/p/go.net/context"
+	"code.google.com/p/google-api-go-client/plus/v1"
 	"github.com/golang/oauth2"
 
-	config "github.com/janicduplessis/projectgo/ct/config"
+	"github.com/janicduplessis/projectgo/ct/config"
 	"github.com/janicduplessis/projectgo/ct/interfaces"
+	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 	profileInfoURL = "https://www.googleapis.com/plus/v1/people/me"
 )
 
-var scopes = []string{"profile", "email"}
+var scopes = []string{plus.UserinfoEmailScope}
 
 type OAuth2Handler struct {
 	url    string
@@ -43,7 +44,7 @@ func (handler *OAuth2Handler) Init() {
 	handler.config = conf
 }
 
-func (handler *OAuth2Handler) GetProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) (*interfaces.OAuth2Profile, error) {
+func (handler *OAuth2Handler) GetProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) (*usecases.GoogleRegisterInfo, error) {
 	// Get the auth code and create a transport object
 	authCode := r.FormValue("code")
 	t, err := handler.config.NewTransportWithCode(authCode)
@@ -52,33 +53,30 @@ func (handler *OAuth2Handler) GetProfile(ctx context.Context, w http.ResponseWri
 	}
 	// Use the transport object to make request with an http.Client
 	client := http.Client{Transport: t}
-	// Request the user profile, we use google profile api
-	response, err := client.Get(profileInfoURL)
+
+	// Create the plus service object with which we can make an API call
+	service, err := plus.New(&client)
+	plusUser, err := service.People.Get("me").Do()
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	log.Println(string(body))
-	userData := make(map[string]interface{})
-	err = json.Unmarshal(body, &userData)
-	if err != nil {
-		return nil, err
+
+	var email string
+	if len(plusUser.Emails) > 0 {
+		email = plusUser.Emails[0].Value
+	} else {
+		return nil, errors.New("The google profile has no emails")
 	}
 
 	// Get what we need from the user profile
-	oauth2Profile := &interfaces.OAuth2Profile{
-	/*Id:           userData["id"],
-	DisplayName:  userData["name"],
-	FirstName:    userData["given_name"],
-	LastName:     userData["family_name"],
-	ProfileImage: userData["picture"],*/
+	profile := &usecases.GoogleRegisterInfo{
+		Id:          plusUser.Id,
+		DisplayName: plusUser.DisplayName,
+		FirstName:   plusUser.Name.GivenName,
+		LastName:    plusUser.Name.FamilyName,
+		Email:       email,
 	}
-
-	return oauth2Profile, nil
+	return profile, nil
 }
 
 func (handler *OAuth2Handler) GetUrl() (string, error) {

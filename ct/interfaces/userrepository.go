@@ -70,6 +70,46 @@ func (repo *DbUserRepo) Create(info *usecases.RegisterInfo) (*usecases.User, err
 	return user, nil
 }
 
+func (repo *DbUserRepo) CreateGoogle(info *usecases.GoogleRegisterInfo) (*usecases.User, error) {
+	res, err := repo.dbHandler.Execute(`INSERT INTO user (GoogleId)
+						   			    VALUES (?)`,
+		info.Id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	// Insert in client
+	res, err = repo.dbHandler.Execute(`INSERT INTO client (ClientId, DisplayName, FirstName, LastName, Email)
+						   			   VALUES (?, ?, ?, ?, ?)`, userId, info.DisplayName, info.FirstName, info.LastName, info.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Create objects
+	client := &domain.Client{
+		Id:          userId,
+		DisplayName: info.DisplayName,
+		FirstName:   info.FirstName,
+		LastName:    info.LastName,
+		Email:       info.Email,
+	}
+
+	user := &usecases.User{
+		Id:       userId,
+		Username: info.Id,
+		Client:   client,
+	}
+
+	return user, nil
+}
+
 func (repo *DbUserRepo) FindByName(name string) (*usecases.User, error) {
 	user, _, err := repo.FindByNameWithHash(name)
 	return user, err
@@ -113,6 +153,44 @@ func (repo *DbUserRepo) FindByNameWithHash(name string) (*usecases.User, string,
 	}
 
 	return user, passwordHash, nil
+}
+
+func (repo *DbUserRepo) FindByGoogleId(id string) (*usecases.User, error) {
+	var (
+		userId      int64
+		displayName string
+		firstName   string
+		lastName    string
+		email       string
+	)
+	err := repo.dbHandler.QueryRow(`SELECT u.UserId, c.DisplayName, c.FirstName, c.LastName, c.Email
+				 	    		    FROM user u
+				 	    		    JOIN client c ON u.UserId = c.ClientId
+				 	     		    WHERE u.GoogleId = ?`, id).Scan(&userId, &displayName, &firstName, &lastName, &email)
+
+	if err != nil {
+		if err == ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Create objects
+	client := &domain.Client{
+		Id:          userId,
+		DisplayName: displayName,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       email,
+	}
+
+	user := &usecases.User{
+		Id:       userId,
+		Username: id,
+		Client:   client,
+	}
+
+	return user, nil
 }
 
 func (repo *DbUserRepo) UpdatePasswordHash(user *usecases.User, hash string) error {

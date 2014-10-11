@@ -4,9 +4,9 @@
 <polymer-element name="ct-auth-service">
 	<template>
 		<style>
-				:host {
-						display: none;
-				}
+			:host {
+				display: none;
+			}
 		</style>
 		<core-ajax id="login"
 				 url="/login"
@@ -44,12 +44,16 @@
 				storageLoaded: function() {
 					var user = this.$.storage.value;
 					if(user && user.logged && user.identity) {
-						this.user.logged = user.logged;
-						this.user.identity = user.identity;
+						_user = user;
 						if(this.user.logged) {
 							this.fire('log-in', this.user);
 						}
+					} else if(ct.utils.getCookie('ctuserinfo')) {
+						_user.identity = JSON.parse(decodeURIComponent(ct.utils.getCookie('ctuserinfo')));
+						_user.logged = true;
+						this.fire('log-in', this.user);
 					}
+					this.fire('ct-auth-ready');
 				},
 				login: function(username, password) {
 					var loginInfo = {
@@ -74,7 +78,7 @@
 					this.user.logged = false;
 					this.user.identity = null;
 					this.$.logout.go();
-					this.$.storage.value = this.user;
+					localStorage.clear();
 					this.fire('log-out');
 				},
 				loginResponse: function(event) {

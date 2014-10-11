@@ -4,7 +4,7 @@ package interfaces
 type DbInitializerRepo DbRepo
 
 const (
-	dbVersion    int  = 2    // Will DELETE all data when you increment this number
+	dbVersion    int  = 3    // Will DELETE all data when you increment this number
 	checkVersion bool = true // Set to false in production environnement to ignore DbVersions
 )
 
@@ -43,7 +43,7 @@ func (repo *DbInitializerRepo) Init() {
 
 	if version != dbVersion && checkVersion {
 		// Drop all tables
-		_, err = repo.dbHandler.Execute(`DROP TABLE IF EXISTS client, user, channel, message;`)
+		_, err = repo.dbHandler.Execute(`DROP TABLE IF EXISTS client, user, message, channel;`)
 		if err != nil {
 			panic(err)
 		}
@@ -70,8 +70,9 @@ func (repo *DbInitializerRepo) Init() {
 
 	_, err = repo.dbHandler.Execute(`CREATE TABLE IF NOT EXISTS user (
 								  		UserId int(11) NOT NULL AUTO_INCREMENT,
-								 	 	Username varchar(64) NOT NULL,
-								  		PasswordHash varchar(64) NOT NULL,
+								 	 	Username varchar(64),
+								  		PasswordHash varchar(64),
+								  		GoogleId varchar(64),
 								  		PRIMARY KEY (UserId)
 									 );`)
 

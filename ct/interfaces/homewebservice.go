@@ -50,7 +50,7 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 		handler.Webservice.Error(w, err)
 	}
 
-	model := &ProfileModel{
+	model := &profileModel{
 		Username:     user.Username,
 		DisplayName:  client.DisplayName,
 		FirstName:    client.FirstName,
@@ -65,7 +65,7 @@ func (handler *HomeWebserviceHandler) GetProfileModel(ctx context.Context, w htt
 }
 
 func (handler *HomeWebserviceHandler) GetClientProfileModel(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	request := new(GetClientProfileModelRequest)
+	request := new(getClientProfileModelRequest)
 	err := handler.Webservice.ReadJson(w, r, request)
 	if err != nil {
 		handler.Webservice.Error(w, err)
@@ -78,7 +78,7 @@ func (handler *HomeWebserviceHandler) GetClientProfileModel(ctx context.Context,
 		return
 	}
 
-	model := &GetClientProfileModelResponse{
+	model := &getClientProfileModelResponse{
 		Username:     client.DisplayName,
 		ProfileImage: fmt.Sprintf("/getProfileImage?clientId=%d", client.Id),
 	}
@@ -125,5 +125,5 @@ func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w htt
 		return
 	}
 
-	handler.Webservice.SendJson(w, SetProfileImageResponse{Result: true})
+	handler.Webservice.SendJson(w, setProfileImageResponse{Result: true})
 }

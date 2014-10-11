@@ -23,24 +23,26 @@ type ChatInteractor interface {
 	Disconnect(userId int64) error
 }
 
+// ChatWebserviceHandler handles chat requests
 type ChatWebserviceHandler struct {
 	Webservice     Webservice
 	Websocket      Websocket
 	ChatInteractor ChatInteractor
 }
 
+// SenderHandler handles sends to a client
 type SenderHandler struct {
 	Handler WebsocketClient
 	Command WebsocketCommand
 }
 
+// NewChatWebservice ctor
 func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *ChatWebserviceHandler {
 	wsHandler := &ChatWebserviceHandler{
 		Webservice:     ws,
 		Websocket:      wsocket,
 		ChatInteractor: ci,
 	}
-
 	ws.AddHandler(urlChat, true, wsHandler.JoinServer)
 
 	wsocket.AddHandler("SendMessage", wsHandler.SendMessage)
@@ -51,6 +53,7 @@ func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *Cha
 	return wsHandler
 }
 
+// JoinServer handles a join server request
 func (handler *ChatWebserviceHandler) JoinServer(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(KeyUser).(*usecases.User)
 
@@ -63,6 +66,7 @@ func (handler *ChatWebserviceHandler) JoinServer(ctx context.Context, w http.Res
 	handler.Websocket.AddClient(ctx, w, r, client)
 }
 
+// SendMessage handles a send message request
 func (handler *ChatWebserviceHandler) SendMessage(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
 	request := SendMessageRequest{}
 	err := client.ReadJson(cmd, &request)
@@ -82,6 +86,7 @@ func (handler *ChatWebserviceHandler) SendMessage(ctx context.Context, client We
 	}
 }
 
+// JoinChannel handles a join channel request
 func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
 	handler.Webservice.Log("Join channel request")
 	request := JoinChannelRequest{}
@@ -129,6 +134,7 @@ func (handler *ChatWebserviceHandler) JoinChannel(ctx context.Context, client We
 	}
 }
 
+// CreateChannel handles a create channel request
 func (handler *ChatWebserviceHandler) CreateChannel(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
 	handler.Webservice.Log("Create channel request")
 	request := CreateChannelRequest{}
@@ -146,6 +152,7 @@ func (handler *ChatWebserviceHandler) CreateChannel(ctx context.Context, client 
 	}
 }
 
+// Channels handles a channels request, returning the list of all channels
 func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
 	handler.Webservice.Log("Channels request")
 	user := ctx.Value(KeyUser).(*usecases.User)
@@ -181,7 +188,9 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 	}
 }
 
-// Sender handler
+// SenderHandler implementation
+
+// Send handles sending a message to a client
 func (sender *SenderHandler) Send(msg *domain.Message) {
 	sender.Command.SetType("SendMessage")
 	response := &MessageModel{
@@ -196,6 +205,7 @@ func (sender *SenderHandler) Send(msg *domain.Message) {
 	}
 }
 
+// ChannelCreated handles warning the client about a new channel
 func (sender *SenderHandler) ChannelCreated(channel *domain.Channel) {
 	sender.Command.SetType("CreateChannel")
 	response := createChannelModel(channel)
@@ -204,6 +214,7 @@ func (sender *SenderHandler) ChannelCreated(channel *domain.Channel) {
 	}
 }
 
+// ChannelJoined handles warning the client about someone joining a channel
 func (sender *SenderHandler) ChannelJoined(channel *domain.Channel, client *domain.Client) {
 	sender.Command.SetType("ChannelJoined")
 	response := &ChannelJoinedResponse{

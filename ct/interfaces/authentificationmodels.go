@@ -10,6 +10,10 @@ type UserModel struct {
 	Email       string
 }
 
+type LoginModel struct {
+	GoogleLoginURL string
+}
+
 // Responses
 type LoginResponseModel struct {
 	Result bool

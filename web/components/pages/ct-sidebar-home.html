@@ -4,6 +4,7 @@
 <link rel="import" href="/lib/core-icons/social-icons.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
+<link rel="import" href="/components/ct-navigator.html">
 
 <polymer-element name="ct-sidebar-home" attributes="route user">
   <template>
@@ -12,6 +13,7 @@
 	</style>
 
 	<ct-auth-service id="auth"></ct-auth-service>
+	<ct-navigator id="nav"></ct-navigator>
 
 	<core-menu selected="{{route}}" valueattr="hash">
 	  <template if="{{user.logged}}">
@@ -33,7 +35,7 @@
 	Polymer('ct-sidebar-home', {
 	  logout: function() {
 		this.$.auth.logout();
-		this.route = 'home/login';
+		this.$.nav.route = 'home/login';
 	  }
 	});
   </script>

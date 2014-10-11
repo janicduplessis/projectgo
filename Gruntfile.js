@@ -7,10 +7,14 @@ module.exports = function(grunt) {
 			options: {
 				GOPATH: [process.env.GOPATH]
 			},
-
-			ct: {
+			release: {
 				output: "ct",
-				run_files: ["main.go"]
+				run_files: ["main.go"],
+			},
+			debug: {
+				output: "ct",
+				run_files: ["main.go"],
+				build_flags: ["-race"]
 			}
 
 		},
@@ -47,6 +51,28 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 
 	// Default task(s).
-	grunt.registerTask('default', ['jshint', 'go:run:ct']);
+	grunt.registerTask('default', 'run', function() {
+		var target = 'debug';
+		var opt = grunt.option('target');
+		if(opt === 'release') {
+			target = opt;
+		}
+		grunt.task.run('run' + target);
+	});
+
+	grunt.registerTask('test', 'test', function() {
+		var target = 'debug';
+		var opt = grunt.option('target');
+		if(opt === 'release') {
+			target = opt;
+		}
+		grunt.task.run('test' + target);
+	});
+
+	grunt.registerTask('rundebug', ['jshint', 'go:run:debug']);
+	grunt.registerTask('runrelease', ['jshint', 'go:run:release']);
+
+	grunt.registerTask('testdebug', ['jshint', 'go:test:debug']);
+	grunt.registerTask('testrelease', ['jshint', 'go:test:release']);
 
 };

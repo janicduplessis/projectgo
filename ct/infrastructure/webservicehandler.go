@@ -65,6 +65,10 @@ func (handler *WebserviceHandler) SendJson(w http.ResponseWriter, obj interface{
 	w.Write(bytes)
 }
 
+func (handler *WebserviceHandler) Redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
 func (handler *WebserviceHandler) Log(msg string) {
 	handler.Logger.Log(msg)
 }

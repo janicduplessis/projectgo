@@ -1,7 +1,7 @@
 package interfaces
 
 // Models
-type ProfileModel struct {
+type profileModel struct {
 	Username     string
 	DisplayName  string
 	FirstName    string
@@ -11,16 +11,16 @@ type ProfileModel struct {
 }
 
 // Requests
-type GetClientProfileModelRequest struct {
+type getClientProfileModelRequest struct {
 	ClientId int64
 }
 
 // Responses
-type GetClientProfileModelResponse struct {
+type getClientProfileModelResponse struct {
 	Username     string
 	ProfileImage string
 }
 
-type SetProfileImageResponse struct {
+type setProfileImageResponse struct {
 	Result bool
 }

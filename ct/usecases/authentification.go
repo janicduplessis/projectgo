@@ -8,24 +8,30 @@ import (
 	"strings"
 )
 
+// UserRepository interfaces a user repo
 type UserRepository interface {
 	Create(info *RegisterInfo) (*User, error)
+	CreateGoogle(info *GoogleRegisterInfo) (*User, error)
 	FindByName(name string) (*User, error)
 	FindByNameWithHash(name string) (*User, string, error)
+	FindByGoogleId(id string) (*User, error)
 	UpdatePasswordHash(user *User, hash string) error
 }
 
+// Crypto interfaces a crypto handler
 type Crypto interface {
 	CompareHashAndPassword(hash string, password string) (bool, error)
 	GenerateFromPassword(password string) (string, error)
 }
 
+// User represents an authentified user
 type User struct {
 	Id       int64
 	Username string
 	Client   *domain.Client
 }
 
+// RegisterInfo info used during registration
 type RegisterInfo struct {
 	Username  string
 	Password  string
@@ -34,11 +40,22 @@ type RegisterInfo struct {
 	Email     string
 }
 
+// GoogleRegisterInfo info for google login/registration
+type GoogleRegisterInfo struct {
+	Id          string
+	DisplayName string
+	FirstName   string
+	LastName    string
+	Email       string
+}
+
+// LoginInfo info for normal login
 type LoginInfo struct {
 	Username string
 	Password string
 }
 
+// AuthentificationInteractor use cases for authentification
 type AuthentificationInteractor struct {
 	UserRepository UserRepository
 	Crypto         Crypto
@@ -47,6 +64,7 @@ type AuthentificationInteractor struct {
 	emailRegexp *regexp.Regexp
 }
 
+// NewAuthentificationInteractor ctor
 func NewAuthentificationInteractor(userRepository UserRepository, crypto Crypto, logger Logger) *AuthentificationInteractor {
 	emailRegexp := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$`)
 
@@ -58,6 +76,7 @@ func NewAuthentificationInteractor(userRepository UserRepository, crypto Crypto,
 	}
 }
 
+// Login logs in the user
 func (ai *AuthentificationInteractor) Login(info *LoginInfo) (*User, error) {
 	ai.Logger.Log(fmt.Sprintf("Login request. Username: %s", info.Username))
 
@@ -84,6 +103,7 @@ func (ai *AuthentificationInteractor) Login(info *LoginInfo) (*User, error) {
 	return user, nil
 }
 
+// Register registers the user
 func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error) {
 	info.Email = strings.ToLower(info.Email)
 
@@ -117,4 +137,21 @@ func (ai *AuthentificationInteractor) Register(info *RegisterInfo) (*User, error
 	info.Password = hash
 
 	return ai.UserRepository.Create(info)
+}
+
+// GoogleLogin logs the user using google+ profile
+func (ai *AuthentificationInteractor) GoogleLogin(info *GoogleRegisterInfo) (*User, error) {
+	user, err := ai.UserRepository.FindByGoogleId(info.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		user, err = ai.UserRepository.CreateGoogle(info)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
 }

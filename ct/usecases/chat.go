@@ -106,7 +106,7 @@ func (ci *ChatInteractor) Disconnect(clientId int64) error {
 	server := ci.ServerRepository.Get()
 	client := server.GetClient(clientId)
 	server.RemoveClient(clientId)
-	if client.Channel != nil {
+	if client != nil && client.Channel != nil {
 		client.Channel.Leave(client)
 	}
 

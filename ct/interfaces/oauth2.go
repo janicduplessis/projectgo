@@ -4,10 +4,12 @@ import (
 	"net/http"
 
 	"code.google.com/p/go.net/context"
+
+	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
 type OAuth2 interface {
-	GetProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) (*OAuth2Profile, error)
+	GetProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) (*usecases.GoogleRegisterInfo, error)
 	GetUrl() (string, error)
 }
 
@@ -17,4 +19,5 @@ type OAuth2Profile struct {
 	FirstName    string
 	LastName     string
 	ProfileImage string
+	Email        string
 }

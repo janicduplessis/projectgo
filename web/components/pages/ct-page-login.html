@@ -38,7 +38,9 @@
 			<div class="content">
 				<paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
 				<paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
-				<div class="buttons" flex horizontal end-justified layout>
+				<div class="buttons" flex horizontal layout>
+					<paper-button id="googleLogin" on-tap="{{googleLogin}}">Login with Google</paper-button>
+					<div flex></div>
 					<paper-button id="switchRegister" on-tap="{{switchRegister}}">Register</paper-button>
 					<template if="{{loading}}">
 						<paper-spinner active self-center></paper-spinner>
@@ -85,6 +87,9 @@
 						this.$.toast.show();
 					}
 					this.lPassword = '';
+			},
+			googleLogin: function() {
+				window.location = this.model.GoogleLoginURL;
 			},
 			switchRegister: function() {
 				this.nav.route = 'home/register';

@@ -23,3 +23,14 @@ type Client struct {
 	Channel      *Channel
 	ClientSender ClientSender
 }
+
+type Client2 struct {
+	Id          int64
+	DisplayName string
+	FirstName   string
+	LastName    string
+	Email       string
+
+	Channel      *Channel
+	ClientSender ClientSender
+}

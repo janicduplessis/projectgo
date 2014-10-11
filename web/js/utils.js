@@ -12,6 +12,12 @@
 
 		error: function(message) {
 			console.error(message);
+		},
+
+		getCookie: function(key) {
+			// Source: jQuery
+			var result;
+    		return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? (result[1]) : null;
 		}
 	};
 })();
