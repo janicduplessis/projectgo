@@ -1,28 +1,39 @@
 {
-	"name": "ct",
-	"version": "0.0.0",
-	"homepage": "https://github.com/janicduplessis/projectgo",
-	"authors": [
-		"Janic <janicduplessis@gmail.com>"
-	],
-	"license": "BSD",
-	"ignore": [
-		"**/.*",
-		"node_modules",
-		"bower_components",
-		"test",
-		"tests"
-	],
-	"dependencies": {
-		"polymer": "Polymer/polymer#master",
-		"core-elements": "Polymer/core-elements#master",
-		"paper-elements": "Polymer/paper-elements#master",
-		"flatiron-director": "PolymerLabs/flatiron-director#master",
-		"paper-spinner": "PolymerLabs/paper-spinner"
-	},
-	"resolutions": {
-		"polymer": "master",
-		"core-component-page": "master",
-		"platform": "master"
-	}
+  "name": "ct",
+  "version": "0.0.0",
+  "homepage": "https://github.com/janicduplessis/projectgo",
+  "authors": [
+    "Janic <janicduplessis@gmail.com>"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "core-elements": "Polymer/core-elements#master",
+    "paper-elements": "Polymer/paper-elements#master",
+    "flatiron-director": "PolymerLabs/flatiron-director#master",
+    "paper-spinner": "PolymerLabs/paper-spinner",
+    "google-signin": "~0.1.0"
+  },
+  "resolutions": {
+    "polymer": "master",
+    "core-component-page": "master",
+    "platform": "master",
+    "core-icon": "master",
+    "core-iconset": "master",
+    "core-icons": "master",
+    "core-iconset-svg": "master",
+    "core-meta": "master",
+    "core-signals": "master",
+    "paper-focusable": "master",
+    "paper-ripple": "master",
+    "font-roboto": "master",
+    "core-shared-lib": "master"
+  }
 }

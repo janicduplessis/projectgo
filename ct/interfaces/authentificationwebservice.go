@@ -1,12 +1,11 @@
 package interfaces
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/url"
-	"time"
 
 	"code.google.com/p/go.net/context"
+
+	"github.com/janicduplessis/projectgo/ct/config"
 	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
@@ -50,14 +49,12 @@ func NewAuthentificationWebservice(ws Webservice, oauth2 OAuth2, ai Authentifica
 }
 
 func (handler *AuthentificationWebserviceHandler) GetLoginModel(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	url, err := handler.OAuth2.GetUrl()
-	if err != nil {
-		handler.Webservice.Error(w, err)
-		return
-	}
-
 	model := &LoginModel{
-		GoogleLoginURL: url,
+		GoogleLogin: GoogleLoginButtonInfo{
+			Callback: UrlOAuth2Login,
+			ClientId: config.OAuth2ClientId,
+			Scope:    handler.OAuth2.GetScope(),
+		},
 	}
 	response := &ModelResponse{
 		Model: model,
@@ -145,10 +142,12 @@ func (handler *AuthentificationWebserviceHandler) Register(ctx context.Context, 
 }
 
 func (handler *AuthentificationWebserviceHandler) OAuth2Login(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	info, err := handler.OAuth2.GetProfile(ctx, w, r)
-	if err != nil {
-		handler.Webservice.Error(w, err)
-		return
+	info := &usecases.GoogleRegisterInfo{
+		Id:          r.FormValue("Id"),
+		DisplayName: r.FormValue("DisplayName"),
+		FirstName:   r.FormValue("FirstName"),
+		LastName:    r.FormValue("LastName"),
+		Email:       r.FormValue("Email"),
 	}
 
 	user, err := handler.AuthentificationInteractor.GoogleLogin(info)
@@ -157,26 +156,26 @@ func (handler *AuthentificationWebserviceHandler) OAuth2Login(ctx context.Contex
 		return
 	}
 
-	handler.Webservice.StartSession(ctx, w, r, user)
+	var userModel *UserModel
 
-	userModel := &UserModel{
-		Id:          user.Id,
-		DisplayName: user.Client.DisplayName,
-		FirstName:   user.Client.FirstName,
-		LastName:    user.Client.LastName,
-		Email:       user.Client.Email,
+	if user != nil {
+		userModel = &UserModel{
+			Id:          user.Id,
+			DisplayName: user.Client.DisplayName,
+			FirstName:   user.Client.FirstName,
+			LastName:    user.Client.LastName,
+			Email:       user.Client.Email,
+		}
+
+		handler.Webservice.StartSession(ctx, w, r, user)
 	}
 
-	userModelJSON, err := json.Marshal(userModel)
+	response := &LoginResponseModel{
+		Result: user != nil,
+		User:   userModel,
+	}
 
-	// Adds a cookie with escaped JSON formatted user info for the client
-	cookie := new(http.Cookie)
-	cookie.Name = "ctuserinfo"
-	cookie.Value = url.QueryEscape(string(userModelJSON))
-	cookie.Expires = time.Now().AddDate(0, 1, 0)
-	http.SetCookie(w, cookie)
-
-	handler.Webservice.Redirect(w, r, "/")
+	handler.Webservice.SendJson(w, response)
 }
 
 func (handler *AuthentificationWebserviceHandler) Logout(ctx context.Context, w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,7 @@
 
 <link rel="import" href="/services/ct-auth-service.html">
 <link rel="import" href="/components/ct-module.html">
+<link rel="import" href="/components/ct-navigator.html">
 
 <polymer-element name="ct-page-register" extends="ct-module">
 		<template>
@@ -28,7 +29,9 @@
 			}
 		</style>
 
+		<ct-navigator id="nav"></ct-navigator>
 		<ct-auth-service id="authService" on-ct-login="{{login}}" on-ct-register="{{register}}"></ct-auth-service>
+
 		<div class="card wide" on-keypress="{{onKeypress}}">
 			<div class="header">
 				<div class="title">
@@ -114,7 +117,7 @@
 				this.loading = false;
 				this.$.registerSubmit.removeAttribute('disabled');
 				if(response.result) {
-					this.nav.route = 'home/profile';
+					this.$.nav.route = 'home/profile';
 					this.$.rUsername.invalid = false;
 					this.$.rPassword.invalid = false;
 					this.$.passwordRepeat.invalid = false;
@@ -133,7 +136,7 @@
 				}
 			},
 			switchLogin: function() {
-				this.nav.route = 'home/login';
+				this.$.nav.route = 'home/login';
 				this.scrollToTop();
 			},
 			onKeypress: function(event) {

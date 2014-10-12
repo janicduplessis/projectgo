@@ -15,6 +15,12 @@
 				 body="{{bodyLogin}}"
 				 on-core-response="{{loginResponse}}">
 		</core-ajax>
+		<core-ajax id="googleLogin"
+				 url="/oauth2login"
+				 method="POST"
+				 handleAs="json"
+				 on-core-response="{{loginResponse}}">
+		</core-ajax>
 		<core-ajax id="register" 
 				 url="/register" 
 				 method="POST" 
@@ -48,10 +54,6 @@
 						if(this.user.logged) {
 							this.fire('log-in', this.user);
 						}
-					} else if(ct.utils.getCookie('ctuserinfo')) {
-						_user.identity = JSON.parse(decodeURIComponent(ct.utils.getCookie('ctuserinfo')));
-						_user.logged = true;
-						this.fire('log-in', this.user);
 					}
 					this.fire('ct-auth-ready');
 				},
@@ -62,6 +64,33 @@
 					};
 					this.bodyLogin = JSON.stringify(loginInfo);
 					this.$.login.go();
+				},
+				googleLogin: function(detail) {
+					var gapi = detail.gapi;
+					var self = this;
+					// Load V1 of the G+ API
+			        gapi.client.load('plus', 'v1', function() {
+			            // To retreive profile information for a user, use the
+			            // people.get API method. For profile info for the currently
+			            // authorized user, use the userId value of me.
+			            var request = gapi.client.plus.people.get({
+			                'userId': 'me'
+			            });
+
+			            request.execute(function(resp) {
+			            	// Get the info we need
+			               self.$.googleLogin.params = JSON.stringify({
+								Id: resp.id,
+								DisplayName: resp.displayName,
+								FirstName: resp.name.givenName,
+								LastName: resp.name.familyName,
+								Email: resp.emails[0].value,
+								Image: resp.image.url
+
+							});
+							self.$.googleLogin.go();
+			            });
+			    	});
 				},
 				register: function(username, password, firstName, lastName, email) {
 					var registerInfo = {

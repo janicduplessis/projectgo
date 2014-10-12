@@ -33,8 +33,6 @@ func main() {
 
 	oauth2 := new(infrastructure.OAuth2Handler)
 	oauth2.Init()
-	url, _ := oauth2.GetUrl()
-	log.Println(url)
 	// Database
 	dbConfig := infrastructure.MySqlDbConfig{
 		User:     config.DbUser,

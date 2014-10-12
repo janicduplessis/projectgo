@@ -11,7 +11,13 @@ type UserModel struct {
 }
 
 type LoginModel struct {
-	GoogleLoginURL string
+	GoogleLogin GoogleLoginButtonInfo
+}
+
+type GoogleLoginButtonInfo struct {
+	Callback string
+	ClientId string
+	Scope    string
 }
 
 // Responses

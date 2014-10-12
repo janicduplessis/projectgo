@@ -4,9 +4,11 @@
 <link rel="import" href="/lib/paper-tabs/paper-tabs.html">
 <link rel="import" href="/lib/paper-spinner/paper-spinner.html">
 <link rel="import" href="/lib/core-pages/core-pages.html">
+<link rel="import" href="/lib/google-signin/google-signin.html">
 
 <link rel="import" href="/services/ct-auth-service.html">
 <link rel="import" href="/components/ct-module.html">
+<link rel="import" href="/components/ct-navigator.html">
 
 <polymer-element name="ct-page-login" extends="ct-module">
 		<template>
@@ -28,7 +30,9 @@
 			}
 		</style>
 
+		<ct-navigator id="nav"></ct-navigator>
 		<ct-auth-service id="authService" on-ct-login="{{login}}"></ct-auth-service>
+
 		<div class="card wide" on-keypress="{{onKeypress}}">
 			<div class="header">
 				<div class="title">
@@ -39,7 +43,7 @@
 				<paper-input id="lUsername" label="Username" value="{{lUsername}}" autofocus floatingLabel flex></paper-input>
 				<paper-input id="lPassword" label="Password" type="password" value="{{lPassword}}" floatingLabel></paper-input>
 				<div class="buttons" flex horizontal layout>
-					<paper-button id="googleLogin" on-tap="{{googleLogin}}">Login with Google</paper-button>
+					<div id="googleButtonContainer"></div>
 					<div flex></div>
 					<paper-button id="switchRegister" on-tap="{{switchRegister}}">Register</paper-button>
 					<template if="{{loading}}">
@@ -57,42 +61,55 @@
 		Polymer('ct-page-login', {
 			loading: false,
 
+			onModelReady: function() {
+				if(!this.shadowRoot.querySelector('google-signin')) {
+					var googleButton = document.createElement('GOOGLE-SIGNIN');
+					googleButton.clientId = this.model.GoogleLogin.ClientId;
+					googleButton.scopes = this.model.GoogleLogin.Scope;
+					var context = this;
+					googleButton.addEventListener('google-signin-success', function(event) {
+						context.googleLogin.call(context, event);
+					});
+					this.shadowRoot.querySelector('#googleButtonContainer').appendChild(googleButton);
+				}
+			},
+
 			loginSubmit: function() {
 				this.loading = true;
 				this.$.loginSubmit.setAttribute('disabled', true);
 				this.$.authService.login(this.lUsername, this.lPassword);
 			},
 			login: function(event) {
-					var response = event.detail;
-					this.loading = false;
-					this.$.loginSubmit.removeAttribute('disabled');
-					if(response.result) {
-						this.nav.route = 'home/profile';
-						this.lUsername = '';
+				var response = event.detail;
+				this.loading = false;
+				this.$.loginSubmit.removeAttribute('disabled');
+				if(response.result) {
+					this.$.nav.route = 'home/profile';
+					this.lUsername = '';
+				} else {
+					//show error message
+					if(this.lPassword === '' && this.lUsername === '') {
+						this.$.toast.text = 'Please enter your username and password';
+						this.$.lUsername.focus();
+					} else if(this.lPassword === '') {
+						this.$.toast.text = 'Please enter your password';
+						this.$.lPassword.focus();
+					} else if(this.lUsername === '') {
+						this.$.toast.text = 'Please enter your username';
+						this.$.lUsername.focus();
 					} else {
-						//show error message
-						if(this.lPassword === '' && this.lUsername === '') {
-							this.$.toast.text = 'Please enter your username and password';
-							this.$.lUsername.focus();
-						} else if(this.lPassword === '') {
-							this.$.toast.text = 'Please enter your password';
-							this.$.lPassword.focus();
-						} else if(this.lUsername === '') {
-							this.$.toast.text = 'Please enter your username';
-							this.$.lUsername.focus();
-						} else {
-							this.$.toast.text = 'Invalid username or password';
-							this.$.lPassword.focus();
-						}
-						this.$.toast.show();
+						this.$.toast.text = 'Invalid username or password';
+						this.$.lPassword.focus();
 					}
-					this.lPassword = '';
+					this.$.toast.show();
+				}
+				this.lPassword = '';
 			},
-			googleLogin: function() {
-				window.location = this.model.GoogleLoginURL;
+			googleLogin: function(event) {
+				this.$.authService.googleLogin(event.detail);
 			},
 			switchRegister: function() {
-				this.nav.route = 'home/register';
+				this.$.nav.route = 'home/register';
 				this.scrollToTop();
 			},
 			onKeypress: function(event) {

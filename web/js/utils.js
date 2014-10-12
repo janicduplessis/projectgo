@@ -3,7 +3,7 @@
 	window.ct = window.ct || {};
 	window.ct.utils = {
 		scrollMainContentTop: function() {
-			document.querySelector('#mainContainer').scroller.scrollTop = 0;
+			document.querySelector('ct-app').scroller.scrollTop = 0;
 		},
 
 		log: function(message) {

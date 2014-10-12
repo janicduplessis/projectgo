@@ -10,7 +10,6 @@ import (
 	"github.com/golang/oauth2"
 
 	"github.com/janicduplessis/projectgo/ct/config"
-	"github.com/janicduplessis/projectgo/ct/interfaces"
 	"github.com/janicduplessis/projectgo/ct/usecases"
 )
 
@@ -23,7 +22,6 @@ const (
 var scopes = []string{plus.UserinfoEmailScope}
 
 type OAuth2Handler struct {
-	url    string
 	config *oauth2.Config
 }
 
@@ -31,7 +29,7 @@ func (handler *OAuth2Handler) Init() {
 	conf, err := oauth2.NewConfig(&oauth2.Options{
 		ClientID:     config.OAuth2ClientId,
 		ClientSecret: config.OAuth2ClientSecret,
-		RedirectURL:  config.SiteUrl + interfaces.UrlOAuth2Login,
+		RedirectURL:  config.SiteUrl,
 		Scopes:       scopes,
 	},
 		authUrl,
@@ -40,13 +38,13 @@ func (handler *OAuth2Handler) Init() {
 		log.Fatal(err)
 	}
 
-	handler.url = conf.AuthCodeURL("state", "online", "auto")
 	handler.config = conf
 }
 
 func (handler *OAuth2Handler) GetProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) (*usecases.GoogleRegisterInfo, error) {
 	// Get the auth code and create a transport object
-	authCode := r.FormValue("code")
+	authCode := r.FormValue("Code")
+	log.Println(authCode)
 	t, err := handler.config.NewTransportWithCode(authCode)
 	if err != nil {
 		return nil, err
@@ -79,6 +77,6 @@ func (handler *OAuth2Handler) GetProfile(ctx context.Context, w http.ResponseWri
 	return profile, nil
 }
 
-func (handler *OAuth2Handler) GetUrl() (string, error) {
-	return handler.url, nil
+func (handler *OAuth2Handler) GetScope() string {
+	return plus.UserinfoEmailScope
 }

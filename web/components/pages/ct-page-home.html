@@ -1,16 +1,17 @@
 <link rel="import" href="/components/ct-module.html">
+<link rel="import" href="/components/ct-navigator.html">
 
 <polymer-element name="ct-page-home" extends="ct-module">
 	<template>
-
+		<ct-navigator id="navigator"></ct-navigator>
 	</template>
 	<script>
 		Polymer('ct-page-home', {
 			onLoad: function() {
 				if(this.user.logged) {
-					this.nav.route = 'home/profile';
+					this.$.navigator.route = 'home/profile';
 				} else {
-					this.nav.route = 'home/login';
+					this.$.navigator.route = 'home/login';
 				}
 			}
 		});

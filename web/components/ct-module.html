@@ -8,7 +8,6 @@
 		Polymer('ct-module', {
 			model: null,
 			name: '',
-			nav: null,
 			get hasModel() {
 				return this.getAttribute('model') !== null;
 			},
@@ -22,7 +21,7 @@
 
 			},
 			scrollToTop: function() {
-				document.querySelector('#mainContent').scroller.scrollTop = 0;
+				ct.utils.scrollMainContentTop();
 			}
 		});
 	</script>

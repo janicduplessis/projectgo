@@ -62,7 +62,7 @@
 				</core-toolbar>
 
 				<div class="container" vertical layout center-justified fit>
-					<ct-controller id="controller" route="{{route}}" user="{{user}}">
+					<ct-controller id="controller" user="{{user}}">
 						<ct-page-home name="home"></ct-page-home>
 						<ct-page-login name="home/login" model></ct-page-login>
 						<ct-page-register name="home/register"></ct-page-register>
@@ -82,31 +82,35 @@
 			var updating = false;
 			Polymer('ct-app', {
 				user: null,
-				route: null,
+				route: 'home',
 				mainModule: null,
 				subModule: null,
-
-				ready: function() {
-					this.user = this.$.auth.user;
-					this.$.controller.nav = this.$.nav;
-					this.$.controller.init();
-					this.$.ctNav.setNavigator(this.$.nav);
-				},
+				appReady: false,
 
 				authReady: function() {
+					this.user = this.$.auth.user;
+					this.$.ctNav.setNavigator(this.$.nav);
+
 					if(this.user.logged) {
 						this.route = this.route || 'home/profile';
 					} else {
 						this.route = this.route || 'home/login';
 					}
+					
+					this.$.controller.init();
+					
+					this.appReady = true;
+					this.routeChanged();
 				},
 
 				routeChanged: function() {
-					this.$.controller.routeChanged();
-					if(updating) {
+					if(!this.appReady || updating) {
 						return;
 					}
+
 					updating = true;
+					this.$.controller.routeChanged();
+					
 					if(this.route) {
 						var parts = this.route.split('/');
 						if(parts[0]) {
@@ -125,7 +129,7 @@
 				},
 
 				mainModuleChanged: function() {
-					if(updating) {
+					if(!this.appReady || updating) {
 						return;
 					}
 					updating = true;
@@ -134,7 +138,7 @@
 				},
 
 				subModuleChanged: function() {
-					if(updating) {
+					if(!this.appReady || updating) {
 						return;
 					}
 					updating = true;
@@ -156,6 +160,9 @@
 				},
 				toggleConnectionDialog: function() {
 					this.$.connectionDialog.toggle();
+				},
+				get scroller() {
+					return this.$.mainContent.scroller;
 				}
 			});
 		})();

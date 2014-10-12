@@ -4,6 +4,8 @@
 
 <link rel="import" href="/lib/paper-spinner/paper-spinner.html">
 
+<link rel="import" href="/components/ct-navigator.html">
+
 <polymer-element name="ct-controller" attributes="user">
 	<template>
 		<style>
@@ -22,6 +24,7 @@
 				 on-core-error="{{requestError}}"></core-ajax>
 
 		<core-localstorage id="localStorage"></core-localstorage>
+		<ct-navigator id="nav"></ct-navigator>
 
 		<core-animated-pages id="pages" transitions="cross-fade-all" selected="{{currentPage}}" valueattr="name">
 			<content></content>
@@ -37,7 +40,6 @@
 			modules: null,
 			curModule: null,
 			updating: false,
-			nav: null,
 
 			init: function() {
 				var pages = this.children;
@@ -45,7 +47,6 @@
 				for(var i = 0; i < pages.length; i++) {
 					var page = pages[i];
 					page.user = this.user;
-					page.nav = this.nav;
 					this.modules[page.name] = page;
 				}
 				this.update();
@@ -59,15 +60,15 @@
 			},
 
 			update: function() {
-				if(this.updating || !this.nav || !this.nav.route) {
+				if(this.updating) {
 					return;
 				}
 				this.updating = true;
-				var module = this.modules[this.nav.route];
+				var module = this.modules[this.$.nav.route];
 				if(!module) {
 					//Nav to the error page
 					this.updating = false;
-					this.nav.route = 'error';
+					this.$.nav.route = 'error';
 					return;
 				}
 				if(this.curModule) {
@@ -82,6 +83,7 @@
 				} else {
 					// Check localstorage for the module
 					this.$.localStorage.name = 'ct-' + module.name + '-model';
+					this.$.localStorage.load();
 					var data = this.$.localStorage.value;
 					if(data) {
 						// We have the module in localstorage
@@ -119,7 +121,7 @@
 			// Model request on-core-error
 			requestError: function(event) {
 				this.stopLoading();
-				this.nav.route = 'error';
+				this.$.nav.route = 'error';
 			},
 
 			// Show the loading page
