@@ -50,9 +50,10 @@
 				storageLoaded: function() {
 					var user = this.$.storage.value;
 					if(user && user.logged && user.identity) {
-						_user = user;
-						if(this.user.logged) {
-							this.fire('log-in', this.user);
+						_user.logged = user.logged;
+						_user.identity = user.identity;
+						if(_user.logged) {
+							this.fire('log-in', _user);
 						}
 					}
 					this.fire('ct-auth-ready');
@@ -104,8 +105,8 @@
 					this.$.register.go();
 				},
 				logout: function() {
-					this.user.logged = false;
-					this.user.identity = null;
+					_user.logged = false;
+					_user.identity = null;
 					this.$.logout.go();
 					localStorage.clear();
 					this.fire('log-out');
@@ -113,28 +114,28 @@
 				loginResponse: function(event) {
 					var response = event.detail.response;
 					if(response.Result) {
-						this.user.logged = true;
-						this.user.identity = response.User;
-						this.fire('log-in', response.User);
+						_user.logged = true;
+						_user.identity = response.User;
+						this.fire('log-in', _user);
 					} else {
-						this.user.logged = false;
-						this.user.identity = null;
+						_user.logged = false;
+						_user.identity = null;
 					}
-					this.$.storage.value = this.user;
-					this.fire('ct-login', {result: response.Result, user: response.User});
+					this.$.storage.value = _user;
+					this.fire('ct-login', {result: response.Result, user: _user});
 				},
 				registerResponse: function(event) {
 					var response = event.detail.response;
 					if(response.Result) {
-						this.user.logged = true;
-						this.user.identity = response.User;
-						this.fire('log-in', response.User);
+						_user.logged = true;
+						_user.identity = response.User;
+						this.fire('log-in', _user);
 					} else {
-						this.user.logged = false;
-						this.user.identity = null;
+						_user.logged = false;
+						_user.identity = null;
 					}
-					this.$.storage.value = this.user;
-					this.fire('ct-register', {result: response.Result, user: response.User, error: response.Error});
+					this.$.storage.value = _user;
+					this.fire('ct-register', {result: response.Result, user: _user, error: response.Error});
 				}
 			});
 		})();

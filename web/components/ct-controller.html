@@ -83,6 +83,7 @@
 				} else {
 					// Check localstorage for the module
 					this.$.localStorage.name = 'ct-' + module.name + '-model';
+					this.$.localStorage.value = undefined;
 					this.$.localStorage.load();
 					var data = this.$.localStorage.value;
 					if(data) {
@@ -110,6 +111,9 @@
 				// Set the model for the page
 				this.curModule.model = response.Model;
 				// Save the model in the localstorage
+				this.$.localStorage.name = 'ct-' + this.curModule.name + '-model';
+				this.$.localStorage.value = undefined;
+				this.$.localStorage.load();
 				this.$.localStorage.value = response.Model;
 
 				this.stopLoading();

@@ -3,40 +3,31 @@
 <link rel="import" href="/lib/core-icons/core-icons.html">
 <link rel="import" href="/lib/core-icons/social-icons.html">
 
-<link rel="import" href="/services/ct-auth-service.html">
-<link rel="import" href="/components/ct-navigator.html">
-
 <polymer-element name="ct-sidebar-home" attributes="route user">
   <template>
 	<style>
 
 	</style>
 
-	<ct-auth-service id="auth"></ct-auth-service>
-	<ct-navigator id="nav"></ct-navigator>
-
 	<core-menu selected="{{route}}" valueattr="hash">
-	  <template if="{{user.logged}}">
-		<core-item hash="home/profile" label="Profile" icon="account-box"></core-item>
-		<core-item hash="home/settings" label="Settings" icon="settings"></core-item>
-		<core-item hash="home/feedback" label="Send Feedback" icon="social:poll"></core-item>
-		<core-item hash="home/help" label="Help" icon="help"></core-item>
-		<core-item label="Sign Out" on-tap="{{logout}}" icon="home"></core-item>
-	</template>
-	<template if="{{!user.logged}}">
-		<core-item hash="home/login" label="Login"></core-item>
-		<core-item hash="home/register" label="Register"></core-item>
-		<core-item hash="home/help" label="Help"></core-item>
-	  </template>
+	  	<template if="{{user.logged}}">
+			<core-item hash="home/profile" label="Profile" icon="account-box"></core-item>
+			<core-item hash="home/settings" label="Settings" icon="settings"></core-item>
+			<core-item hash="home/feedback" label="Send Feedback" icon="social:poll"></core-item>
+			<core-item hash="home/help" label="Help" icon="help"></core-item>
+			<core-item hash="home/logout" label="Sign Out" icon="home"></core-item>
+		</template>
+		<template if="{{!user.logged}}">
+			<core-item hash="home/login" label="Login"></core-item>
+			<core-item hash="home/register" label="Register"></core-item>
+			<core-item hash="home/help" label="Help"></core-item>
+	  	</template>
 	</core-menu>
 
   </template>
   <script>
 	Polymer('ct-sidebar-home', {
-	  logout: function() {
-		this.$.auth.logout();
-		this.$.nav.route = 'home/login';
-	  }
+
 	});
   </script>
 </polymer-element>

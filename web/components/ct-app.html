@@ -37,16 +37,12 @@
 		<core-drawer-panel id="drawer" narrow="{{narrow}}">
 			<core-header-panel drawer>
 				<core-toolbar class="theme">
-				<div class="title"><core-icon icon="communication:chat"></core-icon> Go Chat</div>
+					<div class="title"><core-icon icon="communication:chat"></core-icon> Go Chat</div>
 				</core-toolbar>
-				<template if="{{user.logged}}">
-					Hello {{user.identity.Username}}!
-				</template>
-			<core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name" fit>
-				<ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
-				<ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
-			</core-animated-pages>
-				
+				<core-animated-pages transitions="cross-fade-all" selected="{{mainModule}}" valueattr="name" fit>
+					<ct-sidebar-home name="home" user="{{user}}" route="{{route}}"></ct-sidebar-home>
+					<ct-sidebar-chat name="chat" user="{{user}}" route="{{route}}"></ct-sidebar-chat>
+				</core-animated-pages>
 			</core-header-panel>
 			<core-header-panel main id="mainContent">
 				<core-toolbar class="theme">
@@ -65,6 +61,7 @@
 					<ct-controller id="controller" user="{{user}}">
 						<ct-page-home name="home"></ct-page-home>
 						<ct-page-login name="home/login" model></ct-page-login>
+						<ct-page-logout name="home/logout"></ct-page-logout>
 						<ct-page-register name="home/register"></ct-page-register>
 						<ct-page-profile name="home/profile" model></ct-page-profile>
 						<ct-page-help name="home/help"></ct-page-help>

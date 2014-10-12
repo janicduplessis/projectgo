@@ -1,0 +1,19 @@
+<link rel="import" href="/components/ct-module.html">
+<link rel="import" href="/components/ct-navigator.html">
+
+<link rel="import" href="/services/ct-auth-service.html">
+
+<polymer-element name="ct-page-logout" extends="ct-module">
+	<template>
+		<ct-navigator id="navigator"></ct-navigator>
+		<ct-auth-service id="auth"></ct-auth-service>
+	</template>
+	<script>
+		Polymer('ct-page-logout', {
+			onLoad: function() {
+				this.$.auth.logout();
+				this.$.navigator.route = 'home/login';
+			}
+		});
+	</script>
+</polymer-element>

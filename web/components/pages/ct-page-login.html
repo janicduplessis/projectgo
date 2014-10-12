@@ -71,6 +71,8 @@
 						context.googleLogin.call(context, event);
 					});
 					this.shadowRoot.querySelector('#googleButtonContainer').appendChild(googleButton);
+				} else {
+					this.shadowRoot.querySelector('google-signin').signOut();
 				}
 			},
 

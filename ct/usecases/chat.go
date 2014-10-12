@@ -29,6 +29,10 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 	server := ci.ServerRepository.Get()
 	client := server.GetClient(clientId)
 
+	if client.Channel == nil {
+		return ErrNoChannel
+	}
+
 	message := &domain.Message{
 		Body:      body,
 		ClientId:  client.Id,

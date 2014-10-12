@@ -15,4 +15,5 @@ var (
 
 	// Others
 	ErrAccessDenied = errors.New("Access denied")
+	ErrNoChannel    = errors.New("User is not in any channel")
 )
