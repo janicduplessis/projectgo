@@ -119,6 +119,10 @@ func (handler *WebsocketHandler) AddClient(ctx context.Context, w http.ResponseW
 	onConnectedHander.ServeHTTP(w, r)
 }
 
+func (handler *WebsocketHandler) Log(message string) {
+	handler.Logger.Log(message)
+}
+
 func (handler *WebsocketHandler) executeCommand(cmd *WebsocketCommandHandler) {
 	fn := handler.Handlers[cmd.Command]
 	if fn == nil {
