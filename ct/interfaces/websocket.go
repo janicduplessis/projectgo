@@ -1,8 +1,9 @@
 package interfaces
 
 import (
-	"code.google.com/p/go.net/context"
 	"net/http"
+
+	"code.google.com/p/go.net/context"
 
 	"github.com/janicduplessis/projectgo/ct/domain"
 )
@@ -10,7 +11,6 @@ import (
 type Websocket interface {
 	AddHandler(command string, fn func(context.Context, WebsocketClient, WebsocketCommand))
 	AddClient(ctx context.Context, w http.ResponseWriter, r *http.Request, client *domain.Client)
-	RemoveClient(ctx context.Context, client *domain.Client)
 	Log(msg string)
 }
 

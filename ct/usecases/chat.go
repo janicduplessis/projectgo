@@ -17,6 +17,14 @@ type ChatInteractor struct {
 
 func (ci *ChatInteractor) JoinServer(clientId int64) (*domain.Client, error) {
 	server := ci.ServerRepository.Get()
+
+	// If the client is already connected on the server
+	client := server.GetClient(clientId)
+	if client != nil {
+		return client, nil
+	}
+
+	// If not get its info
 	client, err := ci.ClientRepository.FindById(clientId)
 	if err != nil {
 		return nil, err
@@ -100,15 +108,26 @@ func (ci *ChatInteractor) CreateChannel(clientId int64, name string) error {
 	return nil
 }
 
-func (ci *ChatInteractor) Channels(clientId int64) (map[int64]*domain.Channel, error) {
+func (ci *ChatInteractor) Channels(clientId int64) (map[int64]*domain.Channel, int64, error) {
 	server := ci.ServerRepository.Get()
+	client := server.GetClient(clientId)
+	var channelId int64 = -1
+	if client == nil {
+		return nil, channelId, ErrInvalidClientId
+	}
+	if client.Channel != nil {
+		channelId = client.Channel.Id
+	}
 
-	return server.GetChannels(), nil
+	return server.GetChannels(), channelId, nil
 }
 
 func (ci *ChatInteractor) Disconnect(clientId int64) error {
 	server := ci.ServerRepository.Get()
 	client := server.GetClient(clientId)
+	if client == nil {
+		return ErrInvalidChannelId
+	}
 	server.RemoveClient(clientId)
 	if client != nil && client.Channel != nil {
 		client.Channel.Leave(client)

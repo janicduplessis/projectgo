@@ -63,9 +63,6 @@
 
 			switchChannel: function(event) {
 				var chanId = event.detail.Id;
-				if(chanId < 0 || chanId === this.channels.Current) {
-					return;
-				}
 
 				// Selected class
 				var chanTitles = this.shadowRoot.querySelectorAll('ct-channel-box');

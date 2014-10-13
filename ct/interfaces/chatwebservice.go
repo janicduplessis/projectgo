@@ -16,7 +16,7 @@ const (
 type ChatInteractor interface {
 	JoinServer(userId int64) (*domain.Client, error)
 	JoinChannel(userId int64, channelId int64) error
-	Channels(clientId int64) (map[int64]*domain.Channel, error)
+	Channels(clientId int64) (map[int64]*domain.Channel, int64, error)
 	CreateChannel(clientId int64, name string) error
 	SendMessage(userId int64, body string) error
 	GetMessages(channelId int64) ([]*domain.Message, error)
@@ -156,7 +156,7 @@ func (handler *ChatWebserviceHandler) CreateChannel(ctx context.Context, client 
 func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
 	handler.Webservice.Log("Channels request")
 	user := ctx.Value(KeyUser).(*usecases.User)
-	channels, err := handler.ChatInteractor.Channels(user.Id)
+	channels, curChannel, err := handler.ChatInteractor.Channels(user.Id)
 	if err != nil {
 		client.Error(cmd, err)
 		return
@@ -169,16 +169,9 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 		index++
 	}
 
-	//TODO: not nice!
-	var clientChannel int64 = -1
-	userClient := server.GetClient(user.Id)
-	if userClient.Channel != nil {
-		clientChannel = userClient.Channel.Id
-	}
-
 	response := ChannelsResponse{
 		List:    channelsArr,
-		Current: clientChannel,
+		Current: curChannel,
 	}
 
 	err = client.SendJson(cmd, response)
