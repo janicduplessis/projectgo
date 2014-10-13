@@ -49,6 +49,10 @@ func (repo *FakeUserRepository) Create(info *RegisterInfo) (*User, error) {
 	return repo.Users[id], nil
 }
 
+func (repo *FakeUserRepository) CreateGoogle(info *GoogleRegisterInfo) (*User, error) {
+	return nil, nil
+}
+
 func (repo *FakeUserRepository) FindByName(name string) (*User, error) {
 	for _, user := range repo.Users {
 		if user.Username == name {
@@ -65,6 +69,10 @@ func (repo *FakeUserRepository) FindByNameWithHash(name string) (*User, string, 
 		}
 	}
 	return nil, "", nil
+}
+
+func (repo *FakeUserRepository) FindByGoogleId(id string) (*User, error) {
+	return nil, nil
 }
 
 func (repo *FakeUserRepository) UpdatePasswordHash(user *User, hash string) error {
