@@ -41,7 +41,7 @@ module.exports = function(grunt) {
 					Polymer: true,
 				},
 				extract: 'auto',
-				ignores: ['web/lib/**']
+				ignores: ['web/lib/**', 'web/app/**']
 			}
 		}
 	});

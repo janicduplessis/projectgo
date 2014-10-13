@@ -1,4 +1,8 @@
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
+logs/*
+!.gitkeep
+tmp
+.DS_Store
+.idea# Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
 *.so
