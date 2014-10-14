@@ -1,6 +1,8 @@
 Go Chat
 =========
 
+[![Build Status](https://travis-ci.org/janicduplessis/projectgo.svg?branch=master)](https://travis-ci.org/janicduplessis/projectgo)
+
 Description
 -----------
 Go Chat is a chat server written in [go](http://golang.org/) and a web client using [Polymer](http://www.polymer-project.org/).
