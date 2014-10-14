@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -37,6 +38,9 @@ type serverConfig struct {
 }
 
 func init() {
+	envConfig := flag.Bool("useenv", false, "Use environnement variables config")
+	flag.Parse()
+
 	// Default config
 	config := serverConfig{
 		SiteUrl:    "localhost:8080",
@@ -48,23 +52,62 @@ func init() {
 		DbPort:     "3306",
 	}
 
-	//Get server config
-	file, err := ioutil.ReadFile(configFile)
-
-	if err != nil {
-		// No config found, we will create the default one and tell the user to set it up
-		data, err := json.Marshal(config)
-		if err != nil {
-			log.Fatal(err)
+	if *envConfig {
+		val := os.Getenv("SITE_URL")
+		if len(val) > 0 {
+			config.SiteUrl = val
 		}
-		err = ioutil.WriteFile(configFile, data, 0600)
-		if err != nil {
-			log.Fatal(err)
+		val = os.Getenv("SITE_PORT")
+		if len(val) > 0 {
+			config.SitePort = val
 		}
-		log.Println("No config found, created default config file. Please edit 'server.json' and try again.")
-		// Exit the program
-		return
+		val = os.Getenv("DB_USER")
+		if len(val) > 0 {
+			config.DbUser = val
+		}
+		val = os.Getenv("DB_PASSWORD")
+		if len(val) > 0 {
+			config.DbPassword = val
+		}
+		val = os.Getenv("DB_NAME")
+		if len(val) > 0 {
+			config.DbName = val
+		}
+		val = os.Getenv("DB_URL")
+		if len(val) > 0 {
+			config.DbUrl = val
+		}
+		val = os.Getenv("DB_PORT")
+		if len(val) > 0 {
+			config.DbPort = val
+		}
+		val = os.Getenv("OAUTH2_CLIENT_ID")
+		if len(val) > 0 {
+			config.OAuth2ClientId = val
+		}
+		val = os.Getenv("OAUTH2_CLIENT_SECRET")
+		if len(val) > 0 {
+			config.OAuth2ClientSecret = val
+		}
 	} else {
+		//Get server config
+		file, err := ioutil.ReadFile(configFile)
+
+		if err != nil {
+			// No config found, we will create the default one and tell the user to set it up
+			data, err := json.Marshal(config)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = ioutil.WriteFile(configFile, data, 0600)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println("No config found, created default config file. Please edit 'server.json' and try again.")
+			// Exit the program
+			return
+		}
+
 		if err = json.Unmarshal(file, &config); err != nil {
 			log.Fatal(err)
 		}
@@ -95,7 +138,7 @@ func init() {
 	log.Println(fmt.Sprintf("%s: %s", "OAuth2ClientSecret", OAuth2ClientSecret))
 	log.Println("---------------------")
 
-	_, err = os.Stat("upload")
+	_, err := os.Stat("upload")
 	if os.IsNotExist(err) {
 		os.Mkdir("upload", 0777)
 	}

@@ -1,1 +1,1 @@
-web: projectgo
+web: npm install && projectgo -useenv=true
