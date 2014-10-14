@@ -57,7 +57,7 @@ func init() {
 		if len(val) > 0 {
 			config.SiteUrl = val
 		}
-		val = os.Getenv("SITE_PORT")
+		val = os.Getenv("PORT")
 		if len(val) > 0 {
 			config.SitePort = val
 		}
