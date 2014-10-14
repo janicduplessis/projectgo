@@ -1,6 +1,7 @@
 language: go
 deploy:
   provider: heroku
+  strategy: git
   api_key:
     secure: mSu3ilPFXA7jLxJmRTZVGdlXXPJNHulnFFbVsxhsDJiL8CbRlZmEXmStyoc/57zKUTWRJn8hPCgU5g5SlqKxxaurJ6mmzwzYDgnWaDgDPDHXC3+ymZB2moLpL/Ws3CivJhdJSL34cL6rxlKswRY8VqcmZ+fsk7elkJphoLqm0vY=
   app: peaceful-fortress-9329
