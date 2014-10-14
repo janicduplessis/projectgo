@@ -20,17 +20,16 @@ Installation
 1. Get and build the code using
 
         go get github.com/janicduplessis/projectgo
-        go install github.com/janicduplessis/projectgo
 
 2. Install build system globally
 
         npm install bower -g
         npm install grunt -g
 
-3. Get other dependencies
-
+3. Navigate to the project root and get other dependencies
+		
+		cd $GOPATH/src/github.com/janicduplessis/projectgo
         npm install
-        bower install
 
 4. Run using 
 
