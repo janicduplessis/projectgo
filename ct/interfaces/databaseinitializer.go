@@ -90,7 +90,7 @@ func (repo *DbInitializerRepo) Init() {
 		panic(err)
 	}
 
-	_, err = repo.dbHandler.Execute(`CREATE TABLE IF NOT EXISTS ct.message (
+	_, err = repo.dbHandler.Execute(`CREATE TABLE IF NOT EXISTS message (
 										MessageId INT NOT NULL AUTO_INCREMENT,
 										Body TEXT NOT NULL,
 										Time DATETIME NOT NULL,
