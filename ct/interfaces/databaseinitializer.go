@@ -101,12 +101,12 @@ func (repo *DbInitializerRepo) Init() {
 										INDEX message_channel_idx (ChannelId ASC),
 										CONSTRAINT message_client
 										    FOREIGN KEY (ClientId)
-										    REFERENCES ct.client (ClientId)
+										    REFERENCES client (ClientId)
 										    ON DELETE NO ACTION
 										    ON UPDATE NO ACTION,
 										CONSTRAINT message_channel
 										    FOREIGN KEY (ChannelId)
-										    REFERENCES ct.channel (ChannelId)
+										    REFERENCES channel (ChannelId)
 										    ON DELETE NO ACTION
 										    ON UPDATE NO ACTION
 									);`)
