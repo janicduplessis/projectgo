@@ -25,9 +25,9 @@
 			sendDisabled: true,
 
 			sendMessage: function() {
-				var msg = this.$.tbMessage.inputValue;
+				var msg = this.$.tbMessage.value;
 				this.$.ctMsgService.sendMessage(msg);
-				this.$.tbMessage.inputValue = '';
+				this.$.tbMessage.value = '';
 			},
 
 			onInput: function() {
