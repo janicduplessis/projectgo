@@ -41,7 +41,7 @@ module.exports = function(grunt) {
 					Polymer: true,
 				},
 				extract: 'auto',
-				ignores: ['web/lib/**', 'web/app/**']
+				ignores: ['web/lib/**', 'web/app/**', 'web/e2e-tests/**']
 			}
 		}
 	});
