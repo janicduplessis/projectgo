@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/context"
 
-	//"github.com/janicduplessis/projectgo/ct/domain"
 	"github.com/janicduplessis/projectgo/ct/config"
 	"github.com/janicduplessis/projectgo/ct/infrastructure"
 	"github.com/janicduplessis/projectgo/ct/interfaces"
@@ -33,7 +32,7 @@ func main() {
 
 	var fileStore interfaces.FileStore
 	if config.UseS3 {
-		fileStoreHandler = new(infrastructure.S3FileStorageHandler)
+		fileStoreHandler := new(infrastructure.S3FileStorageHandler)
 		fileStoreHandler.Init()
 		fileStore = fileStoreHandler
 	} else {
