@@ -33,7 +33,9 @@ func main() {
 
 	var fileStore interfaces.FileStore
 	if config.UseS3 {
-		fileStore = new(infrastructure.S3FileStorageHandler)
+		fileStoreHandler = new(infrastructure.S3FileStorageHandler)
+		fileStoreHandler.Init()
+		fileStore = fileStoreHandler
 	} else {
 		fileStore = new(infrastructure.LocalFileStoreHandler)
 	}
