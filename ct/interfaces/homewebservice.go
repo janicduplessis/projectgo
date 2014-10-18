@@ -26,13 +26,15 @@ type HomeWebserviceHandler struct {
 	Webservice     Webservice
 	HomeInteractor HomeInteractor
 	ImageUtils     ImageUtils
+	FileStore      FileStore
 }
 
-func NewHomeWebservice(ws Webservice, hi HomeInteractor, imageUtils ImageUtils) *HomeWebserviceHandler {
+func NewHomeWebservice(ws Webservice, hi HomeInteractor, imageUtils ImageUtils, fileStore FileStore) *HomeWebserviceHandler {
 	wsHandler := &HomeWebserviceHandler{
 		Webservice:     ws,
 		HomeInteractor: hi,
 		ImageUtils:     imageUtils,
+		FileStore:      fileStore,
 	}
 
 	ws.AddHandler(urlGetProfileModel, true, wsHandler.GetProfileModel)
@@ -103,7 +105,7 @@ func (handler *HomeWebserviceHandler) GetProfileImage(ctx context.Context, w htt
 func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(KeyUser).(*usecases.User)
 
-	file, hndl, err := r.FormFile("File")
+	imgData, hndl, err := r.FormFile("File")
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return
@@ -111,7 +113,7 @@ func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w htt
 
 	handler.Webservice.Log(fmt.Sprintf("Upload file %s", hndl.Filename))
 
-	image, err := handler.ImageUtils.Load(file)
+	image, err := handler.ImageUtils.Load(imgData)
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return
@@ -119,7 +121,14 @@ func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w htt
 
 	image = handler.ImageUtils.Resize(image, 192, 192)
 
-	err = handler.ImageUtils.Save(image, fmt.Sprintf("upload/profile_%d.png", user.Id))
+	file, err := handler.FileStore.Create(fmt.Sprintf("upload/profile_%d.png", user.Id))
+	if err != nil {
+		handler.Webservice.Error(w, err)
+		return
+	}
+	defer file.Close()
+	err = handler.ImageUtils.Save(file, image, ".png")
+
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return

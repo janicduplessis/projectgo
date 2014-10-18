@@ -31,6 +31,8 @@ func main() {
 
 	imageUtils := new(infrastructure.ImageUtilsHandler)
 
+	fileStore := new(infrastructure.LocalFileStoreHandler)
+
 	oauth2 := new(infrastructure.OAuth2Handler)
 	oauth2.Init()
 	// Database
@@ -73,7 +75,7 @@ func main() {
 	// Webservices
 	interfaces.NewAuthentificationWebservice(webservice, oauth2, authInteractor, chatInteractor)
 	interfaces.NewChatWebservice(webservice, websocket, chatInteractor)
-	interfaces.NewHomeWebservice(webservice, homeInteractor, imageUtils)
+	interfaces.NewHomeWebservice(webservice, homeInteractor, imageUtils, fileStore)
 
 	http.Handle("/", http.FileServer(http.Dir("web")))
 

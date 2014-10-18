@@ -22,6 +22,11 @@ var (
 
 	OAuth2ClientId     string
 	OAuth2ClientSecret string
+
+	UseS3       bool
+	S3AccessKey string
+	S3SecretKey string
+	S3Bucket    string
 )
 
 type serverConfig struct {
@@ -35,10 +40,15 @@ type serverConfig struct {
 
 	OAuth2ClientId     string
 	OAuth2ClientSecret string
+
+	S3AccessKey string
+	S3SecretKey string
+	S3Bucket    string
 }
 
 func init() {
-	envConfig := flag.Bool("useenv", false, "Use environnement variables config")
+	envConfig := *flag.Bool("useenv", false, "Use environnement variables config")
+	UseS3 = *flag.Bool("uses3", false, "Use amazon s3 for file storage")
 	flag.Parse()
 
 	// Default config
@@ -52,7 +62,7 @@ func init() {
 		DbPort:     "3306",
 	}
 
-	if *envConfig {
+	if envConfig {
 		val := os.Getenv("SITE_URL")
 		if len(val) > 0 {
 			config.SiteUrl = val
@@ -89,6 +99,18 @@ func init() {
 		if len(val) > 0 {
 			config.OAuth2ClientSecret = val
 		}
+		val = os.Getenv("S3_ACCESS_KEY")
+		if len(val) > 0 {
+			config.S3AccessKey = val
+		}
+		val = os.Getenv("S3_SECRET_KEY")
+		if len(val) > 0 {
+			config.S3SecretKey = val
+		}
+		val = os.Getenv("S3_BUCKET")
+		if len(val) > 0 {
+			config.S3Bucket = val
+		}
 	} else {
 		//Get server config
 		file, err := ioutil.ReadFile(configFile)
@@ -124,8 +146,12 @@ func init() {
 	OAuth2ClientId = config.OAuth2ClientId
 	OAuth2ClientSecret = config.OAuth2ClientSecret
 
+	S3AccessKey = config.S3AccessKey
+	S3SecretKey = config.S3SecretKey
+	S3Bucket = config.S3Bucket
+
 	log.Println("---------------------")
-	log.Println("- Config            -")
+	log.Println("-     Config        -")
 	log.Println("---------------------")
 	log.Println(fmt.Sprintf("%s: %s", "SiteUrl", SiteUrl))
 	log.Println(fmt.Sprintf("%s: %s", "SitePort", SitePort))
@@ -134,8 +160,15 @@ func init() {
 	log.Println(fmt.Sprintf("%s: %s", "DbName", DbName))
 	log.Println(fmt.Sprintf("%s: %s", "DbUrl", DbUrl))
 	log.Println(fmt.Sprintf("%s: %s", "DbPort", DbPort))
+	log.Println("-------- OAuth ------")
 	log.Println(fmt.Sprintf("%s: %s", "OAuth2ClientId", OAuth2ClientId))
 	log.Println(fmt.Sprintf("%s: %s", "OAuth2ClientSecret", OAuth2ClientSecret))
+	if UseS3 {
+		log.Println("--------- S3 --------")
+		log.Println(fmt.Sprintf("%s: %s", "S3AccessKey", S3AccessKey))
+		log.Println(fmt.Sprintf("%s: %s", "S3SecretKey", S3SecretKey))
+		log.Println(fmt.Sprintf("%s: %s", "S3Bucket", S3Bucket))
+	}
 	log.Println("---------------------")
 
 	_, err := os.Stat("upload")
