@@ -31,7 +31,12 @@ func main() {
 
 	imageUtils := new(infrastructure.ImageUtilsHandler)
 
-	fileStore := new(infrastructure.LocalFileStoreHandler)
+	var fileStore interfaces.FileStore
+	if config.UseS3 {
+		fileStore = new(infrastructure.S3FileStorageHandler)
+	} else {
+		fileStore = new(infrastructure.LocalFileStoreHandler)
+	}
 
 	oauth2 := new(infrastructure.OAuth2Handler)
 	oauth2.Init()
