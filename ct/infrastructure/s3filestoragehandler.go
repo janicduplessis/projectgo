@@ -1,24 +1,20 @@
 package infrastructure
 
 import (
-	"io"
+	"fmt"
 	"path"
+	"strings"
 
 	"launchpad.net/goamz/aws"
 	"launchpad.net/goamz/s3"
 
 	"github.com/janicduplessis/projectgo/ct/config"
+	"github.com/janicduplessis/projectgo/ct/interfaces"
 )
 
 // S3FileStorageHandler handles reading and writing files to amazon s3
 type S3FileStorageHandler struct {
 	s3 *s3.S3
-}
-
-// ReadWriteCloser for s3
-type s3ReadWriteCloser struct {
-	fileName string
-	bucket   *s3.Bucket
 }
 
 // Init initializes the connection to amazon
@@ -33,41 +29,21 @@ func (handler *S3FileStorageHandler) Init() {
 }
 
 // Create  creates a file
-func (handler *S3FileStorageHandler) Create(path string) (io.WriteCloser, error) {
+func (handler *S3FileStorageHandler) Create(filePath string, data []byte) error {
 	bucket := handler.s3.Bucket(config.S3Bucket)
-	writer := &s3ReadWriteCloser{
-		fileName: path,
-		bucket:   bucket,
-	}
-	return writer, nil
+	return bucket.Put(filePath, data, fmt.Sprintf("image/%s", path.Ext(filePath)), s3.BucketOwnerFull)
 }
 
 // Open opens a file
-func (handler *S3FileStorageHandler) Open(path string) (io.ReadCloser, error) {
+func (handler *S3FileStorageHandler) Open(filePath string) ([]byte, error) {
 	bucket := handler.s3.Bucket(config.S3Bucket)
-	reader := &s3ReadWriteCloser{
-		fileName: path,
-		bucket:   bucket,
-	}
-	return reader, nil
-}
-
-func (wc *s3ReadWriteCloser) Read(p []byte) (int, error) {
-	data, err := wc.bucket.Get(wc.fileName)
+	data, err := bucket.Get(filePath)
 	if err != nil {
-		return 0, err
+		if strings.Contains(err.Error(), "The specified key does not exist") {
+			return nil, interfaces.ErrNoFile
+		}
+		return nil, err
 	}
 
-	copy(data, p)
-
-	return len(p), nil
-}
-
-func (wc *s3ReadWriteCloser) Write(p []byte) (int, error) {
-	err := wc.bucket.Put(wc.fileName, p, "image/"+path.Ext(wc.fileName), s3.BucketOwnerFull)
-	return len(p), err
-}
-
-func (wc *s3ReadWriteCloser) Close() error {
-	return nil
+	return data, err
 }

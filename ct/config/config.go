@@ -48,7 +48,7 @@ type serverConfig struct {
 
 func init() {
 	envConfig := flag.Bool("useenv", false, "Use environnement variables config")
-	useS3 := flag.Bool("uses3", false, "Use amazon s3 for file storage")
+	useS3 := flag.Bool("uses3", true, "Use amazon s3 for file storage")
 	flag.Parse()
 
 	UseS3 = *useS3

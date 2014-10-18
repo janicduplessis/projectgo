@@ -2,8 +2,9 @@ package interfaces
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"os"
+	"path"
 
 	"code.google.com/p/go.net/context"
 
@@ -94,12 +95,19 @@ func (handler *HomeWebserviceHandler) GetProfileImage(ctx context.Context, w htt
 	// Get request with query params
 	clientId := r.FormValue("clientId")
 	imageUrl := fmt.Sprintf("upload/profile_%s.png", clientId)
-	_, err := os.Stat(imageUrl)
-	if os.IsNotExist(err) {
-		imageUrl = "images/no-profile.png"
+
+	data, err := handler.FileStore.Open(imageUrl)
+	if err != nil {
+		if err == ErrNoFile {
+			data, err = ioutil.ReadFile("images/no-profile.png")
+		} else {
+			handler.Webservice.Error(w, err)
+			return
+		}
 	}
 
-	http.ServeFile(w, r, imageUrl)
+	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", path.Ext(imageUrl)))
+	w.Write(data)
 }
 
 func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -121,13 +129,13 @@ func (handler *HomeWebserviceHandler) SetProfileImage(ctx context.Context, w htt
 
 	image = handler.ImageUtils.Resize(image, 192, 192)
 
-	file, err := handler.FileStore.Create(fmt.Sprintf("upload/profile_%d.png", user.Id))
+	data, err := handler.ImageUtils.Save(image, ".png")
+
+	err = handler.FileStore.Create(fmt.Sprintf("upload/profile_%d.png", user.Id), data)
 	if err != nil {
 		handler.Webservice.Error(w, err)
 		return
 	}
-	defer file.Close()
-	err = handler.ImageUtils.Save(file, image, ".png")
 
 	if err != nil {
 		handler.Webservice.Error(w, err)

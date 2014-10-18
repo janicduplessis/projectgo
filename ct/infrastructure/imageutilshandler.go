@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"bytes"
 	"errors"
 	"image"
 	"image/jpeg"
@@ -29,9 +30,10 @@ func (handler *ImageUtilsHandler) Resize(image image.Image, maxWidth int, maxHei
 	return imaging.Thumbnail(image, maxWidth, maxHeight, imaging.Lanczos)
 }
 
-func (handler *ImageUtilsHandler) Save(file io.Writer, img image.Image, format string) error {
+func (handler *ImageUtilsHandler) Save(img image.Image, format string) ([]byte, error) {
 	// Based on github.com/disintegration/imaging/helpers.go Save()
 	var err error
+	writer := new(bytes.Buffer)
 	switch format {
 	case ".jpg", ".jpeg":
 		var rgba *image.RGBA
@@ -45,20 +47,20 @@ func (handler *ImageUtilsHandler) Save(file io.Writer, img image.Image, format s
 			}
 		}
 		if rgba != nil {
-			err = jpeg.Encode(file, rgba, &jpeg.Options{Quality: 95})
+			err = jpeg.Encode(writer, rgba, &jpeg.Options{Quality: 95})
 		} else {
-			err = jpeg.Encode(file, img, &jpeg.Options{Quality: 95})
+			err = jpeg.Encode(writer, img, &jpeg.Options{Quality: 95})
 		}
 
 	case ".png":
-		err = png.Encode(file, img)
+		err = png.Encode(writer, img)
 	case ".tif", ".tiff":
-		err = tiff.Encode(file, img, &tiff.Options{Compression: tiff.Deflate, Predictor: true})
+		err = tiff.Encode(writer, img, &tiff.Options{Compression: tiff.Deflate, Predictor: true})
 	case ".bmp":
-		err = bmp.Encode(file, img)
+		err = bmp.Encode(writer, img)
 	default:
-		return errors.New("Invalid image format")
+		return nil, errors.New("Invalid image format")
 	}
 
-	return err
+	return writer.Bytes(), err
 }
