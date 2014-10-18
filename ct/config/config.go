@@ -47,9 +47,11 @@ type serverConfig struct {
 }
 
 func init() {
-	envConfig := *flag.Bool("useenv", false, "Use environnement variables config")
-	UseS3 = *flag.Bool("uses3", false, "Use amazon s3 for file storage")
+	envConfig := flag.Bool("useenv", false, "Use environnement variables config")
+	useS3 := flag.Bool("uses3", false, "Use amazon s3 for file storage")
 	flag.Parse()
+
+	UseS3 = *useS3
 
 	// Default config
 	config := serverConfig{
@@ -62,7 +64,7 @@ func init() {
 		DbPort:     "3306",
 	}
 
-	if envConfig {
+	if *envConfig {
 		val := os.Getenv("SITE_URL")
 		if len(val) > 0 {
 			config.SiteUrl = val
