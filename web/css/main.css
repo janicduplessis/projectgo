@@ -18,6 +18,7 @@ core-toolbar.theme {
 
 core-header-panel[drawer] {
 	background-color: #fff;
+	z-index: 20;
 }
 
 core-toolbar .title {

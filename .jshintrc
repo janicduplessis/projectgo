@@ -1,13 +1,21 @@
 {
-  "globalstrict": true,
-  "globals": {
-    "angular": false,
-    "describe": false,
-    "it": false,
-    "expect": false,
-    "beforeEach": false,
-    "afterEach": false,
-    "module": false,
-    "inject": false
-  }
+	curly: true,
+	eqeqeq: true,
+	eqnull: true,
+	bitwise: true,
+	immed: true,
+	latedef: true,
+	noarg: true,
+	nonbsp: true,
+	quotmark: 'single',
+	undef: true,
+	unused: false,
+	maxparams: 5,
+	browser: true,
+	globals: {
+		ct: true,
+		Polymer: true,
+	},
+	extract: 'auto',
+	ignores: ['web/lib/**', 'web/app/**', 'web/e2e-tests/**']
 }

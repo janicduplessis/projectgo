@@ -20,6 +20,10 @@ type ChannelModel struct {
 	Clients []ClientModel
 }
 
+type PingModel struct {
+	Response string
+}
+
 // Requests
 type SendMessageRequest struct {
 	Message string

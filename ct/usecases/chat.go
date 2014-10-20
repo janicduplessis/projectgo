@@ -2,6 +2,8 @@ package usecases
 
 import (
 	"fmt"
+	"html/template"
+	"regexp"
 	"time"
 
 	"github.com/janicduplessis/projectgo/ct/domain"
@@ -13,6 +15,24 @@ type ChatInteractor struct {
 	MessageRepository domain.MessageRepository
 	ClientRepository  domain.ClientRepository
 	Logger            Logger
+
+	urlRegex *regexp.Regexp
+}
+
+func NewChatInteractor(serverRepo domain.ServerRepository, channelRepo domain.ChannelRepository,
+	msgRepo domain.MessageRepository, clientRepo domain.ClientRepository, logger Logger) *ChatInteractor {
+
+	urlRegex := regexp.MustCompile(`(https?:\/\/([-\w\.]+)+(:\d+)?(\/([\w\/_\.]*(\?\S+)?)?)?)`)
+
+	return &ChatInteractor{
+		ServerRepository:  serverRepo,
+		ChannelRepository: channelRepo,
+		MessageRepository: msgRepo,
+		ClientRepository:  clientRepo,
+		Logger:            logger,
+
+		urlRegex: urlRegex,
+	}
 }
 
 func (ci *ChatInteractor) JoinServer(clientId int64) (*domain.Client, error) {
@@ -41,8 +61,13 @@ func (ci *ChatInteractor) SendMessage(clientId int64, body string) error {
 		return ErrNoChannel
 	}
 
+	safeBody := template.HTMLEscapeString(body)
+
+	// Create hyperlinks
+	safeBody = ci.urlRegex.ReplaceAllString(safeBody, `<a href="$1" target="_blank">$1</a>`)
+
 	message := &domain.Message{
-		Body:      body,
+		Body:      safeBody,
 		ClientId:  client.Id,
 		Author:    client.DisplayName,
 		Time:      time.Now(),

@@ -20,45 +20,37 @@
 			.identifier:hover paper-icon-button {
 				visibility: visible;
 			}
+
+			/* Super hacky file input based on the ones on facebook */
 			#file {
-				width: 128px;
-				height: 128px;
-				visibility: hidden;
-				margin-bottom: 20px;
-			}
-			#file:before {
-				display: inline-block;
-				visibility: visible;
+				bottom: 0;
+				cursor: inherit;
+				font-size: 1000px !important;
+				height: 300px;
+				margin: 0;
+				opacity: 0;
+				padding: 0;
 				position: absolute;
-				content: "";
-				width: 128px;
-				height: 128px;
-				outline: none;
-				z-index: 12;
+				right: 0;
 			}
 			#fileButton {
-				position: absolute;
-				top: 0;
-				left: 0;
 				width: 128px;
 				height: 128px;
 				border-radius: 64px;
 				-webkit-box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
 				-moz-box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
 				box-shadow: 0px 6px 11px 0px rgba(50, 50, 50, 0.61);
-				z-index: 10;
 			}
 			#fileOverlay {
 				display: none;
 				position: absolute;
-				top: 0;
-				left: 0;
+				top: 15px;
+				left: 15px;
 				width: 128px;
 				height: 128px;
 				border-radius: 64px;
 				background-color: #000;
 				opacity: 0.6;
-				z-index: 11;
 				color: #fff;
 				font-size: 20px;
 				-webkit-flex-direction: row;
@@ -71,6 +63,8 @@
 			}
 			#fileContainer {
 				position: relative;
+				overflow: hidden;
+				padding: 15px;
 			}
 			#fileContainer:hover #fileOverlay {
 				display: -webkit-flex;
@@ -88,9 +82,9 @@
 			<div class="content">
 				<form vertical layout center>
 					<div id="fileContainer">
-						<input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
-						<div id="fileOverlay" vertical layout center>Edit<br />picture</div>
 						<div id="fileButton"></div>
+						<div id="fileOverlay" vertical layout center>Edit<br />picture</div>
+						<input type="file" name="File" id="file" accept="image/*" on-change="{{sendImage}}">
 					</div>
 				</form>
 				<div id="firstName" class="identifier" horizontal layout center>

@@ -106,7 +106,7 @@ func (handler *HomeWebserviceHandler) GetProfileImage(ctx context.Context, w htt
 		}
 	}
 
-	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", path.Ext(imageUrl)))
+	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", path.Ext(imageUrl)[1:]))
 	w.Write(data)
 }
 

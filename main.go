@@ -69,12 +69,8 @@ func main() {
 	// Interactors
 	authInteractor := usecases.NewAuthentificationInteractor(interfaces.NewDbUserRepo(handlers), crypto, logger)
 
-	chatInteractor := new(usecases.ChatInteractor)
-	chatInteractor.ServerRepository = interfaces.NewSingletonServerRepo(handlers)
-	chatInteractor.ChannelRepository = interfaces.NewDbChannelRepo(handlers)
-	chatInteractor.MessageRepository = interfaces.NewDbMessageRepo(handlers)
-	chatInteractor.ClientRepository = clientRepo
-	chatInteractor.Logger = logger
+	chatInteractor := usecases.NewChatInteractor(interfaces.NewSingletonServerRepo(handlers), interfaces.NewDbChannelRepo(handlers),
+		interfaces.NewDbMessageRepo(handlers), clientRepo, logger)
 
 	homeInteractor := usecases.NewHomeInteractor(clientRepo, logger)
 

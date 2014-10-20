@@ -1,22 +1,10 @@
 <link rel="import" href="../services/ct-msg-service.html">
+<link rel="import" href="../components/ct-message.html">
 <link rel="import" href="../lib/core-animation/core-animation.html">
 
 <polymer-element name="ct-message-list">
 	<template>
-		<style>
-			.msg {
-				background-color: #F4F4F4;
-				border-radius: 5px;
-				padding: 15px;
-				margin-bottom: 10px;
-				width: 100%;
-			}
-			.msgAuthor {
-				font-weight: bold;
-			}
-			.msgBody {
-				word-break: break-all;
-			}
+		<style>			
 			#msgList {
 
 			}
@@ -37,10 +25,7 @@
 
 		<div id="msgList" layout vertical center>
 			<template repeat="{{m in messages.List}}">
-				<div class="msg">
-					<span class="msgAuthor">{{m.Author}} :</span>
-					<span class="msgBody">{{m.Body}}</span>
-				</div>
+				<ct-message message="{{m}}"></ct-message>
 			</template>
 		</div>
 	</template>

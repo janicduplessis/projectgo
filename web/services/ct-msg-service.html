@@ -19,7 +19,8 @@
 				},
 				_services = [],
 				_handlers,
-				_commands;
+				_commands,
+				_pingInterval;
 
 			function connect() {
 				if (_ws !== null) {
@@ -29,6 +30,10 @@
 
 				_ws.onopen = function(){
 					executeCommand('Channels');
+					// Ping the server every 30 sec
+					_pingInterval = setInterval(function() {
+						executeCommand('Ping');
+					}, 30 * 1000);
 				};
 	 
 				_ws.onmessage = function (event){
@@ -42,6 +47,7 @@
 				};
 	 
 				_ws.onclose = function(){
+					clearInterval(_pingInterval);
 					_ws = null;
 					for(var i = 0; i < _services.length; i++) {
 						_services[i].disconnected();
@@ -133,6 +139,10 @@
 					channel.Clients.push(data.Client);
 				},
 
+				Ping: function() {
+
+				},
+
 				Error: function(data) {
 					ct.utils.log(JSON.stringify(data));
 				}
@@ -153,6 +163,10 @@
 				},
 
 				Channels: function() {
+					return null;
+				},
+
+				Ping: function() {
 					return null;
 				}
 			};

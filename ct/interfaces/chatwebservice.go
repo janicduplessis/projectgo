@@ -49,6 +49,7 @@ func NewChatWebservice(ws Webservice, wsocket Websocket, ci ChatInteractor) *Cha
 	wsocket.AddHandler("JoinChannel", wsHandler.JoinChannel)
 	wsocket.AddHandler("CreateChannel", wsHandler.CreateChannel)
 	wsocket.AddHandler("Channels", wsHandler.Channels)
+	wsocket.AddHandler("Ping", wsHandler.Ping)
 
 	return wsHandler
 }
@@ -179,6 +180,11 @@ func (handler *ChatWebserviceHandler) Channels(ctx context.Context, client Webso
 		client.Error(cmd, err)
 		return
 	}
+}
+
+// Ping handles client heartbeats
+func (handler *ChatWebserviceHandler) Ping(ctx context.Context, client WebsocketClient, cmd WebsocketCommand) {
+	client.SendJson(cmd, &PingModel{Response: "Pong"})
 }
 
 // SenderHandler implementation

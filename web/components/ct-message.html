@@ -1,0 +1,35 @@
+<polymer-element name="ct-message" attributes="message">
+	<template>
+		<style>
+			:host {
+				width: 100%;
+			}
+			.msg {
+				background-color: #F4F4F4;
+				border-radius: 5px;
+				padding: 15px;
+				margin-bottom: 10px;
+				width: 100%;
+			}
+			.msgAuthor {
+				font-weight: bold;
+			}
+			.msgBody {
+				word-break: break-all;
+			}
+		</style>
+
+		<div class="msg">
+			<span class="msgAuthor">{{message.Author}} :</span>
+			<span class="msgBody"></span>
+		</div>
+	</template>
+	<script>
+		Polymer('ct-message', {
+			messageChanged: function() {
+				this.shadowRoot.querySelector('.msgBody').innerHTML = this.message.Body;
+			}
+		});
+	</script>
+
+</polymer-element>
